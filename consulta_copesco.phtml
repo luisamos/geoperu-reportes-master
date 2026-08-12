@@ -1,0 +1,178 @@
+<?php
+
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+
+	include("conexion_postgres.phtml");
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$gid = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	//$gid = 2;
+	$sQueryS = "SELECT * ";
+	$sQueryF = "FROM peru_py_copesco_2023";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$cod_fotos=pg_fetch_result($rsDet,0,"\"cod_fotos\"");
+	$titulo_ventana = 'PROYECTOS DEL PLAN COPESCO - <br>DISTRITO '.pg_fetch_result($rsDet,0,"\"distrito\"");
+	$titulo = 'PROYECTOS DEL PLAN COPESCO - <br>DISTRITO '.pg_fetch_result($rsDet,0,"\"distrito\"");
+	include ('inc/consulta_cabecera.php');
+?>
+
+
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		
+	
+					<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%'>Departamento</th>
+				<th width='25%'>Provincia</th>
+				<th width='25%'>Distrito</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"departamen\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"provincia\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"distrito\"")."</td>
+			  </tr>";
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+			
+<br>
+
+
+
+	<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				
+					
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td>&nbsp;&nbsp;DATOS PLAN COPESCO</td>
+						  </tr>
+						</table>
+						
+							<table width='100%' align='center' class='general'>	
+							<tr>
+							<td class='lista_titulo'>C&oacute;digo &Uacute;nico del proyecto </td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"cup\"")) ?></td>
+						  </tr>
+						  <tr>
+							<td class='lista_titulo'>Código de proyecto según el Sistema Nacional de Inversión Pública </td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"cod_snip\"")) ?></td>
+						  </tr>
+						  <tr>
+							<td class='lista_titulo'>Nombre del proyecto </td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"nombre_pip\"")) ?></td>
+						  </tr>
+						  <tr><td class='lista_titulo'>Monto del proyecto en nuevos soles</td><td  class='lista_textosub'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"monto_pen\""),2)) ?></td>
+						  </tr>
+						  <tr>
+							<td class='lista_titulo'>Situaci&oacute;n del Proyecto</td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"situacion\"")) ?></td>
+						  </tr>
+						  <tr>
+							<td class='lista_titulo'>Funci&oacute;n:</td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"funcion\"")) ?></td></tr>
+						  <tr>
+							<td class='lista_titulo'>Programa:</td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"programa\"")) ?></td>
+						  </tr>
+						  <tr>
+							<td class='lista_titulo'>Fecha de registro del proyecto</td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"fecha_regi\"")) ?></td>
+						  </tr>
+						  <tr>
+							<td class='lista_titulo'>Estado del Proyecto:</td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"estado\"")) ?></td>
+						  </tr>
+						  <tr>
+							<td class='lista_titulo'>Componentes del Proyecto</td><td  class='lista_textosub'><?php echo(pg_fetch_result($rsDet,0,"\"comp_proy\"").'</br> '.pg_fetch_result($rsDet,0,"\"comp_proy1\"").' </br> '.pg_fetch_result($rsDet,0,"\"comp_proy2\"").'</br> '.pg_fetch_result($rsDet,0,"\"comp_proy3\"").' </br> '.pg_fetch_result($rsDet,0,"\"comp_proy4\"").'</br>  '.pg_fetch_result($rsDet,0,"\"comp_proy5\"")); ?></td>
+						  </tr>					 
+					</table>
+			</td>
+		  </tr>
+		</table>
+
+<br>
+		<!-- <table>
+		  <tr>
+			<td>
+					<table width="100%" align='center' class="general">	
+						<tr>
+							<td colspan = "3" style="font-size: 12px;padding: 2px;">&nbsp;&nbsp;<b>Imagenes</b></td>
+						</tr>
+						<tr>
+							<td valign="top"><img src="./repository/fotos_copesco/<?php echo($cod_fotos);?>_1.png"></td>
+							<td valign="top"><img src="./repository/fotos_copesco/<?php echo($cod_fotos);?>_2.png"></td>
+							<td valign="top"><img src="./repository/fotos_copesco/<?php echo($cod_fotos);?>_3.png"></td>	
+						    <td valign="top"><img src="./repository/fotos_copesco/<?php echo($cod_fotos);?>_4.png"></td>	
+						 </tr>		
+
+                   
+
+				  
+					</table> -->
+			</td>
+		  </tr>
+		</table>
+	
+		
+		 
+		<br>
+		<table class='fuente_general' width="100%">
+			<thead>
+			<tr><th><b>Fuentes:</b>
+			<br>-<?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?>
+			</tr></thead>
+		</table>
+		<br>
+		
+	<?php
+	$name=$titulo_ventana;
+	$capa='consulta_copesco';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&gid='.$gid;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+
+
+</html>

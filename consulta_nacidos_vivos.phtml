@@ -1,0 +1,307 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$year  = $_GET['year'];
+	$gid = 	$_GET['ovalor'];
+	$linkPG = Conectarse_POSTGRES(); 
+	// Browse Data
+	$sQueryS = " SELECT * from ";   
+	$sQueryF = " data_nacidos_vivos_reporte";
+	$sQueryW = " WHERE cod_dist = '" . $gid. "' and annio='".$year."'";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$annio=pg_fetch_result($rsDet,0,"\"annio\"");
+	$cod_dist=pg_fetch_result($rsDet,0,"\"cod_dist\"");
+	$institucion=pg_fetch_result($rsDet,0,"\"institucio\"");
+	$titulo_ventana = 'Reporte nacidos Vivos - '.$annio;
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general" border="1">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general' border="1">
+				<thead>
+				  <tr>
+					<?php 
+					echo('
+						<th width="25%">'.getTablaCampo('data_nacidos_vivos','nom_dpto').'</th>
+						<th width="25%">'.getTablaCampo('data_nacidos_vivos','nom_prov').'</th>
+						<th width="25%">'.getTablaCampo('data_nacidos_vivos','nom_dist').'</th>
+						<th width="25%">'.getTablaCampo('data_nacidos_vivos','cod_dist').'</th>
+						');
+					?>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		<tr>
+		<td>
+		<table width="100%" class="titulo_general" border="1">
+			  <tr>
+				<td>&nbsp;&nbsp;INSTITUCI&Oacute;N AL QUE PERTENECE EL ESTABLECIMIENTO DEL NACIDO VIVO</td>
+			  </tr>
+		</table>
+		</td>
+		</tr>
+		</table>
+
+			<?php
+
+				$distQueryA		=	"select * from data_nacidos_vivos_reporte  where institucio= 'ESSALUD'  " ;
+				$distQueryB		=	"select count(1) as cantidad from data_nacidos_vivos_reporte  where institucio= 'ESSALUD' and cod_dist = '".$cod_dist."' and annio= '".$annio."' " ;
+				$rsDetessalud 	= 	pg_query($linkPG , $distQueryA);
+				$rsDetessaludb 	= 	pg_query($linkPG , $distQueryB);
+				$numrowsDist 	= 	pg_num_rows($rsDetessalud);
+				$cantidadsalud = pg_fetch_result($rsDetessaludb,0,"cantidad");
+				$i=1;
+				if($cantidadsalud >= 1){
+					echo('
+					<br>
+					<table width="100%" class="marco_individual">
+						<tr>
+							<td>
+								<table width="100%" class="titulo_general"  border="1">
+								<tr>
+										<td colspan="2">&nbsp;&nbsp;ESSALUD</td>
+								</tr>
+								</table>');
+				
+							while($i<$numrowsDist){
+						
+								if (pg_fetch_result($rsDetessalud,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")) {
+						
+									echo('<table width="100%" class="listado"  border="1">
+									<tr>
+									<td width="40%" class=\'lista_titulo\'><b>'.getTablaCampo("data_nacidos_vivos","est_nombre").'</b></td>
+									<td class="lista_texto"> '.pg_fetch_result($rsDetessalud,$i,"\"est_nombre\"").' </td>
+									</tr>
+									<tr>
+									<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","menos2500").'</b></td>
+									<td class="lista_texto"> '.pg_fetch_result($rsDetessalud,$i,"\"menos2500\"").' </td>
+									</tr>
+									<tr>
+									<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","d2500mas").'</b></td>
+									<td class="lista_texto"> '.pg_fetch_result($rsDetessalud,$i,"\"d2500mas\"").' </td>
+									</tr>
+									<tr>
+									<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","g_total").'</b></td>
+									<td class="lista_texto"> '.pg_fetch_result($rsDetessalud,$i,"\"g_total\"").' </td>
+									</tr>
+									<tr>
+									<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","nac_mascul").'</b></td>
+									<td class="lista_texto"> '.pg_fetch_result($rsDetessalud,$i,"\"nac_mascul\"").' </td>
+									</tr>
+									<tr>
+									<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","nac_femen").'</b></td>
+									<td class="lista_texto"> '.pg_fetch_result($rsDetessalud,$i,"\"nac_femen\"").' </td>
+									<br></table>');
+									
+								} 
+								$i++;
+								
+							}echo ('</td>
+						</tr>
+					</table>');}
+							
+			
+			?>
+							
+			<?php
+				
+				$distQueryA		=	"select * from data_nacidos_vivos_reporte  where institucio= 'MINSA'  " ;
+				$distQueryB		=	"select count(1) as cantidad from data_nacidos_vivos_reporte  where institucio= 'MINSA' and cod_dist = '".$cod_dist."' and annio= '".$annio."' " ;
+				$rsDeteminsa 	= 	pg_query($linkPG , $distQueryA);
+				$rsDeteminsab 	= 	pg_query($linkPG , $distQueryB);
+				$numrowsDist 	= 	pg_num_rows($rsDeteminsa);
+				$cantidadminsa = pg_fetch_result($rsDeteminsab,0,"cantidad");
+				$i=1;
+								
+								//if(isset($numrowsDist)){
+								if($cantidadminsa >= 1){
+									echo('<br><table width="100%" class="marco_individual">
+										  <tr>
+											<td>
+												<table width="100%" class="titulo_general"  border="1">
+												<tr>
+													<td colspan="2">&nbsp;&nbsp;MINSA</td>
+												</tr>
+												</table>');
+												while($i<$numrowsDist){
+												if (pg_fetch_result($rsDeteminsa,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")) {
+													echo('<table width="100%" class="listado"  border="1">
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","est_nombre").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDeteminsa,$i,"\"est_nombre\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","menos2500").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDeteminsa,$i,"\"menos2500\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","d2500mas").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDeteminsa,$i,"\"d2500mas\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","g_total").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDeteminsa,$i,"\"g_total\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","nac_mascul").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDeteminsa,$i,"\"nac_mascul\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","nac_femen").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDeteminsa,$i,"\"nac_femen\"").' </td>
+													</tr><br></table>');
+													
+												} 
+						
+												$i++;
+					
+												}echo ('</td>
+						</tr>
+					</table>');}
+												
+
+				?>
+					
+				
+				<?php
+				
+				$distQueryA		=	"select * from data_nacidos_vivos_reporte  where institucio= 'GOBIERNO REGIONAL'  " ;
+				$distQueryB		=	"select count(1) as cantidad from data_nacidos_vivos_reporte  where institucio= 'GOBIERNO REGIONAL' and cod_dist = '".$cod_dist."' and annio= '".$annio."' " ;
+				$rsDetegob 	= 	pg_query($linkPG , $distQueryA);
+				$rsDetegobb 	= 	pg_query($linkPG , $distQueryB);
+				$numrowsDist 	= 	pg_num_rows($rsDetegob);
+				$cantidadgob = pg_fetch_result($rsDetegobb,0,"cantidad");
+				
+				
+				$i=1;
+				
+					//if(isset($numrowsDist)){
+								if($cantidadgob >= 1){
+									echo('	<br><table width="100%" class="marco_individual">
+											   <tr>
+												<td> <table width="99%" class="titulo_general"  border="1">
+														   <tr>					
+																<td colspan="2">&nbsp;&nbsp;GOBIERNO REGIONAL</td>
+														   </tr>
+													</table>');
+											while($i<$numrowsDist){
+										
+												if (pg_fetch_result($rsDetegob,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")) {
+													echo('<table width="100%" class="listado"  border="1">
+													<tr>
+													<td width="40%" class=\'lista_titulo\'><b>'.getTablaCampo("data_nacidos_vivos","est_nombre").'</b></td>
+													<td class=\'lista_texto\'> '.pg_fetch_result($rsDetegob,$i,"\"est_nombre\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","menos2500").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDetegob,$i,"\"menos2500\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","d2500mas").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDetegob,$i,"\"d2500mas\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","g_total").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDetegob,$i,"\"g_total\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","nac_mascul").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDetegob,$i,"\"nac_mascul\"").' </td>
+													</tr>
+													<tr>
+													<td width="40%" class="lista_titulo"><b>'.getTablaCampo("data_nacidos_vivos","nac_femen").'</b></td>
+													<td class="lista_texto"> '.pg_fetch_result($rsDetegob,$i,"\"nac_femen\"").' </td>
+													</tr>
+													<br>
+													</table>');
+													
+												} 
+												$i++;
+											
+											}echo ('</td>
+						</tr>
+					</table>');}
+												
+											
+											
+										
+				?>
+		
+		<br>
+
+		
+	
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='Nacidos vivios';
+	$capa='consulta_nacidos_vivos';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$gid.'&olayer='.$player.'&ocampo='.$pcampo;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+</html>
+
+
+<?php include_once("./analyticstracking.php");?>

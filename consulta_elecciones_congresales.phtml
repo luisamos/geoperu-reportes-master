@@ -1,0 +1,170 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+    // Browse Data
+    // select pec.cod_des_op, pec.tot_vot,pec.desc_op, pd.cod_dist, pd.nom_dist, pd.cod_prov , pd.nom_prov, pd.cod_dpto, pd.nom_dpto,pd.the_geom from peru_elecciones_congresales pec
+	//   	inner join peru_distritos pd on pd.cod_dist = pec.cod_dist where pd.cod_dist = '010101';
+	$sQueryS = "select pec.cod_des_op, pec.tot_vot,pec.desc_op, pec.fuente, pd.cod_dist, pd.nom_dist, pd.cod_prov , pd.nom_prov, pd.cod_dpto, pd.nom_dpto,pd.the_geom from peru_elecciones_congresales pec";
+	$sQueryF = " inner join peru_distritos pd on pd.cod_dist = pec.cod_dist";
+	$sQueryW = "  where pd.cod_dist = '" . $pvalor . "' order by pec.tot_vot desc ";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Elecciones Congresales 2020';
+	$titulo = 'Elecciones Congresales 2020';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Codigo Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dpto\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_prov\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dist\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"cod_dist\"")) ?></td>
+					</tr>
+	
+					</tbody>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+            <tr>
+                <td width='50%' class='lista_titulo' style="text-align:center;">AGRUPACIÓN POLÍTICA</td>
+                <td width='50%' class='lista_titulo' style="text-align:center;">TOTAL DE VOTOS</td>
+            </tr>
+		<?php
+			$total = 0;
+
+			$votos_nulos = 0;
+			$votos_blanco = 0;
+			$votos_impugnados = 0;
+			$votos_total = 0;
+
+			if (pg_num_rows($rsDet)>0) {
+
+				while($result = pg_fetch_array($rsDet))
+				{
+					if($result["cod_des_op"] == 99){
+						$votos_total = $result["tot_vot"];
+					} else if($result["cod_des_op"] == 22){
+						$votos_blanco = $result["tot_vot"];
+					} else if($result["cod_des_op"] == 23){
+						$votos_impugnados = $result["tot_vot"];
+					} else if($result["cod_des_op"] == 24){
+						$votos_nulos = $result["tot_vot"];
+					} else {
+						print "
+						<tr>
+							<td width='50%' class='texto1'>".$result["desc_op"]."</td>
+							<td width='50%' class='texto1' style='text-align:right;'>".number_format($result["tot_vot"],0)."</td>
+						</tr>
+			
+						";
+						$total += $result["tot_vot"];
+					}
+					
+				}
+			}
+
+			print "
+					<tr>
+						<td width='50%' class='texto1'>VOTOS EN BLANCO</td>
+						<td width='50%' class='texto1' style='text-align:right;'>".number_format($votos_blanco,0)."</td>
+					</tr>
+					<tr>
+						<td width='50%' class='texto1'>VOTOS IMPUGNADOS</td>
+						<td width='50%' class='texto1' style='text-align:right;'>".number_format($votos_impugnados,0)."</td>
+					</tr>
+					<tr>
+						<td width='50%' class='texto1'>VOTOS NULOS</td>
+						<td width='50%' class='texto1' style='text-align:right;'>".number_format($votos_nulos,0)."</td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='lista_titulo'>TOTAL DE VOTOS EMITIDOS</td>
+						<td width='50%' class='lista_titulo' style='text-align:right;'>".number_format($votos_total,0)."</td>
+					</tr>
+					";
+			
+       
+		?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$name='Elecciones Congresales 2020';
+	$capa='consulta_elecciones_congresales';
+	if (!isset($_GET['excel'])) {
+		$ruta='consulta_poblacion_electoral.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=poblacion_eletoral'.'&ocampo=gid';
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>
+
+

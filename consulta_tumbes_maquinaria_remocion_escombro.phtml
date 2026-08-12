@@ -1,0 +1,159 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+function valorsino($campo){
+				if($campo=='1'){$valor='S&iacute;';}elseif($campo=='2'){$valor='No';}elseif($campo=='0'){$valor='Sin datos';}
+				return $valor;
+			}
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+    $pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	//$sQueryF = " FROM unidades_min_produccion_mayo2022";
+	$sQueryF = " FROM vw_peru_tumbes_maquinaria_remocion_escombro";
+	$sQueryW = " WHERE \"gid\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Mapa de Empresas de Maquinarias para Remoción de Escombros';
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				<?php print" <tr>
+					<th width='20%'>DEPARTAMENTO</th>
+					<th width='20%'>PROVINCIA</th>
+					<th width='20%'>DISTRITO</th>
+					<th width='20%'>UBIGEO</th>
+				  </tr>";?>
+				</thead>
+				<tbody>
+	<?php
+			print "<tr>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nombdep\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nombprov\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nombdist\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"coddist\"")."</td>
+				  </tr>";
+	?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+        <table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;DATOS DE MAPA DE EMPRESAS DE MAQUINARIAS PARA REMOCIÓN DE ESCOMBROS</td>
+			  </tr>
+			</table>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Nombre de la empresa</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_empr\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Indica el tipo de local</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"tipo_local\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Dirección de la empresa</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"direccion\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Indica el número de teléfono de la empresa</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"telef_1\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Número del RUC con el que la empresa está registrada en la SUNAT</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"\"ruc")."</td>
+              </tr>
+			  <tr>
+				<td width='50%' class='lista_titulo'>Indica el tipo de actividad</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"tipo_activ\"")."</td>
+			  </tr>
+			  <tr>
+				<td width='50%' class='lista_titulo'>Indica el primer sub tipo de actividad que realiza la empresa</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"sub_tip_1\"")."</td>
+			  </tr>
+			  <tr>
+				<td width='50%' class='lista_titulo'>Indica el segundo sub tipo de actividad que realiza la empresa</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"sub_tip_2\"")."</td>
+			  </tr>
+              <tr>
+                <td class='lista_titulo'>Accesibilidad</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"accesib\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Exposición a peligro de tsunami </td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"tsunami\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Nivel de peligro de la zona en la cual se ubica el objeto</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"peligro\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Exposición a peligro por inundación</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"inundacion\"")."</td>
+			</tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>  
+
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\""))?><?php echo(pg_fetch_result($rsDet,0,"\"fuente1\""));?>
+		</th></tr></thead></table>
+	<?php
+	$name='CONADIS - Población con discapacidad';
+	$capa='peru_discapacidad_pobla_discap_';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_conadis'.'&ocampo=gid';
+		
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

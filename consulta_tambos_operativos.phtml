@@ -1,0 +1,195 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM vw_peru_tambos_operativos";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo_ventana = 'TAMBOS OPERATIVOS - '.pg_fetch_result($rsDet,0,"\"nom_prov\"");
+		$titulo = 'TAMBOS OPERATIVOS -  '.pg_fetch_result($rsDet,0,"\"nom_prov\"");
+	//$titulo = $name;
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th width="20%">DEPARTAMENTO</th>
+							<th width="20%">PROVINCIA</th>
+							<th width="20%">DISTRITO</th>
+							<th width="20%">CENTRO POBLADO</th>
+							<th width="20%">CODIGO CCPP</th>
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"ccpp\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"ubi_ccpp\"")."</td>";
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS GENERALES</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					 
+					
+						<?php 
+							print "<tr>";
+							print "<td width='50%' class='lista_titulo'><b>Sector</b></td>";
+							print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"sector\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Programa</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"programa\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Código SNIP</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"snip\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Código del Tambo</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"cod_tambo\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Nombre del Tambo</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nom_tambo\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Población</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"poblacion\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Viviendas</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"viviendas\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Fuente</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"fuente_tam\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Estado de avance de obras</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"est_av_obr\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Presta servicios?</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pres_ser\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Servicio de internet</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"ser_inter\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Altitud (msnm)</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"altitud\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Región Natural (RN)</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"reg_nat\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Rango de Región Natural (msnm)</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"rango_rn\"")."&nbsp;</td>";
+							print "</tr>";
+
+						?>
+								
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_peru_tambos_operativos';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+	$("#u1").h2c_acordeon();
+	$("#u2").h2c_acordeon();
+	$("#u3").h2c_acordeon();
+	$("#u4").h2c_acordeon();
+	$("#u5").h2c_acordeon();
+	$("#u6").h2c_acordeon();
+	});
+</script>
+</html> 

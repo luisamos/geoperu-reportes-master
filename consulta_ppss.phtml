@@ -1,0 +1,661 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Gobierno y Transformación Digital
+Sistema		: 	Plataforma Nacional de Datos Georreferenciados - GeoPerú
+Periodo		: 	2022
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include("conexion_postgres.phtml");
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$gid = limpiarNumeros($_GET['gid_']);
+	if($_GET['gid_']!=''){ $gid = limpiarNumeros($_GET['gid_']);}else if($_GET['gid']!=''){
+		$gid = limpiarNumeros($_GET['gid']);}
+		$cod_pronaa = isset($_GET['cod_qal_']) ? limpiarNumeros($_GET['cod_qal_']) : ''; // QALIWARMA
+		$cod_p65 	= isset($_GET['cod_p65_']) ? limpiarNumeros($_GET['cod_p65_']) : ''; // PENSION 65
+		$cod_cmas 	= isset($_GET['cod_cmas_']) ? limpiarNumeros($_GET['cod_cmas_']) : ''; // CUNA MAS
+		$cod_junt 	= isset($_GET['cod_junt_']) ? limpiarNumeros($_GET['cod_junt_']) : '';// JUNTOS
+		$cod_fonco 	= isset($_GET['cod_fonco_']) ? limpiarNumeros($_GET['cod_fonco_']) : ''; // FONCODES
+		$cod_cont 	= isset($_GET['cod_cont_']) ? limpiarNumeros($_GET['cod_cont_']) : ''; // CONTIGO
+		$cod_tamb 	= isset($_GET['cod_tamb_']) ? limpiarNumeros($_GET['cod_tamb_']) : '';// TAMBOS
+		$cod_prov	= isset($_GET['cod_prov_']) ? limpiarNumeros($_GET['cod_prov_']) : '';
+	if($cod_pronaa==1){
+		$programa	=	'QALIWARMA';
+		$cam_programa='cod_pronaa';
+		$cod_programa=$cod_pronaa;
+	}else if($cod_p65==1){
+		$programa	=	'PENSION 65';
+		$cam_programa='cod_p65';
+		$cod_programa=$cod_p65;
+	}else if($cod_cmas==1){
+		$programa	=	'CUNA MAS';
+		$cam_programa='cod_cmas';
+		$cod_programa=$cod_cmas;
+	}else if($cod_junt==1){
+		$programa	=	'JUNTOS';
+		$cam_programa='cod_junt';
+		$cod_programa=$cod_junt;
+	}else if($cod_fonco==1){
+		$programa	=	'FONCODES';
+		$cam_programa='cod_fonco';
+		$cod_programa=$cod_fonco;
+	}else if ($cod_cont ==1){
+		$programa = 'CONTIGO';
+		$cam_programa='cod_cont';
+		$cod_programa=$cod_cont;	
+	
+	}else if ($cod_tamb ==1){
+		$programa = 'PA&Iacute;S';
+		$cam_programa='cod_tamb';
+		$cod_programa=$cod_tamb;	
+	
+	}
+	$linkPG = Conectarse_POSTGRES();
+	$tabla="peru_programas_sociales2";
+	// Browse Data
+	$sQueryS = "SELECT * ";
+	$sQueryF = "FROM ".$tabla;
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+	$sQuery  = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo_ventana = 'PROGRAMA SOCIAL - '.$programa. ' (TAMBOS) - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$titulo = 'PROGRAMA SOCIAL - '.$programa.' (TAMBOS) <br>DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width="100%" align='center' class="general">
+					<thead>
+					  <tr>
+						<th width="30%"><?php echo(getTablaCampo($tabla,'nom_dpto'))?></th>
+						<th width="20%"><?php echo(getTablaCampo($tabla,'nom_prov'))?></th>
+						<th width="40%"><?php echo(getTablaCampo($tabla,'nom_dist'))?></th>
+					  </tr>
+					</thead>
+					<tbody>
+					  <tr>
+					<?php 
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+					?> 		  
+					  </tr>
+					</tbody>
+					</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL DE LA PROVINCIA <?php echo pg_fetch_result($rsDet,0,"\"nom_prov\"");?></td>
+						  </tr>
+						</table></h1>
+					<div>
+<?php
+//lista de distritos por cada provincias
+	$distQuery		=	"select * from ".$tabla."  where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' order by nom_dist ";
+	$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+    $numrowsDist 	= 	pg_num_rows($rsDetDist);
+	print("<table width='100%' align='center' class='general'>");
+	print("<tr><td width='50%' class='titulo1'><b>Distritos</b></td>
+			<td width='10%' class='nivel3'><b>CUNA MAS (1)</b></td>
+			<td width='10%' class='nivel4'><b>JUNTOS (2)</b></td>
+			<td width='10%' class='nivel5'><b>FONCODES (3)</b></td>
+			<td width='10%' class='nivel2'><b>PENSION 65 (4)</b></td>
+			<td width='10%' class='nivel1'><b>QALI WARMA (5)</b></td>
+			<td width='10%' class='nivel6'><b>CONTIGO (6)</b></td>
+			<td width='10%' class='nivel7'><b>PA&Iacute;S (7)</b></td>
+			</tr>");
+	$i=0;
+	$j=1;
+	while($i<$numrowsDist){
+		echo('<tr>');
+		if (pg_fetch_result($rsDetDist,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")) {
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+			$enlace=$j;
+		} else {
+			$enlace='<a href="consulta_ppss.phtml?olayer=peru_ppss&ocampo=cod_dist&gid_='.pg_fetch_result($rsDetDist,$i,"\"gid\"").'&'.$cam_programa.' ='.$cod_programa.'">'.$j.'</a>';
+		}
+		if(pg_fetch_result($rsDetDist,$i,"\"cod_qal\"")==1){$imgpronaa='<img src="imajes/check.png" width="15" height="15"/>';}else{$imgpronaa='';}
+		if(pg_fetch_result($rsDetDist,$i,"\"cod_p65\"")==1){$imgp65='<img src="imajes/check.png" width="15" height="15"/>';}else{$imgp65='';}
+		if(pg_fetch_result($rsDetDist,$i,"\"cod_cmas\"")==1){$codcmas='<img src="imajes/check.png" width="15" height="15"/>';}else{$codcmas='';}
+		if(pg_fetch_result($rsDetDist,$i,"\"cod_junt\"")==1){$codjunt='<img src="imajes/check.png" width="15" height="15"/>';}else{$codjunt='';}
+		if(pg_fetch_result($rsDetDist,$i,"\"con_fonco\"")==1){$codfoncodes='<img src="imajes/check.png" width="15" height="15"/>';}else{$codfoncodes='';}
+		if(pg_fetch_result($rsDetDist,$i,"\"cod_cont\"")==1){$codcont='<img src="imajes/check.png" width="15" height="15"/>';}else{$codcont='';}
+		if(pg_fetch_result($rsDetDist,$i,"\"cod_tamb\"")==1){$codtamb='<img src="imajes/check.png" width="15" height="15"/>';}else{$codtamb='';}
+		echo('<td '.$classet.'>'.$enlace.'- '.pg_fetch_result($rsDetDist,$i,"\"nom_dist\"").'</td>
+			  <td '.$classe.'>'.$codcmas.'&nbsp;</td>
+			  <td '.$classe.'>'.$codjunt.'&nbsp;</td>
+			  <td '.$classe.'>'.$codfoncodes.'&nbsp;</td>
+			  <td '.$classe.'>'.$imgp65.'&nbsp;</td>
+			  <td '.$classe.'>'.$imgpronaa.'&nbsp;</td>
+			  <td '.$classe.'>'.$codcont.'&nbsp;</td>
+			  <td '.$classe.'>'.$codtamb.'&nbsp;</td>');
+		$i++;
+		$j++;
+		echo('</tr>');
+	}
+	echo('<tr><td class="titulo1"><b>Total</td>');
+	for($q=1;$q<=7;$q++){
+		if($q==1){
+			$tip_programa='cod_cmas';
+		}else if($q==2){
+			$tip_programa='cod_junt';
+		}else if($q==3){
+			$tip_programa='con_fonco';
+		}else if($q==4){
+			$tip_programa='cod_p65';
+		}else if($q==5){
+			$tip_programa='cod_qal';
+		}else if($q==6){
+			$tip_programa='cod_cont';
+		}else if($q==7){
+			$tip_programa='cod_tamb';
+		}
+		$cantidad= "select count(*) as cantidad from ".$tabla."  where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and ".$tip_programa." =1 ";
+		$rsDetCantidad = pg_query($linkPG , $cantidad);
+		$total=pg_fetch_result($rsDetCantidad,0,"\"cantidad\"");
+			if($q ==1){
+				$classe='class="nivel3"';
+			} else  if($q ==2){
+				$classe='class="nivel4"';
+			} else 	if($q ==3){
+				$classe='class="nivel5"';
+			} else if($q ==4){
+				$classe='class="nivel2"';
+			} else	if($q ==5){
+				$classe='class="nivel1"';
+			}else	if($q ==6){
+				$classe='class="nivel6"';
+			}else	if($q ==7){
+				$classe='class="nivel7"';
+			}
+		echo('<td '.$classe.'><b>'.$total.'</b></td>');
+	}
+echo('</tr></table>');
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<!--beneficiarios-->
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO DE BENEFICIARIOS DE LA PROVINCIA <?php echo pg_fetch_result($rsDet,0,"\"nom_prov\"");?></td>
+						  </tr>
+						</table></h1>
+				<div>
+<?php
+//lista de distritos por cada provincias
+
+$cabecera = "</strong></td>
+	  				<td colspan='2' class='nivel3'><b>CUNAMAS (1)</b></td>
+					<td colspan='2' class='nivel4'><b>JUNTOS (2)</b></td>
+					<td colspan='5' class='nivel5'><b>FONCODES (3)</b></td>
+					<td rowspan='2' class='nivel2'><b>PENSION 65(4)</b></td>
+					<td colspan='2' class='nivel1'><b>QALI WARMA (5)</td>
+					<td rowspan='2' class='nivel6'><b>CONTIGO(6)</b></td>
+					<td colspan='3' class='nivel7'><b>PA&Iacute;S (7)</b></td>
+				</tr>
+				<tr>
+					<td class='nivel3'><b>".getTablaCampo($tabla,'cuid_dia')."</b></td>
+					<td class='nivel3'><b>".getTablaCampo($tabla,'acompa_fam')."</b></td>
+					<td class='nivel4'><b>".getTablaCampo($tabla,'hog_ads')."</b></td>
+					<td class='nivel4'><b>".getTablaCampo($tabla,'hog_abon')."</b></td>
+					<td class='nivel5'><b>".getTablaCampo($tabla,'usu_est')."</b></td>
+					<td class='nivel5'><b>".getTablaCampo($tabla,'proy_culm')."</b></td>
+					<td class='nivel5'><b>".getTablaCampo($tabla,'proy_eje')."</b></td>
+					<td class='nivel5'><b>".getTablaCampo($tabla,'hog_hakuw')."</b></td> 
+					<td class='nivel5'><b>".getTablaCampo($tabla,'acu_hakuw')."</b></td> 
+					<td class='nivel1'><b>".getTablaCampo($tabla,'nin_atend')."</b></td>
+					<td class='nivel1'><b>".getTablaCampo($tabla,'num_iiee')."</b></td>
+					<td class='nivel7'><b>".getTablaCampo($tabla,'tam_pser')."</b></td>
+					<td class='nivel7'><b>".getTablaCampo($tabla,'tam_atrea')."</b></td>
+					<td class='nivel7'><b>".getTablaCampo($tabla,'tam_nubem')."</b></td>
+				</tr>";
+
+	$distQuery		=	"select * from ".$tabla." where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' order by nom_dist ";
+	$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+    $numrowsDist 	= 	pg_num_rows($rsDetDist);
+	print("<table width='100%' align='center' class='general'>");
+
+	echo("<tr><td width='20%' class='titulo1' rowspan='2'><strong> Distritos ".$cabecera);
+	$i=0;
+	$j=1;
+	$total_dist1 = 0;
+	$total_dist2 = 0;
+	$total_dist3 = 0;
+	$total_dist4 = 0;
+	$total_dist5 = 0;
+	$total_dist6 = 0;
+	$total_dist7 = 0;
+	$total_dist8 = 0;
+	$total_dist9 = 0;
+	$total_dist10 = 0;
+	$total_dist11 = 0;
+	$total_dist12 = 0;
+	$total_dist13 = 0;
+	$total_dist14 = 0;
+	$total_dist15 = 0;
+	$total_dist16 = 0;
+	while($i<$numrowsDist){
+		echo('<tr>');
+		if (pg_fetch_result($rsDetDist,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")) {
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		
+		echo('<td '.$classet.'>'.$j.'- '.pg_fetch_result($rsDetDist,$i,"\"nom_dist\"").'</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"cuid_dia\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"acompa_fam\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"hog_ads\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"hog_abon\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"usu_est\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"proy_culm\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"proy_eje\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"hog_hakuw\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"acu_hakuw\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"pension65\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"nin_atend\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"num_iiee\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"contigo\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"tam_pser\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"tam_atrea\"")).'&nbsp;</td>
+			<td '.$classe.'>'.number_format(pg_fetch_result($rsDetDist,$i,"\"tam_nubem\"")).'&nbsp;</td>');
+			$total_dist1 = $total_dist1 + pg_fetch_result($rsDetDist,$i,"\"cuid_dia\"");
+			$total_dist2 = $total_dist2 + pg_fetch_result($rsDetDist,$i,"\"acompa_fam\"");
+			$total_dist3 = $total_dist3 + pg_fetch_result($rsDetDist,$i,"\"hog_ads\"");
+			$total_dist4 = $total_dist4 + pg_fetch_result($rsDetDist,$i,"\"hog_abon\"");
+			$total_dist5 = $total_dist5 + pg_fetch_result($rsDetDist,$i,"\"usu_est\"");
+			$total_dist6 = $total_dist6 + pg_fetch_result($rsDetDist,$i,"\"proy_culm\"");
+			$total_dist7 = $total_dist7 + pg_fetch_result($rsDetDist,$i,"\"proy_eje\"");
+			$total_dist8 = $total_dist8 + pg_fetch_result($rsDetDist,$i,"\"hog_hakuw\"");
+			$total_dist9 = $total_dist9 + pg_fetch_result($rsDetDist,$i,"\"acu_hakuw\"");
+			$total_dist10 = $total_dist10 + pg_fetch_result($rsDetDist,$i,"\"pension65\"");
+			$total_dist11 = $total_dist11 + pg_fetch_result($rsDetDist,$i,"\"nin_atend\"");
+			$total_dist12 = $total_dist12 + pg_fetch_result($rsDetDist,$i,"\"num_iiee\"");
+			$total_dist13 = $total_dist13 + pg_fetch_result($rsDetDist,$i,"\"contigo\"");
+			$total_dist14 = $total_dist14 + pg_fetch_result($rsDetDist,$i,"\"tam_pser\"");
+			$total_dist15 = $total_dist15 + pg_fetch_result($rsDetDist,$i,"\"tam_atrea\"");
+			$total_dist16 = $total_dist16 + pg_fetch_result($rsDetDist,$i,"\"tam_nubem\"");
+		$i++;
+		$j++;
+		echo('</tr>');
+	}
+	
+	echo('<tr><td class="titulo1">Total</td><td class="nivel3"><b>'.number_format($total_dist1).'</b></td><td class="nivel3"><b>'.number_format($total_dist2).'</b></td><td class="nivel4"><b>'.number_format($total_dist3).'</b></td><td class="nivel4"><b>'.number_format($total_dist4).'</b></td><td class="nivel5"><b>'.number_format($total_dist5).'</b></td><td class="nivel5"><b>'.number_format($total_dist6).'</b></td><td class="nivel5"><b>'.number_format($total_dist7).'</b></td><td class="nivel5"><b>'.number_format($total_dist8).'</b></td><td class="nivel5"><b>'.number_format($total_dist9).'</b></td><td class="nivel2"><b>'.number_format($total_dist10).'</b></td><td class="nivel1"><b>'.number_format($total_dist11).'</b></td><td class="nivel1"><b>'.number_format($total_dist12).'</b></td><td class="nivel6"><b>'.number_format($total_dist13).'</b></td><td class="nivel7"><b>'.number_format($total_dist14).'</b></td><td class="nivel7"><b>'.number_format($total_dist15).'</b></td><td class="nivel7"><b>'.number_format($total_dist16).'</b></td></tr>');
+	echo('</table>');
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u4" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL DEL DEPARTAMENTO <?php print pg_fetch_result($rsDet,0,"\"nom_dpto\"");?></td>
+						  </tr>
+						</table></h1>
+					<div>
+<?php
+//lista de  provincia por cada departamento
+	$provQuery="select count(cod_prov), nom_prov, cod_prov from ".$tabla." where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' GROUP BY cod_prov,nom_prov";
+	$rsDetprov = pg_query($linkPG , $provQuery);
+    $numrowsprov = pg_num_rows($rsDetprov);
+	print("<table width='100%' align='center' class='general'><tr><td width='20%' class='titulo1' rowspan='2'><strong> Provincias ".$cabecera);
+
+	$m=0;
+	$n=1;
+	$total_prov1 = 0;
+	$total_prov2 = 0;
+	$total_prov3 = 0;
+	$total_prov4 = 0;
+	$total_prov5 = 0;
+	$total_prov6 = 0;
+	$total_prov7 = 0;
+	$total_prov8 = 0;
+	$total_prov9 = 0;
+	$total_prov10 = 0;
+	$total_prov11 = 0;
+	$total_prov12 = 0;
+	$total_prov13 = 0;
+	$total_prov14 = 0;
+	$total_prov15 = 0;
+	$total_prov16 = 0;
+	while ($m<$numrowsprov) {
+		if(pg_fetch_result($rsDetprov,$m,"\"cod_prov\"")==pg_fetch_result($rsDet,0,"\"cod_prov\"")){
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+			
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+			
+		}
+		echo('<tr><td '.$classet.'>'.$n.'- '.pg_fetch_result($rsDetprov,$m,"\"nom_prov\"").'</td>');
+
+		$acumulador=0;
+		//$classe='';
+		for ($d=1;$d<=7; $d++){
+			if($d==1){
+				$tip_programa='cod_cmas';
+				
+				$queryProg 	= "select sum(cuid_dia) as suma4,sum(acompa_fam) as suma5 ";
+			}else if($d==2){
+				$tip_programa='cod_junt';
+				
+				$queryProg 	= "select sum(hog_ads) as suma6,sum(hog_abon) as suma7 ";
+			}else if($d==3){
+				$tip_programa='con_fonco';
+				
+				$queryProg 	= "select sum(usu_est) as suma8,sum(proy_culm) as suma9,sum(proy_eje) as suma10, sum(hog_hakuw) as suma11, sum(acu_hakuw) as suma12 ";
+			}else if($d==4){
+				$tip_programa='cod_p65';
+				
+				$queryProg 	= "select sum(pension65) as suma3 ";				
+			}else if($d==5){
+				$tip_programa='cod_qal';
+				
+				$queryProg 	= "select sum(nin_atend) as suma1, sum(num_iiee) as suma2 ";	
+			}else if($d==6){
+				$tip_programa='cod_cont';
+				
+				$queryProg 	= "select sum(contigo) as suma13 ";	
+			}else if($d==7){
+				$tip_programa='cod_tamb';
+				
+				$queryProg 	= "select sum(tam_pser) as suma14, sum(tam_atrea) as suma15, sum(tam_nubem) as suma16 ";
+			}
+			
+			$consultaDisxP = $queryProg."from ".$tabla."
+											where ".$tip_programa." =1 and 
+												cod_prov = '".pg_fetch_result($rsDetprov,$m,"\"cod_prov\"")."' ";
+			$cantiDiss = pg_query($linkPG , $consultaDisxP);
+			if($d==1){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma4\"")).'</td><td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma5\"")).'</td>';
+			}else if($d==2){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma6\"")).'</td><td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma7\"")).'</td>';
+			}else if($d==3){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma8\"")).'</td>
+							   <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma9\"")).'</td>
+							   <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma10\"")).'</td>
+							   <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma11\"")).'</td>
+							   <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma12\"")).'</td>';
+			}else if($d==4){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma3\"")).'</td>';
+			}else if($d==5){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma1\"")).'</td><td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma2\"")).'</td>';
+			}else if($d==6){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma13\"")).'</td>';
+			}else if($d==7){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma14\"")).'</td>
+				               <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma15\"")).'</td>
+							   <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma16\"")).'</td>';
+			}
+			
+			echo($columnas);
+			@$total_prov1 = $total_prov1 + pg_fetch_result($cantiDiss,0,"\"suma4\"");
+			@$total_prov2 = $total_prov2 + pg_fetch_result($cantiDiss,0,"\"suma5\"");
+			@$total_prov3 = $total_prov3 + pg_fetch_result($cantiDiss,0,"\"suma6\"");
+			@$total_prov4 = $total_prov4 + pg_fetch_result($cantiDiss,0,"\"suma7\"");
+			@$total_prov5 = $total_prov5 + pg_fetch_result($cantiDiss,0,"\"suma8\"");
+			@$total_prov6 = $total_prov6 + pg_fetch_result($cantiDiss,0,"\"suma9\"");
+			@$total_prov7 = $total_prov7 + pg_fetch_result($cantiDiss,0,"\"suma10\"");
+			@$total_prov8 = $total_prov8 + pg_fetch_result($cantiDiss,0,"\"suma11\"");
+			@$total_prov9 = $total_prov9 + pg_fetch_result($cantiDiss,0,"\"suma12\"");
+			@$total_prov10 = $total_prov10 + pg_fetch_result($cantiDiss,0,"\"suma3\"");
+			@$total_prov11 = $total_prov11 + pg_fetch_result($cantiDiss,0,"\"suma1\"");
+			@$total_prov12 = $total_prov12 + pg_fetch_result($cantiDiss,0,"\"suma2\"");
+			@$total_prov13 = $total_prov13 + pg_fetch_result($cantiDiss,0,"\"suma13\"");
+			@$total_prov14 = $total_prov14 + pg_fetch_result($cantiDiss,0,"\"suma14\"");
+			@$total_prov15 = $total_prov15 + pg_fetch_result($cantiDiss,0,"\"suma15\"");
+			@$total_prov16 = $total_prov16 + pg_fetch_result($cantiDiss,0,"\"suma16\"");
+		}
+		$m++;
+		$n++;
+		echo('</tr>');
+	}
+
+	
+	echo('<tr><td class="titulo1">Total</td><td class="nivel3"><b>'.number_format($total_prov1).'</td><td class="nivel3"><b>'.number_format($total_prov2).'</td><td class="nivel4"><b>'.number_format($total_prov3).'</td><td class="nivel4"><b>'.number_format($total_prov4).'</td><td class="nivel5"><b>'.number_format($total_prov5).'</td><td class="nivel5"><b>'.number_format($total_prov6).'</td><td class="nivel5"><b>'.number_format($total_prov7).'</td><td class="nivel5"><b>'.number_format($total_prov8).'</td><td class="nivel5"><b>'.number_format($total_prov9).'</td><td class="nivel2"><b>'.number_format($total_prov10).'</td><td class="nivel1"><b>'.number_format($total_prov11).'</td><td class="nivel1"><b>'.number_format($total_prov12).'</td><td class="nivel6"><b>'.number_format($total_prov13).'</td><td class="nivel7"><b>'.number_format($total_prov14).'</td><td class="nivel7"><b>'.number_format($total_prov15).'</td><td class="nivel7"><b>'.number_format($total_prov16).'</td></tr></table>');
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u5" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL NACIONAL</td>
+						  </tr>
+						</table></h1>
+					<div>
+					
+<?php
+print("<table width='100%' align='center' class='general'><tr><td width='20%' class='titulo1' rowspan='2'><strong> Departamentos ".$cabecera);
+//lista de distritos A NIVEL NACIONAL
+	$depQuery="select count(cod_dpto) as cantdep, nom_dpto, cod_dpto from ".$tabla." group by cod_dpto,nom_dpto order  by cod_dpto";
+	$rsDetDep = pg_query($linkPG , $depQuery);
+    $numrowsDep = pg_num_rows($rsDetDep);
+	$x=0;
+	$y=1;
+	$total_dept1 = 0;
+	$total_dept2 = 0;
+	$total_dept3 = 0;
+	$total_dept4 = 0;
+	$total_dept5 = 0;
+	$total_dept6 = 0;
+	$total_dept7 = 0;
+	$total_dept8 = 0;
+	$total_dept9 = 0;
+	$total_dept10 = 0;
+	$total_dept11 = 0;
+	$total_dept12 = 0;
+	$total_dept13 = 0;
+	$total_dept14 = 0;
+	$total_dept15 = 0;
+	$total_dept16 = 0;
+	while($x<$numrowsDep){
+		if(pg_fetch_result($rsDetDep,$x,"\"cod_dpto\"")==pg_fetch_result($rsDet,0,"\"cod_dpto\"")){
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+			
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+			
+		}
+		echo('<tr><td '.$classet.'>'.$y.'- '.pg_fetch_result($rsDetDep,$x,"\"nom_dpto\"").'</td>');
+		$acumulador3=0;
+		//$classe='';
+		for($f=1;$f<=7; $f++){
+			if($f==1){
+				$tip_programa='cod_cmas';
+				
+				$queryProg 	= "select sum(cuid_dia) as suma4,sum(acompa_fam) as suma5 ";
+			}else if($f==2){
+				$tip_programa='cod_junt';
+				
+				$queryProg 	= "select sum(hog_ads) as suma6,sum(hog_abon) as suma7 ";				
+			}else if($f==3){
+				$tip_programa='con_fonco';
+				
+				$queryProg 	= "select sum(usu_est) as suma8,sum(proy_culm) as suma9,sum(proy_eje) as suma10, sum(hog_hakuw) as suma11, sum(acu_hakuw) as suma12 ";
+			}else if($f==4){
+				$tip_programa='cod_p65';
+				
+				$queryProg 	= "select sum(pension65) as suma3 ";
+			}else if($f==5){
+				$tip_programa='cod_qal';
+				
+				$queryProg 	= "select sum(nin_atend) as suma1, sum(num_iiee) as suma2 ";
+			}else if($f==6){
+				$tip_programa='cod_cont';
+				
+				$queryProg 	= "select sum(contigo) as suma13 ";	
+			}else if($f==7){
+				$tip_programa='cod_tamb';
+				
+				$queryProg 	= "select sum(tam_pser) as suma14,sum(tam_atrea) as suma15,sum(tam_nubem) as suma16 ";
+			}
+			$consultaDisxD = $queryProg." from ".$tabla." 
+									where ".$tip_programa." =1 and cod_dpto = '".pg_fetch_result($rsDetDep,$x,"\"cod_dpto\"")."'";
+			$cantiDiss = pg_query($linkPG , $consultaDisxD);
+	
+   		echo '<script>console.log("'.$consultaDisxD.'")</script>';
+
+			
+		if($f==1){
+			$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma4\"")).'</td><td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma5\"")).'</td>';
+		}else if($f==2){
+			$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma6\"")).'</td><td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma7\"")).'</td>';
+		}else if($f==3){
+			$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma8\"")).'</td>
+					  <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma9\"")).'</td>
+					  <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma10\"")).'</td>
+					  <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma11\"")).'</td>	
+					  <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma12\"")).'</td>';	
+		}else if($f==4){
+			$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma3\"")).'</td>';
+		}else if($f==5){
+	
+			$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma1\"")).'</td><td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma2\"")).'</td>';
+		}else if($f==6){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma13\"")).'</td>';
+		}else if($f==7){
+				$columnas	= '<td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma14\"")).'</td>
+							   <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma15\"")).'</td>
+							   <td '.$classe.'>'.number_format(pg_fetch_result($cantiDiss,0,"\"suma16\"")).'</td>';
+		}
+			echo($columnas);
+			
+			@$total_dpto1 = $total_dpto1 + pg_fetch_result($cantiDiss,0,"\"suma4\"");
+			@$total_dpto2 = $total_dpto2 + pg_fetch_result($cantiDiss,0,"\"suma5\"");
+			@$total_dpto3 = $total_dpto3 + pg_fetch_result($cantiDiss,0,"\"suma6\"");
+			@$total_dpto4 = $total_dpto4 + pg_fetch_result($cantiDiss,0,"\"suma7\"");
+			@$total_dpto5 = $total_dpto5 + pg_fetch_result($cantiDiss,0,"\"suma8\"");
+			@$total_dpto6 = $total_dpto6 + pg_fetch_result($cantiDiss,0,"\"suma9\"");
+			@$total_dpto7 = $total_dpto7 + pg_fetch_result($cantiDiss,0,"\"suma10\"");
+			@$total_dpto8 = $total_dpto8 + pg_fetch_result($cantiDiss,0,"\"suma11\"");
+			@$total_dpto9 = $total_dpto9 + pg_fetch_result($cantiDiss,0,"\"suma12\"");
+			@$total_dpto10 = $total_dpto10 + pg_fetch_result($cantiDiss,0,"\"suma3\"");
+			@$total_dpto11 = $total_dpto11 + pg_fetch_result($cantiDiss,0,"\"suma1\"");
+			@$total_dpto12 = $total_dpto12 + pg_fetch_result($cantiDiss,0,"\"suma2\"");
+			@$total_dpto13 = $total_dpto13 + pg_fetch_result($cantiDiss,0,"\"suma13\"");
+			@$total_dpto14 = $total_dpto14 + pg_fetch_result($cantiDiss,0,"\"suma14\"");
+			@$total_dpto15 = $total_dpto15 + pg_fetch_result($cantiDiss,0,"\"suma15\"");
+			@$total_dpto16 = $total_dpto16 + pg_fetch_result($cantiDiss,0,"\"suma16\"");
+			
+		}
+		$x++;
+		$y++;
+		echo('</tr>');
+	}		
+	echo('<tr><td class="titulo1">Total</td><td class="nivel3"><b>'.number_format($total_dpto1).'</b></td><td class="nivel3"><b>'.number_format($total_dpto2).'</b></td><td class="nivel4"><b>'.number_format($total_dpto3).'</b></td><td  class="nivel4"><b>'.number_format($total_dpto4).'</b></td><td class="nivel5"><b>'.number_format($total_dpto5).'</b></td><td class="nivel5"><b>'.number_format($total_dpto6).'</b></td><td class="nivel5"><b>'.number_format($total_dpto7).'</b></td><td class="nivel5"><b>'.number_format($total_dpto8).'</b></td><td class="nivel5"><b>'.number_format($total_dpto9).'</b></td><td class="nivel2"><b>'.number_format($total_dpto10).'</b></td><td class="nivel1"><b>'.number_format($total_dpto11).'</b></td><td class="nivel1"><b>'.number_format($total_dpto12).'</b></td><td class="nivel6"><b>'.number_format($total_dpto13).'</b></td><td class="nivel7"><b>'.number_format($total_dpto14).'</b></td><td class="nivel7"><b>'.number_format($total_dpto15).'</b></td><td class="nivel7"><b>'.number_format($total_dpto16).'</b></td></tr>');
+	?>
+					</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table><br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuentes:</b>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente1\"");?>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente2\"");?>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente3\"") .'
+			</br>'. pg_fetch_result($rsDet,0,"\"fuente3_1\"");?>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente4\"");?>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente5\"") .'
+			</br>'. pg_fetch_result($rsDet,0,"\"fuente5_1\"");?>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente6\"");?>
+			<br>- <?php echo pg_fetch_result($rsDet,0,"\"fuente7\"") .'
+			</br>'. pg_fetch_result($rsDet,0,"\"fuente7_1\"");?></tr></thead>
+		</table>
+	<?php
+	$name=$titulo_ventana;
+	$capa='consulta_ppss';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&gid='.$gid;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+	});
+</script>
+
+</html>

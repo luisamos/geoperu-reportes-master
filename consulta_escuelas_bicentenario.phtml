@@ -1,0 +1,160 @@
+
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM vw_peru_escuelas_bicentenario";
+	$sQueryW = " WHERE gid = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Escuelas Bicentenario';
+	$titulo = 'Escuelas Bicentenario';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <!--tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Codigo Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dpto\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_prov\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dist\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"cod_dist\"")) ?></td>
+					</tr>
+	
+					</tbody>
+				</table>
+			</td>
+		  </tr-->
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        <tr>
+        <td width='50%' class='lista_titulo'>Grupo</td>
+        <td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"grupo\"")."</td>
+      </tr>
+        <tr>
+				<td width='50%' class='lista_titulo'>Coordinador BIM</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"coord_bim\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Coordinador de Cartera</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"coord_cart\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Código Local</td>
+				<td class='texto1'>".pg_fetch_result($rsDet,0,"\"cod_local\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Código Modular</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"cod_mod\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Institución Educativa</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"inst_educ\"")."</td>
+              </tr>
+
+              <tr>
+                <td class='lista_titulo'>UGEL</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"ugel\"")."</td>
+              </tr>
+
+              <tr>
+                <td class='lista_titulo'>Codigo Único de Inversiones</td>
+               <td class='texto1'>".pg_fetch_result($rsDet,0,"\"cod_uni\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Nombre del Proyecto</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"nom_proy\"")."</td>
+              </tr>
+
+              <tr>
+              <td class='lista_titulo'>Monto de Inversión Perfil Viable</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"mont_perf\"")."</td>
+              </tr>
+
+			  <tr>
+              <td class='lista_titulo'>Monto de Inversión PIM 2022</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"mont_pim22\"")."</td>
+              </tr>
+
+			";
+		?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$name='Población Penitenciaria';
+	$capa='Población Penitenciaria';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_internos_delito'.'&ocampo=gid';
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

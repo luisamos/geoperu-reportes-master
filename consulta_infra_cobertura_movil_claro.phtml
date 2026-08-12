@@ -1,0 +1,128 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$gid = limpiarNumeros($_GET['ovalor']);
+	
+	$linkPG = Conectarse_POSTGRES(); 
+	// Browse Data
+	$sQueryS = " SELECT *  ";   
+	$sQueryF = " FROM peru_infra_cobertura_movil_claro";
+	$sQueryW = " WHERE gid = '" . $gid. "'";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'COBERTURA M&Oacute;VIL CLARO ';
+	$titulo = $titulo_ventana;
+	
+	
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='20%'>Departamento</th>
+					<th width='20%'>Provincia</th>
+					<th width='20%'>Distrito</th>
+					<th width='20%'>Centro Poblado</th>
+					<th width='20%'>Código CCPP</th>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_ccpp\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_ccpp\"")."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;TECNOLOGÍA</td>
+			  </tr>
+			</table>
+			<table align='center' width="100%" class="listado" >
+			
+<?php
+
+		print "<tr>";
+		print "<td align='center' width='20%' class='lista_titulo center' colspan='1'><b >GSM_CLA</b></td>";
+		print "<td align='center' width='20%' class='lista_titulo center' colspan='1'><b >CDMA_CLA</b></td>";
+		print "<td align='center' width='20%' class='lista_titulo center' colspan='1'><b >IDEN_CLA</b></td>";
+		print "<td align='center' width='20%' class='lista_titulo center' colspan='1'><b >UMTS_CLA</b></td>";
+		print "<td align='center' width='20%' class='lista_titulo center' colspan='1'><b >LTE_CLA</b></td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"gsm_cla\"")."</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"cdma_cla\"")."</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"iden_cla\"")."</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"umts_cla\"")."</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"lte_cla\"")."</td>";
+		print "</tr>";
+	
+	?>
+			</table>
+			
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='Cobertura Movil Claro';
+	$capa='peru_infra_cobertura_movil_claro';
+	if (!isset($_GET['excel'])) {
+		$ruta='consulta_telefonia_movil.phtml?excel=excel&capa='.$capa.'&ovalor='.$gid;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+</html>
+
+
+<?php include_once("./analyticstracking.php");?>

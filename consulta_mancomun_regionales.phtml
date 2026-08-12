@@ -1,0 +1,221 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+
+    // Obtenemos los parametros de la url
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+    
+	$sQueryS = "select * from peru_mancomunidades_regionales pmr";
+	$sQueryW = "  where pmr.gid = " . $pvalor;
+
+	$sQuery = $sQueryS . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'MANCOMUNIDADES REGIONALES - ' . pg_fetch_result($rsDet,0,"\"entid_reg\"") ;
+	$titulo =  'MANCOMUNIDADES REGIONALES - ' . pg_fetch_result($rsDet,0,"\"entid_reg\"") ;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Gobierno Regional</th>
+					  </tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"entid_reg\"")) ?></td>
+					</tr>
+	
+					</tbody>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+
+                    <tr>
+						<td width='50%' class='texto1'>Población proyectada 2021 (Hab.)</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"pob_py_21\""), 0)) ?></td>
+					</tr>
+
+                    <tr>
+						<td width='50%' class='texto1'>Pobreza monetaria</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(pg_fetch_result($rsDet,0,"\"pobr_mon20\"")) ?></td>
+					</tr>
+					
+					<tr>
+						<td width='50%' class='texto1'>Viviendas sin agua de red pública</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"vs_agua_rp\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de Viviendas sin agua de red pública</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"pvs_agua_r\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>Viviendas sin servicios higiénicos de red pública</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"vs_sh\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de Viviendas sin servicios higiénicos de red pública</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"pvs_sh\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>Índice de Desarrollo Humano (IDH)</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"idh\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>Quintil IDH</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(pg_fetch_result($rsDet,0,"\"quintil\"")) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>Ingreso familiar per cápita (Soles por mes)</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"ifp_ns_mes\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de niños menores de 5 años con desnutrición crónica</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"dcron_m5\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de niños menores de 5 años con desnutrición crónica</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"pdcron_m5\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de niños de 6 a 36 meses con anemia</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"anem_6_36\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de niños de 6 a 36 meses con anemia</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"panem_6_36\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de estudiantes del 4to grado de primaria con nivel satisfactorio en Comprensión Lectora</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"cl_nest_sa\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de estudiantes del 4to grado de primaria con nivel satisfactorio en Comprensión Lectora</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"cl_pest_sa\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de estudiantes del 4to grado de primaria con nivel satisfactorio en Matemática</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"mt_nest_sa\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de estudiantes del 4to grado de primaria con nivel satisfactorio en Matemática</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"mt_pest_sa\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de niños que no saben leer ni escribir</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"analf\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de Analfabetismo</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"p_analf\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de viviendas con piso de tierra</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"v_ptierra\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de viviendas con piso de tierra</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"pv_ptierra\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de hogares que cocinan con leña</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"h_lenna\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de hogares que cocinan con leña</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"ph_lenna\""),2)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>N° de hogares con acceso a internet</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"h_c_int\""),0)) ?></td>
+					</tr>
+
+					<tr>
+						<td width='50%' class='texto1'>% de hogares con acceso a internet</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"ph_c_int\""),2)) ?></td>
+					</tr>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$name= 'MANCOMUNIDADES REGIONALES - ' . pg_fetch_result($rsDet,0,"\"entid_reg\"") ;;
+	$capa= 'consulta_mancomun_regionales';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&ocampo=gid';
+		include 'inc/consulta_pie.php';
+	}
+	
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>
+

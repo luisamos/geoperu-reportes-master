@@ -1,0 +1,562 @@
+<?php
+/***************************************************************************************
+Organización: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Descentralización
+Sistema		: 	Sistema Nacional de Información Geográfica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	set_time_limit(1000);		
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES(); 
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";   
+	$sQueryF = " FROM peru_instituciones_educativas";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'INFORMACI&Oacute;N DE LA INSTITUCI&Oacute;N EDUCATIVA';
+	$titulo = 'INFORMACI&Oacute;N DE LA INSTITUCI&Oacute;N EDUCATIVA';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr>
+  <td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th width='20%'>Departamento</th>
+								<th width='20%'>Provincia</th>
+								<th width='20%'>Distrito</th>
+								<th width='20%'>Nombre CCPP</th>
+							  </tr>
+							</thead>
+						<tbody>
+				<?php
+					print "<tr>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nomcpsig\"")."</td>
+						   </tr>";
+				?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		</br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DE LA INSTITUCI&Oacute;N EDUCATIVA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='listado'>
+		  <?php
+		  		print "<tr>";
+				print "<td width='50%' class='lista_titulo'>Ugel</td>";
+				print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"dre_ugel\"")."</td>";
+		  		print "</tr>";
+		  		print "<tr>";
+				print "<td class='lista_titulo'>C&oacute;digo UGEL</td>";
+				print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"codooii\"")."&nbsp;</td>";
+		  		print "</tr>";
+				
+				$nivel = pg_fetch_result($rsDet,0,"\"nivel\"");
+				    if($nivel='A1'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Dependencia</td><td class='lista_textosub'>Pública</td></tr>
+						  <tr><td class='lista_textosub'>Educación básica regular - Inicial cuna</td></tr>";
+					}else if($nivel='A2'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Dependencia</td><td class='lista_textosub'>Pública</td></tr>
+						  <tr><td class='lista_textosub'>Otro sector Público (FF.AA)</td></tr>";
+					}else if($nivel='A3'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Dependencia</td><td class='lista_textosub'>Pública</td></tr>
+						  <tr><td class='lista_textosub'>Mnunicipalidad</td></tr>";
+					}else if($nivel='A4'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Dependencia</td><td class='lista_textosub'>Pública en convenio</td></tr>
+						  <tr><td class='lista_textosub'>Nacionales en convenio</td></tr>";
+					}else if($nivel='B1'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Privado</td><td class='lista_textosub'>Privado</td></tr>
+						  <tr><td class='lista_textosub'>Cooperativo</td></tr>";
+					}else if($nivel='B2'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Privado</td><td class='lista_textosub'>Privado</td></tr>
+						  <tr><td class='lista_textosub'>Comunidad o asociación religiosa</td></tr>";
+					}else if($nivel='B3'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Privado</td><td class='lista_textosub'>Privado</td></tr>
+						  <tr><td class='lista_textosub'>Comunidad</td></tr>";
+					}else if($nivel='B4'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Privado</td><td class='lista_textosub'>Privado</td></tr>
+						  <tr><td class='lista_textosub'>Particular</td></tr>";
+					}else if($nivel='B5'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Privado</td><td class='lista_textosub'>Privado</td></tr>
+						  <tr><td class='lista_textosub'>Empresa</td></tr>";
+					}else if($nivel='B6'){
+					print "<tr><td rowspan='2' class='lista_titulo'>Privado</td><td class='lista_textosub'>Privado</td></tr>
+						  <tr><td class='lista_textosub'>Asocición civil / Inst. Benefica</td></tr>";
+					}			
+		  		print "<tr>";
+				print "<td class='lista_titulo'>Centro Educativo</td>";
+				print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"cen_edu\"")."&nbsp;</td>";
+		  		print "</tr>";
+				print "<tr><td class='lista_titulo'>Nivel y/o modalidad de centro o programa educativo</td><td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nivel\"")."</td></tr>";
+
+		  		print "<tr>";
+				print "<td class='lista_titulo'>Código modular</td>";
+				print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"cod_mod\"")."&nbsp;</td>";
+		  		print "</tr>";
+		  		print "<tr>";
+				print "<td class='lista_titulo'>Forma</td>";
+				$forma = pg_fetch_result($rsDet,0,"\"formas\"");
+				if($forma='S'){
+				print "<td class='lista_textosub'>Escolarizada</td>";
+				} else	if($forma='N'){
+				print "<td class='lista_textosub'>No Escolarizado</td>";
+				} 
+				if($forma=''){
+				print "<td class='lista_textosub'>&nbsp;</td>";
+				} 
+		  		print "<tr>";
+				print "<td class='lista_titulo'>Direcci&oacute;n</td>";
+				print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"dir_cen\"")."&nbsp;</td>";
+		  		print "</tr>";
+				
+				print "<tr><td class='lista_titulo'>Centro poblado</b></td><td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nomcpsig\"")."</td></tr>";
+?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		</br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;INSTITUCIONES EDUCATIVAS - DISTRITO <?php print pg_fetch_result($rsDet,0,"\"nom_dist\"");?></td>
+						  </tr>
+						</table>
+					</h1>
+					<div>
+<?php
+//lista de centros educativos a nivel distrital
+	$cceeQuery="select * from peru_instituciones_educativas where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' order by cen_edu";
+	$rsDetcenedu = pg_query($linkPG , $cceeQuery);
+    $numrowscenedu = pg_num_rows($rsDetcenedu);
+	print("<table width='100%' align='center' class='general'>
+			<tr><td width='350' class='titulosub'>Centro Educativo</td>
+			<td class='educacion1'><b>I.E.</br>Inicial</b></td>
+			<td class='educacion2'><b>I.E.</br>Primaria</b></td>
+			<td class='educacion3'><b>I.E.</br>Secundaria</b></td>
+			<td class='educacion4'><b>I.E.</br>Básica Alternativa</br>CEBA</b></td>
+			<td class='educacion5'><b>I.E.</br>Especial</b></td>
+			<td class='educacion6'><b>I.E.</br>Superior Pedagógico</br>ISP</b></td>
+			<td class='educacion7'><b>I.E.</br>Superior Artística</br>ESFA</b></td>
+			<td class='educacion8'><b>I.E.</br>Técnico Prod.</br>CETPRO</b></td>
+			<td class='educacion9'><b>I.E.</br>Superior Tecnológica</br>IST</b></td>
+			</tr>");
+$i=1;
+$j=0;
+
+while($j<$numrowscenedu){
+	if(pg_fetch_result($rsDetcenedu,$j,"\"gid\"")==pg_fetch_result($rsDet,0,"\"gid\"")){
+		$classet='class="titulo11"';
+		$classe='align="left" class="titulo11"';
+		$class=' align = "center" class="titulo11"';
+	} else {
+		$classet='class="titulo111"';
+		$classe='class="textosub"';
+		$class=' align = "center" class="fondocuerpo"';
+	}
+	
+$enlace='<a href="consulta_educacion.phtml?olayer=educacion_primaria&ocampo='.$pcampo.'&ovalor='.pg_fetch_result($rsDetcenedu,$j,"\"gid\"").'">'.$i.'</a>';
+echo('<tr '.$classe.'><td '.$classet.'>'.$enlace.' .- '.pg_fetch_result($rsDetcenedu,$j,"\"cen_edu\"").'</td>');
+
+for($nivel=1;$nivel<=9;$nivel++){
+$where ='';
+	if($nivel==1){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  in('A1','A2','A3','A5')";
+	}else if($nivel==2){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'B0'";
+	}else if($nivel==3){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'F0'";
+	}else if($nivel==4){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'D0'";
+	}else if($nivel==5){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'E0'";
+	}else if($nivel==6){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'K0'";
+	}else if($nivel==7){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'M0'";
+	}else if($nivel==8){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'L0'";
+	}else if($nivel==9){
+	$where =" where gid= '".pg_fetch_result($rsDetcenedu,$j,"\"gid\"")."' and niv_mod  = 'T0'";
+	}
+//$educacionclass="educacion".$nivel;
+		$eduinicial   		= "select * from peru_instituciones_educativas ".$where;
+		$rseduinicial 		= pg_query($linkPG ,$eduinicial);
+		$numrowseduinicial 	= pg_num_rows($rseduinicial);
+		if($numrowseduinicial>0){
+			echo('<td aling = "center" '.$class.'><img src="imajes/check.png"" width="15" height="15"/></td>');
+		}else{
+			echo('<td '.$class.'></td>');
+		}
+}
+echo('</tr>');
+
+$i++;
+$j++;
+}
+
+echo('<tr><td '.$classet.'>Total</td>');
+for($TotalDist=1;$TotalDist<=9;$TotalDist++){
+	$where = '';
+	if($TotalDist==1){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  in('A1','A2','A3','A5')";
+	}else if($TotalDist==2){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'B0'";
+	}else if($TotalDist==3){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'F0'";
+	}else if($TotalDist==4){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'D0'";
+	}else if($TotalDist==5){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'E0'";
+	}else if($TotalDist==6){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'K0'";
+	}else if($TotalDist==7){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'M0'";
+	}else if($TotalDist==8){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'L0'";
+	}else if($TotalDist==9){
+	$where =" where cod_dist = '".pg_fetch_result($rsDet,0,"\"cod_dist\"")."' and niv_mod  = 'T0'";
+	}
+$educacionclass="educacion".$TotalDist;
+
+	$TotalDistrito = "select count(*) as totainicial from peru_instituciones_educativas ".$where;
+	$rsTotalDistrito = pg_query($linkPG , $TotalDistrito);
+echo('<td class='.$educacionclass.'>'.pg_fetch_result($rsTotalDistrito,0,"\"totainicial\"").'</td>');
+}
+echo('</tr></table>');
+
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr><td><?php echo $imgtitulo;?>&nbsp;&nbsp;INSTITUCIONES EDUCATIVAS - PROVINCIAS <?php print pg_fetch_result($rsDet,0,"\"nom_prov\"");?></td></tr>
+						</table>
+					</h1>
+					<div>
+						<?php
+						//lista de centros educativos a nivel distrital
+							$distQuery="select count(cod_dist) as total, cod_dist, nom_dist from peru_instituciones_educativas where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' group by cod_dist, nom_dist order by nom_dist";
+							$rsDetcenedudist = pg_query($linkPG , $distQuery);
+							$numrowscenedudist = pg_num_rows($rsDetcenedudist);
+							print("<table width='100%' align='center' class='general'>
+									<tr><td width='350' class='titulosub'>Distritos</td>
+									<td class='educacion1'><b>I.E.</br>Inicial</b></td>
+									<td class='educacion2'><b>I.E.</br>Primaria</b></td>
+									<td class='educacion3'><b>I.E.</br>Secundaria</b></td>
+									<td class='educacion4'><b>I.E.</br>Básica Alternativa</br>CEBA</b></td>
+									<td class='educacion5'><b>I.E.</br>Especial</b></td>
+									<td class='educacion6'><b>I.E.</br>Superior Pedagógico</br>ISP</b></td>
+									<td class='educacion7'><b>I.E.</br>Superior Artística</br>ESFA</b></td>
+									<td class='educacion8'><b>I.E.</br>Técnico Prod.</br>CETPRO</b></td>
+									<td class='educacion9'><b>I.E.</br>Superior Tecnológica</br>IST</b></td>
+									</tr>");
+						$k=0;
+
+						while($k<$numrowscenedudist){
+
+							if(pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")){
+								$classet='class="titulo11"';
+								$classe='align="left" class="titulo11"';
+								$class=' align = "center" class="titulo11"';
+							} else {
+								$classet='class="titulo111"';
+								$classe='class="textosub"';
+								$class=' align = "center" class="fondocuerpo"';
+							}
+
+						echo('<tr '.$classe.'><td '.$classet.'>'.pg_fetch_result($rsDetcenedudist,$k,"\"nom_dist\"").'</td>');
+
+						for($niveldist=1;$niveldist<=9;$niveldist++){
+							$where ='';
+							if($niveldist==1){
+							$where = "where niv_mod  in('A1','A2','A3','A5') and cod_dist= '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."'";
+							}else if($niveldist==2){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'B0'";
+							}else if($niveldist==3){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'F0'";
+							}else if($niveldist==4){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'D0'";
+							}else if($niveldist==5){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'E0'";
+							}else if($niveldist==6){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'K0'";
+							}else if($niveldist==7){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'M0'";
+							}else if($niveldist==8){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'L0'";
+							}else if($niveldist==9){
+							$where =" where cod_dist = '".pg_fetch_result($rsDetcenedudist,$k,"\"cod_dist\"")."' and niv_mod  = 'T0'";
+							}
+								$eduTotalinicial   		= "select count(*) as totaldistrito from peru_instituciones_educativas " .$where;
+								$rseduTotalinicial 		= pg_query($linkPG ,$eduTotalinicial);
+								$numrowseduTotalinicial 	= pg_num_rows($rseduTotalinicial);
+								
+									echo('<td '.$class.'>'.pg_fetch_result($rseduTotalinicial,0,"\"totaldistrito\"").'</td>');
+
+							}
+						echo('</tr>');
+						$k++;
+						}
+						echo('<tr><td '.$classet.'>Total</td>');
+						for($TotalProv=1;$TotalProv<=9;$TotalProv++){
+							$where = '';
+							if($TotalProv==1){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  in('A1','A2','A3','A5')";
+							}else if($TotalProv==2){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'B0'";
+							}else if($TotalProv==3){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'F0'";
+							}else if($TotalProv==4){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'D0'";
+							}else if($TotalProv==5){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'E0'";
+							}else if($TotalProv==6){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'K0'";
+							}else if($TotalProv==7){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'M0'";
+							}else if($TotalProv==8){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'L0'";
+							}else if($TotalProv==9){
+							$where =" where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_mod  = 'T0'";
+							}
+						$educacionclass="educacion".$TotalProv;
+
+							$Totalprovincia = "select count(*) as totainicial from peru_instituciones_educativas ".$where;
+							$rsTotalprovincia = pg_query($linkPG , $Totalprovincia);
+						echo('<td class='.$educacionclass.'>'.pg_fetch_result($rsTotalprovincia,0,"\"totainicial\"").'</td>');
+						}
+						echo('</tr></table>');
+								?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;INSTITUCIONES EDUCATIVAS - REGION <?php print pg_fetch_result($rsDet,0,"\"nom_dpto\"");?></td>
+						   </tr>
+						</table>
+					</h1>
+				<div>
+					<?php
+					//lista de centros educativos a nivel distrital
+						$provQuery="select count(cod_prov) as total, cod_prov, nom_prov from peru_instituciones_educativas where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' group by cod_prov, nom_prov order by nom_prov";
+						$rsDetceneduprov = pg_query($linkPG , $provQuery);
+						$numrowsceneduprov = pg_num_rows($rsDetceneduprov);
+						print("<table width='100%' align='center' class='general'>
+								<tr><td width='350' class='titulosub'>Provincias</td>
+								<td class='educacion1'><b>I.E.</br>Inicial</b></td>
+								<td class='educacion2'><b>I.E.</br>Primaria</b></td>
+								<td class='educacion3'><b>I.E.</br>Secundaria</b></td>
+								<td class='educacion4'><b>I.E.</br>Básica Alternativa</br>CEBA</b></td>
+								<td class='educacion5'><b>I.E.</br>Especial</b></td>
+								<td class='educacion6'><b>I.E.</br>Superior Pedagógico</br>ISP</b></td>
+								<td class='educacion7'><b>I.E.</br>Superior Artística</br>ESFA</b></td>
+								<td class='educacion8'><b>I.E.</br>Técnico Prod.</br>CETPRO</b></td>
+								<td class='educacion9'><b>I.E.</br>Superior Tecnológica</br>IST</b></td>
+								</tr>");
+					$l=0;
+
+					while($l<$numrowsceneduprov){
+						if(pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")==pg_fetch_result($rsDet,0,"\"cod_prov\"")){
+							$classet='class="titulo11"';
+							$classe='align="left" class="titulo11"';
+							$class=' align = "center" class="titulo11"';
+						} else {
+							$classet='class="titulo111"';
+							$classe='class="textosub"';
+							$class=' align = "center" class="fondocuerpo"';
+						}
+						
+					echo('<tr '.$classe.'><td '.$classet.'>'.pg_fetch_result($rsDetceneduprov,$l,"\"nom_prov\"").'</td>');
+
+					for($nivelprov=1;$nivelprov<=9;$nivelprov++){
+						$where ='';
+						if($nivelprov==1){
+						$where = "where niv_mod  in('A1','A2','A3','A5') and cod_prov= '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."'";
+						}else if($nivelprov==2){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'B0'";
+						}else if($nivelprov==3){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'F0'";
+						}else if($nivelprov==4){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'D0'";
+						}else if($nivelprov==5){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'E0'";
+						}else if($nivelprov==6){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'K0'";
+						}else if($nivelprov==7){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'M0'";
+						}else if($nivelprov==8){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'L0'";
+						}else if($nivelprov==9){
+						$where =" where cod_prov = '".pg_fetch_result($rsDetceneduprov,$l,"\"cod_prov\"")."' and niv_mod  = 'T0'";
+						}
+							$eduTotalinicial   		= "select count(*) as totaldistrito from peru_instituciones_educativas " .$where;
+							$rseduTotalinicial 		= pg_query($linkPG ,$eduTotalinicial);
+							$numrowseduTotalinicial 	= pg_num_rows($rseduTotalinicial);
+						
+								echo('<td '.$class.'>'.pg_fetch_result($rseduTotalinicial,0,"\"totaldistrito\"").'</td>');
+
+						}
+					echo('</tr>');
+					$l++;
+					}
+					echo('<tr><td '.$classet.'>Total</td>');
+					for($TotalReg=1;$TotalReg<=9;$TotalReg++){
+						$where = '';
+						if($TotalReg==1){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  in('A1','A2','A3','A5')";
+						}else if($TotalReg==2){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'B0'";
+						}else if($TotalReg==3){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'F0'";
+						}else if($TotalReg==4){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'D0'";
+						}else if($TotalReg==5){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'E0'";
+						}else if($TotalReg==6){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'K0'";
+						}else if($TotalReg==7){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'M0'";
+						}else if($TotalReg==8){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'L0'";
+						}else if($TotalReg==9){
+						$where =" where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and niv_mod  = 'T0'";
+						}
+					$educacionclass="educacion".$TotalReg;
+
+						$Totalprovincia = "select count(*) as totainicial from peru_instituciones_educativas ".$where;
+						$rsTotalprovincia = pg_query($linkPG , $Totalprovincia);
+					echo('<td class='.$educacionclass.'>'.pg_fetch_result($rsTotalprovincia,0,"\"totainicial\"").'</td>');
+					}
+					echo('</tr></table>');
+					?>
+				</div>
+				</div>
+			</td>
+		  </tr>
+		</table>	
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente_g\"");?>
+			</th></tr></thead>
+		</table>
+			</td>
+		  </tr>
+		</table>
+				<?php
+				if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='A1'||pg_fetch_result($rsDet,0,"\"niv_mod\"")=='A2'||pg_fetch_result($rsDet,0,"\"niv_mod\"")=='A3'||pg_fetch_result($rsDet,0,"\"niv_mod\"")=='A5'){
+				$ins_educa = "Inicial";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='B0'){
+				$ins_educa = "Primaria";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='D0'){
+				$ins_educa = "Básica Alternativa - CEBA";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='E0'){
+				$ins_educa = "Básica Especial";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='F0'){
+				$ins_educa = "Secundaria";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='K0'){
+				$ins_educa = "Superior Pedagógica - ISP";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='L0'){
+				$ins_educa = "Técnico Productiva - CETPRO";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='M0'){
+				$ins_educa = "Superior Artística - ESFA";
+				}else if(pg_fetch_result($rsDet,0,"\"niv_mod\"")=='T0'){
+				$ins_educa = "Superior Tecnológica - IST";
+				}
+				$descripcion = pg_fetch_result($rsDet,0,"\"cen_edu\"");
+				$name=strtoupper('INSTITUCION EDUCATIVA '.$ins_educa);
+				$capa='consulta_educacion';
+				if (!isset($_GET['excel'])) {
+					$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+					include 'inc/consulta_pie.php';
+				}
+				if (isset($_SESSION['usuario'])) {
+					grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+				}
+				?>
+		</td></tr>
+	</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

@@ -1,0 +1,282 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+		
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	$linkPG = Conectarse_POSTGRES();
+	$gid = $pvalor;
+$cabecera = "<td class='lista_titulo'>Cargo</td><td class='lista_titulo'>Provincia</td><td class='lista_titulo'>Distritos</td><td class='lista_titulo'>G&eacute;nero</td>";
+	
+	
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_autoridad_genero";
+	$sQueryW = " WHERE \"gid\" = '" . $gid. "' and cargo != '' ";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	//capturar genero
+	$_g=pg_fetch_result($rsDet,0,"\"cod_sexo\"");
+	if($player=='peru_autoridades_genero'){//para rango menores a 3
+		$titulo_ventana = 'REPORTE DE AUTORIDADES POR G&Eacute;NERO';
+		$titulo = $titulo_ventana.'<br>DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");				
+	}
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table>
+					</h1>
+				<div>
+					<table width='100%' align='center' class='general'>
+						<thead>
+							<th width='20%'>Departamento</th>
+							<th width='20%'>Provincia</th>
+							<th width='20%'>Distrito</th>
+							<th width='20%'>Ubigeo</th>
+						</thead>
+						<tbody>
+						<?php
+							print "<tr>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+								</tr>";
+						?>
+						</tbody>
+					</table>
+				</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+
+		<br>
+
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u6" style="width: 100%;">
+					<h1>
+                        <table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DE LA MUNICIPALIDAD</td>
+						  </tr>
+						</table>
+					</h1>
+				<div>
+					<table width='100%' align='center' class='general'>
+						<tbody>
+						<?php
+							print "
+								<tr>
+									<td align='center' class='texto'>Municipalidad</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_muni\"")."</td>
+								</tr>
+								<tr>
+									<td align='center' class='texto'>Nombres del alcalde</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nombres\"")."</td>
+								</tr>
+								<tr>
+									<td align='center' class='texto'>Cargo</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cargo\"")."</td>
+								</tr>
+								<tr>
+									<td align='center' class='texto'>Sexo</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"sexo\"")."</td>
+								</tr>
+								<tr>
+									<td align='center' class='texto'>Dirección</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"direccion\"")."</td>
+								</tr>
+								<tr>
+									<td align='center' class='texto'>Teléfono</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"telefono\"")."</td>
+								</tr>
+								<tr>
+									<td align='center' class='texto'>Correo electrónico</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"correo\"")."</td>
+								</tr>
+							";
+						?>
+						</tbody>
+					</table>
+				</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+
+		<br>
+		
+		
+		
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+							<tr>
+								<td><?php echo $imgtitulo;?>&nbsp;&nbsp;PARTICIPACI&Oacute;N A NIVEL DEPARTAMENTAL - <?php print pg_fetch_result($rsDet,0,"\"nom_dpto\"");?></td>
+							</tr>
+						</table>
+					</h1>
+				<div>
+			<?php
+				
+				echo('<table width="100%" align="center" class="general"><td  class="lista_titulo">Departamento</td><td class="lista_titulo">Provincia</td><td class="lista_titulo">Distrito</td><td class="lista_titulo">G&eacute;nero</td><td class="lista_titulo">Cargo</td>');
+				//echo($cabecera);
+				$distQuery		=	"select nom_dpto , cod_dpto, nom_prov, cod_prov, nom_dist, sexo, cod_dist, cod_sexo, cargo 
+									from peru_autoridad_genero where cod_dpto ='".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and cargo != '' and cod_sexo='".$_g."'  group by nom_dpto, cod_dpto, sexo, cod_sexo, nom_prov, nom_dist, cod_prov, cod_dist, cargo order by cod_prov";
+												
+				$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+				$numrowsDist 	= 	pg_num_rows($rsDetDist);
+				$num_cas=0;
+				$neva_te=0;
+				$i=0;
+				$j=1;
+				while($i<$numrowsDist){
+				if(pg_fetch_result($rsDetDist,$i,"\"cod_prov\"")==pg_fetch_result($rsDet,0,"\"cod_prov\"")){
+					$classet='class="titulo11"';
+					$classe='align="center" class="titulo11"';
+				} else {
+					$classet='class="titulo111"';
+					$classe='class="textosub"';
+				}
+				
+				echo('<tr> <td '.$classet.'>'.pg_fetch_result($rsDetDist,$i,"\"nom_dpto\"").'</td>
+				           <td '.$classe.'>'.pg_fetch_result($rsDetDist,$i,"\"nom_prov\"").'</td>
+						   <td '.$classe.'>'.pg_fetch_result($rsDetDist,$i,"\"nom_dist\"").'</td>
+						   <td '.$classe.'>'.pg_fetch_result($rsDetDist,$i,"\"sexo\"").'</td>
+						   <td '.$classe.'>'.pg_fetch_result($rsDetDist,$i,"\"cargo\"").'</td>
+						');
+				
+				
+		$i++;
+		$j++;
+		
+		echo('</tr>');
+	}
+	
+?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+							<tr>
+								<td><?php echo $imgtitulo;?>&nbsp;&nbsp;PARTICIPACI&Oacute;N A NIVEL NACIONAL </td>
+							</tr>
+						</table>
+					</h1>
+				<div>
+			<?php
+				
+				echo('<table width="100%" align="center" class="general"><td  class="lista_titulo">Departamento</td><td class="lista_titulo">G&eacute;nero</td><td class="lista_titulo">Cargo</td><td class="lista_titulo">Total</td>');
+				
+				$distQuery		=	"select nom_dpto ,cod_dpto,  sexo, cod_sexo, cargo, count(cod_sexo) as total
+									from peru_autoridad_genero where cargo != '' and cod_sexo='".$_g."' group by sexo, cargo, nom_dpto, cod_sexo, cod_dpto  order by nom_dpto asc";
+				$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+				$numrowsDist 	= 	pg_num_rows($rsDetDist);
+				$num_cas=0;
+				$neva_te=0;
+				$i=0;
+				$j=1;
+				while($i<$numrowsDist){
+				$total= pg_fetch_result($rsDetDist,$i,"\"total\"");
+				
+				if(pg_fetch_result($rsDetDist,$i,"\"cod_dpto\"")==pg_fetch_result($rsDet,0,"\"cod_dpto\"")){
+					$classet='class="titulo11"';
+					$classe='align="center" class="titulo11"';
+				} else {
+					$classet='class="titulo111"';
+					$classe='class="textosub"';
+				}
+				echo('<tr> <td '.$classet.'>'.pg_fetch_result($rsDetDist,$i,"\"nom_dpto\"").'</td>
+				           <td '.$classe.'>'.pg_fetch_result($rsDetDist,$i,"\"sexo\"").'</td>
+						   <td '.$classe.'>'.pg_fetch_result($rsDetDist,$i,"\"cargo\"").'</td>
+						   <td '.$classe.'>'.pg_fetch_result($rsDetDist,$i,"\"total\"").'</td>
+					
+						');
+				$neva_te=$neva_te+$total;
+		$i++;
+		$j++;
+		
+		echo('</tr>');
+	}
+	echo('<tr><td class="titulosub">Total</td><td class="titulosub"></td><td class="titulosub"></td><td class="titulosub">'.$neva_te.'</td></tr>');
+?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	$name=pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$capa='consulta_autoridades_genero';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&ocampo='.$pcampo.'&olayer='.$player;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+        $("#u6").h2c_acordeon();
+	});
+</script>
+
+</html>

@@ -1,0 +1,216 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pvalor = limpiarCadena($_GET['ovalor']);
+	if($player=='peru_pma_via_ccpp'){
+		$sQuery = " SELECT * FROM peru_pma_via_ccpp where gid = '".$pvalor."'";
+	}else if($player=='peru_pma_via_mzas'){
+		$sQuery = " SELECT * FROM peru_pma_via_mzas where gid = '".$pvalor."'";
+	}
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$linkPG = Conectarse_POSTGRES();
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	if($player=='peru_pma_via_ccpp'){
+		$titulo_ventana = '&Iacute;NDICE DE VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA - CCPP '.pg_fetch_result($rsDet,0,"\"nom_ccpp\"");
+		$titulo = '&Iacute;NDICE DE VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA </br> CCPP '.pg_fetch_result($rsDet,0,"\"nom_ccpp\"");
+		$subtitulo='<tr>
+					<td width="100%" colspan="2"class="titulo1">Nivel de Vulnerabilidad a la Inseguridad Alimentaria	</td><td align="center" class="titulo1">'.pg_fetch_result($rsDet,0,"\"des_ni_via\"").'</td>
+				</tr><tr>
+					<td width="100%" colspan="2"class="titulo1">&Iacute;ndice Vulnerabilidad a la Inseguridad Alimentaria</td><td align="center" class="titulo1">'.pg_fetch_result($rsDet,0,"\"ind_via\"").'</td>
+				</tr>
+				';
+					$ubigeof = "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_ccpp\"")."</td><td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"ubi_ccpp\"")."</td>";
+	}else if($player=='peru_pma_via_mzas'){
+		$titulo_ventana = '&Iacute;NDICE DE VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA - MZNA';
+		$titulo = '&Iacute;NDICE DE VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA - MZNA';
+		$subtitulo='<tr>
+					<td width="100%" colspan="2"class="titulo1">Nivel de Vulnerabilidad a la Inseguridad Alimentaria</td><td align="center" class="titulo1">'.pg_fetch_result($rsDet,0,"\"des_ni_via\"").'</td>
+				</tr><tr>
+					<td width="100%" colspan="2"class="titulo1">&Iacute;ndice Vulnerabilidad a la Inseguridad Alimentaria</td>
+					<td align="center" class="titulo1">'.pg_fetch_result($rsDet,0,"\"via_persoc\"").'</td>
+				</tr>
+				';		
+					$ubigeof = "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"idmanzana\"")."</td>";
+
+	}
+
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" class="marco_general">
+  <tr><td><table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%'>Departamento</th>
+				<th width="25%">Provincia</th>
+				<th width="25%">Distrito</th>
+				<?php if($player=='peru_pma_via_ccpp'){
+					
+					print"<th width='25%'>Centro Poblado</th>";
+					
+				}?>
+				<th width='25%'>Ubiogeo</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+		print 	"<tr><td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+					print"<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+					print"<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>".$ubigeof."</tr>";
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+</br>
+  <table width="100%" class="marco_individual">
+		<tr>
+			<td colspan="3">
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;DATOS DEL MAPA</td>
+				  </tr>
+				</table>
+			</td>
+		</tr>
+<?php
+	echo('<tr><td><table width="100%" align="center" class="general">
+			<tbody>'.$subtitulo);
+		if($player=='peru_pma_via_ccpp'){
+			echo('    <tr >
+    <td rowspan="2" class="texto1"><b>Disponibilidad de alimentos</b></td>
+    <td  class="texto1">Indice de Herfindahl 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ic_her\"").'</td>
+  </tr>
+  <tr >
+    <td  class="texto1">Vulnerabilidad a la disponibilidad</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"vul_disp\"").'</td>
+  </tr>
+		<tr><td rowspan="4"  class="texto1"><b>Acceso a los alimentos</b></td>');}
+   
+  if($player=='peru_pma_via_mzas'){ echo('<td rowspan="3"  class="texto1"><b>Acceso a los alimentos</b></td>');}
+    
+	if($player=='peru_pma_via_ccpp'){
+		echo('<td  class="texto1">Ratio PEA 14 y m&aacute;s en    agricultura 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_pea_ag\"").'</td>
+		</tr>');}
+  
+  
+  if($player=='peru_pma_via_mzas'){		
+	  echo('<tr >
+				<td  class="texto1">Ratio poblac. en viv. piso de tierra 2007</td>
+				<td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_pis_t07\"").'</td>
+			  </tr>
+			  <tr >
+				<td  class="texto1">Ratio poblac. sin electricidad 2007</td>
+				<td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_selec07\"").'</td>
+			  </tr>'); 	  
+	}
+  if($player=='peru_pma_via_ccpp'){	
+  echo('
+		<tr>
+			<td  class="texto1">Ratio poblac. en viv. piso de tierra 2007</td>
+			<td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_pis_t07\"").'</td>
+		</tr>
+		<tr >
+			<td  class="texto1">Ratio poblac. sin electricidad 2007</td>
+			<td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_psac_el\"").'</td>
+		</tr>
+		<tr>
+			<td  class="texto1">Vulnerabilidad al acceso</td>
+			<td  class="texto1">'.pg_fetch_result($rsDet,0,"\"vul_acce\"").'</td>
+		</tr>
+		<tr><td rowspan="6"  class="texto1"><b>Utilizaci&oacute;n de alimentos</b></td>');}
+   if($player=='peru_pma_via_mzas'){	 echo('<td rowspan="4"  class="texto1"><b>Utilizaci&oacute;n de alimentos</b></td>');}
+if($player=='peru_pma_via_ccpp'){	
+	echo('<td  class="texto1">Tasa de analfabetismo mujeres</td>
+	<td class="texto1">'.pg_fetch_result($rsDet,0,"\"tana_muj\"").'</td>
+  </tr>
+  <tr >
+    <td  class="texto1">Ratio jefes de hogar con primaria incompleta 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_jh_pi\"").'</td>
+  </tr>  <tr>
+    <td  class="texto1">Ratio viv sin agua de red ni pilon 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_sa_rp07\"").'</td>
+  </tr>');}
+  if($player=='peru_pma_via_mzas'){
+	  echo('
+  <tr >
+    <td  class="texto1">Ratio viv sin agua de red ni pilon 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_sa_np07\"").'</td>
+  </tr>
+  <tr >
+    <td  class="texto1">Ratio viv sin desague de red publica 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_sdesa07\"").'</td>
+  </tr>
+  <tr >
+    <td  class="texto1">Ratio poblac. cocinan con le&ntilde;a y otros 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_cocle07\"").'</td>
+  </tr>
+  ');
+ }
+   if($player=='peru_pma_via_ccpp'){ 
+  echo('<tr >
+    <td  class="texto1">Ratio poblac. cocinan con le&ntilde;a y otros 2007</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"ra_pcocle0\"").'</td>
+  </tr><tr >
+    <td  class="texto1">Vulnerabilidad a la utilizaci&oacute;n</td>
+    <td  class="texto1">'.pg_fetch_result($rsDet,0,"\"vul_util\"").'</td>
+  </tr>');}
+  
+  
+  echo('</tbody>
+</table>');
+?> 
+
+</td></tr></table><br> <table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+</td></tr>
+</table>
+ <?php
+	$capas=$titulo_general;
+	$name=$capas.strtoupper(pg_fetch_result($rsDet,0,"\"nom_dpto\""));
+	$capa='consulta_sbs';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+</body></html>
+<?php include_once("./analyticstracking.php");?>

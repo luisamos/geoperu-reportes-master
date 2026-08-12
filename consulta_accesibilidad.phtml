@@ -1,0 +1,185 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	if($_GET['gid_']!='') { 
+			$pvalor = limpiarNumeros($_GET['gid_']);
+	}
+	else if($_GET['ovalor']!=''){
+		$pvalor = limpiarNumeros($_GET['ovalor']);
+	}
+	
+	$linkPG = Conectarse_POSTGRES();
+	$gid = limpiarCadena($pvalor);
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM peru_accesibilidad_capitales";
+	$sQueryW = " WHERE \"gid\" = '".$gid."'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Accesibilidad entre capitales - '.pg_fetch_result($rsDet,0,"\"capital\"");
+	$titulo = 'Accesibilidad entre capitales<br> '.pg_fetch_result($rsDet,0,"\"capital\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+<table width="100%" class="marco_general">
+  <tr><td>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%'><?php echo(getTablaCampo('peru_accesibilidad_capitales','nom_dpto'));?></th>
+				<th width='25%'><?php echo(getTablaCampo('peru_accesibilidad_capitales','nom_prov'));?></th>
+				<th width='25%'><?php echo(getTablaCampo('peru_accesibilidad_capitales','nom_dist'));?></th>
+				<th width='25%'><?php echo(getTablaCampo('peru_accesibilidad_capitales','cod_dist'));?></th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+			  </tr>";
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;Datos Accesibilidad entre capitales	</td>
+		  </tr>
+		</table>
+		<table width="100%" class="general">
+			<tbody>
+			  <tr>
+				<td class='titulo1'><?php echo getTablaCampo('peru_accesibilidad_capitales','capital');?></td>
+				<td class='texto1'><?php echo(pg_fetch_result($rsDet,0,"\"capital\""));?></td>
+			  </tr>
+			  <tr>
+				<td class='titulo1'><?php echo getTablaCampo('peru_accesibilidad_capitales','tipo');?></td>
+				<td class='texto1'><?php echo(pg_fetch_result($rsDet,0,"\"tipo\""));?></td>
+			  </tr>
+			  <tr>
+				<td class='titulo1'><?php echo getTablaCampo('peru_accesibilidad_capitales','dt_odpe_km');?></td>
+				<td class='texto1'><?php echo(pg_fetch_result($rsDet,0,"\"dt_odpe_km\""));?></td>
+			  </tr>
+			  <tr>
+				<td class='titulo1'><?php echo getTablaCampo('peru_accesibilidad_capitales','tiempo');?></td>
+				<td class='texto1'><?php echo(pg_fetch_result($rsDet,0,"\"tiempo\""));?></td>
+			  </tr>
+			  <tr>
+				<td class='titulo1'><?php echo getTablaCampo('peru_accesibilidad_capitales','tipo_via');?></td>
+				<td class='texto1'><?php echo(pg_fetch_result($rsDet,0,"\"tipo_via\""));?></td>
+			  </tr>
+			  <tr>
+				<td class='titulo1'><?php echo getTablaCampo('peru_accesibilidad_capitales','tipo_trans');?></td>
+				<td class='texto1'><?php echo(pg_fetch_result($rsDet,0,"\"tipo_trans\""));?></td>
+			  </tr>
+			  <tr>
+				<td class='titulo1'><?php echo getTablaCampo('peru_accesibilidad_capitales','ruta');?></td>
+				<td class='texto1'><?php echo(pg_fetch_result($rsDet,0,"\"ruta\""));?></td>
+			  </tr>
+			</thead>
+<?php
+		print"</tbody></table>";
+?>
+		</td>
+	  </tr>
+	</table>	<br>
+<?php
+		$consulta  ="select * from peru_accesibilidad_capitales where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' order by nom_dist";
+		$rsConsulta=pg_query($linkPG,$consulta);
+		$numRowsPAC=pg_num_rows($rsConsulta);
+		$i=0;
+		?>
+			<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;Accesibilidad A LA CAPITAL DE PROVINCIA <?php echo('- '.pg_fetch_result($rsDet,0,"\"nom_prov\"")); ?></td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+				<thead><tr><th>#</th>
+						  <th><?php echo getTablaCampo('peru_accesibilidad_capitales','nom_dist');?></th>
+						  <th><?php echo getTablaCampo('peru_accesibilidad_capitales','dt_odpe_km');?></th>
+						  <th><?php echo getTablaCampo('peru_accesibilidad_capitales','tiempo');?></th>
+						  <th><?php echo getTablaCampo('peru_accesibilidad_capitales','tipo_via');?></th></tr></thead>
+		<?php
+		while($i<$numRowsPAC){
+			$j=$i+1;
+			if($i%2){
+				$classe = "class='rowpar'";
+			}else{
+				$classe = "";
+			}
+			echo('<tr '.$classe.'><td class="numero11">'.$j.'</td>
+					  <td class="numero11">'.pg_fetch_result($rsConsulta,$i,"\"nom_dist\"").'</td>
+					  <td class="numero11">'.pg_fetch_result($rsConsulta,$i,"\"dt_odpe_km\"").'</td>
+					  <td class="numero11">'.pg_fetch_result($rsConsulta,$i,"\"tiempo\"").'</td>
+					  <td class="numero11">'.pg_fetch_result($rsConsulta,$i,"\"tipo_via\"").'</td></tr>');
+			$i++;
+		}
+	?>
+			</table>
+			</td></tr>
+		</table>
+	<br>
+	    <table class='fuente_general' width="100%"><thead><tr><th><b><?php echo getTablaCampo('peru_accesibilidad_capitales','fuente');?></b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	</td></tr>
+</table>
+</body>
+</html>
+
+<?php 
+$name=$capas.strtoupper(pg_fetch_result($rsDet,0,"\"nom_dist\""));
+	$capa='consulta_accesibilidad';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+include_once("../analyticstracking.php");?>

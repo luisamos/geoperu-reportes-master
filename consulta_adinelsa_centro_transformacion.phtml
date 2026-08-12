@@ -1,0 +1,181 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM vw_peru_adinelsa_centros_transformacion";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo_ventana = 'Centros de transformación (P.E) '. pg_fetch_result($rsDet,0,"");
+		$titulo = 'Centros de transformación (P.E) '. pg_fetch_result($rsDet,0,"");
+	//$titulo = $name;
+	include ('inc/consulta_cabecera.php');
+	
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>	  
+	  <table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACIÓN GEOGRÁFICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						<tr>
+							<th width="20%">DEPARTAMENTO</th>
+							<th width="20%">PROVINCIA</th>
+							<th width="20%">DISTRITO</th>
+							<th width="20%">UBIGEO</th>
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";	
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>";						
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DEL CENTRO DE TRANSFORMACIÓN (P.E)</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					 
+					
+						<?php
+			//EMPRESA ENTEL
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo' colspan='3' ><b >Se describe el código del centro de transformación asociado</b></td>";
+		print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"codigo\"")."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo' colspan='3' ><b >Se describe el  nombre de la localidad asociada al centro de transformación</b></td>";
+		print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nombre\"")."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo' colspan='3' ><b >Describe la tensión nominal de llegada en kilovoltios</b></td>";
+		print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"tension_no\"")."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo' colspan='3' ><b >Describe la primera tensión nominal de salida en kilovoltios</b></td>";
+		print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"tens_nom_1\"")."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo' colspan='3' ><b >Describe la segunda tensión nominal de salida en kilovoltios</b></td>";
+		print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"tens_nom_2\"")."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo' colspan='3' ><b >Máxima demanda total  en kilowatio</b></td>";
+		print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"max_dem_to\"")."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo' colspan='3' ><b >Potencia instalada en kilovatio</b></td>";
+		print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"po_instala\"")."</td>";
+		print "</tr>";
+							?>								
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_ccpp';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+	$("#u1").h2c_acordeon();
+	$("#u2").h2c_acordeon();
+	$("#u3").h2c_acordeon();
+	$("#u4").h2c_acordeon();
+	$("#u5").h2c_acordeon();
+	$("#u6").h2c_acordeon();
+	});
+</script>
+</html> 

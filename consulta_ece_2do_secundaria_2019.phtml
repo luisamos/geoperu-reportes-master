@@ -1,0 +1,343 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel'] == 'excel')) {
+	header("Content-type:application/x-msexcel");
+	$file = $_GET['capa'];
+	header("Content-Disposition: attachment; filename=" . $file . ".xls");
+	$imgtitulo = '';
+} else {
+	$imgtitulo = '<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+include('conexion_postgres.phtml');
+include('injection/funciones.php');
+$player = 	limpiarCadena($_GET['olayer']);
+$pcampo = 	limpiarCadena($_GET['ocampo']);
+$pvalor = 	$_GET['ovalor'];
+if ($_GET['cod_dpto_'] != '') {
+	$cod_dpto   =   limpiarNumeros($_GET['cod_dpto_']);
+} else if ($_GET['cod_dist'] != '') {
+	$cod_dpto   =   limpiarNumeros($_GET['cod_dist']);
+}
+
+$gid = $pvalor;
+$linkPG = Conectarse_POSTGRES();
+
+
+// Tipo de materia
+$materia = explode('_', $player)[3]; // cl || ct || mat
+$precampo = ($materia == 'cl') ? 'l': (($materia=='ct') ? 'c':'m'); // l || c || m
+$nombre_materia = ($materia == 'cl') ? 'Lectura': (($materia=='ct') ? 'Ciencia y Tecnología':'Matemática'); // l || c || m
+// Nivel
+$nivel = explode('_', $player)[2]; // reg || prov || dist
+
+
+if ($nivel == 'reg') {
+	$sQueryF = "peru_ece_reg_2s_2019";
+	$titulo_ventana = 'Evaluaci&oacute;n Censal de Estudiantes (ECE) 2019 - Segundo grado de secundaria '.$nombre_materia.' <br>resultados a nivel regional';
+	$nivel_logro_texto = 'Nivel de logro predominante de '.$nombre_materia.' en la región';
+} else if ($nivel == 'prov') {
+	$sQueryF = "peru_ece_prov_2s_2019";
+	$titulo_ventana = 'Evaluaci&oacute;n Censal de Estudiantes (ECE) 2019 - Segundo grado de secundaria '.$nombre_materia.' <br>resultados a nivel provincial';
+	$nivel_logro_texto = 'Nivel de logro predominante de '.$nombre_materia.' en la provincia';
+} else if ($nivel == 'dist') {
+	$sQueryF = "peru_ece_dist_2s_2019";
+	$titulo_ventana = 'Evaluaci&oacute;n Censal de Estudiantes (ECE) 2019 - Segundo grado de secundaria '.$nombre_materia.' <br>resultados a nivel distrital';
+	$nivel_logro_texto = 'Nivel de logro predominante de '.$nombre_materia.' en el distrito';
+}
+
+
+// Browse Data
+$sQueryS = "SELECT * from ";
+
+$sQueryW = " WHERE gid = '" . $gid . "'";
+$sQuery = $sQueryS . $sQueryF . $sQueryW;
+$rsDet = pg_query($linkPG, $sQuery);
+
+$titulo = $titulo_ventana;
+$name = $titulo;
+include('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+	<tr>
+		<td>
+			<table width="100%" class="marco_general">
+				<tr>
+					<td>
+						<table width="100%" class="marco_individual">
+							<tr>
+								<td>
+									<div id="u1" style="width: 100%;">
+										<h1>
+											<table width="100%" class="titulo_general">
+												<tr>
+													<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+												</tr>
+											</table>
+										</h1>
+										<div>
+											<table width='100%' align='center' class='general' border='1'>
+												<?php if ($nivel == 'reg') { ?>
+													<thead>
+														<tr bgcolor="#B86D26">
+															<th width='25%'>Ámbito Regional</th>
+														</tr>
+													</thead>
+													<tbody>
+														<?php
+														print "<tr>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"region\"") . "</td>
+														</tr>";
+														?>
+													</tbody>
+												<?php } ?>
+
+												<?php if ($nivel == 'prov') { ?>
+													<thead>
+														<tr bgcolor="#B86D26">
+															<th width='25%'>Departamento</th>
+															<th width='25%'>Provincia</th>
+															<th width='25%'>Ubigeo</th>
+														</tr>
+													</thead>
+													<tbody>
+														<?php
+														print "<tr>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"nom_dpto\"") . "</td>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"nom_prov\"") . "</td>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"cod_prov\"") . "</td>
+														</tr>";
+														?>
+													</tbody>
+												<?php } ?>
+
+												<?php if ($nivel == 'dist') { ?>
+													<thead>
+														<tr bgcolor="#B86D26">
+															<th width='25%'>Departamento</th>
+															<th width='25%'>Provincia</th>
+															<th width='25%'>Distrito</th>
+															<th width='25%'>Ubigeo</th>
+														</tr>
+													</thead>
+													<tbody>
+														<?php
+														print "<tr>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"nom_dpto\"") . "</td>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"nom_prov\"") . "</td>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"nom_dist\"") . "</td>
+															<td align='center' class='texto'>" . pg_fetch_result($rsDet, 0, "\"cod_dist\"") . "</td>
+														</tr>";
+														?>
+													</tbody>
+												<?php } ?>
+											</table>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</table>
+
+
+						<br>
+
+						<table width='100%' class='marco_individual'>
+							<tr>
+								<td>
+									<div id='u2' style='width: 100%;'>
+										<h1>
+											<table width='100%' class='titulo_general'>
+												<tr>
+													<td>&nbsp;&nbsp;Indicadores</td>
+												</tr>
+											</table>
+										</h1>
+										<div>
+											<table width='100%' class='listado' border='1'>
+												<tr>
+													<td width='70%' class='lista_titulo' colspan="2"><b>% de Cobertura de instituciones educativas evaluadas</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, "\"cob_ie\""),2)) ?></td>
+												</tr>
+
+												<tr>
+													<td class='lista_titulo' colspan="2"><b>% de Cobertura de estudiantes evaluados</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, "\"cob_est\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													<td class='lista_titulo nivel1' rowspan="8"><b>HOMBRES</b></td>
+													<td class='lista_titulo texto1'><b>N° de estudiantes hombres en nivel Previo al inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_nest_pi\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes hombres en nivel En inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_nest_in\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes hombres en nivel En proceso</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_nest_pr\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes hombres en nivel Satisfactorio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_nest_sa\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes hombres en nivel Previo al inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_pest_pi\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes hombres en nivel En inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_pest_in\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes hombres en nivel En proceso</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_pest_pr\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes hombres en nivel Satisfactorio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"h_pest_sa\""),2)) ?> </td>
+												</tr>
+
+
+												<tr>
+													<td class='lista_titulo nivel1' rowspan="8"><b>MUJERES</b></td>
+													<td class='lista_titulo texto1'><b>N° de estudiantes mujeres en nivel Previo al inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_nest_pi\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes mujeres en nivel En inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_nest_in\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes mujeres en nivel En proceso</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_nest_pr\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes mujeres en nivel Satisfactorio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_nest_sa\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes mujeres en nivel Previo al inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_pest_pi\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes mujeres en nivel En inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_pest_in\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes mujeres en nivel En proceso</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_pest_pr\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes mujeres en nivel Satisfactorio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"m_pest_sa\""),2)) ?> </td>
+												</tr>
+
+
+												<tr>
+													<td class='lista_titulo nivel1' rowspan="8"><b>TOTAL</b></td>
+													<td class='lista_titulo texto1'><b>N° de estudiantes en nivel Previo al inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_nest_pi\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes en nivel En inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_nest_in\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes en nivel En proceso</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_nest_pr\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>N° de estudiantes en nivel Satisfactorio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_nest_sa\""),0)) ?> </td>
+												</tr>
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes en nivel Previo al inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_pest_pi\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes en nivel En inicio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_pest_in\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes en nivel En proceso</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_pest_pr\""),2)) ?> </td>
+												</tr>
+
+												<tr>
+													
+													<td class='lista_titulo texto1'><b>% de estudiantes en nivel Satisfactorio</b></td>
+													<td class='texto1 text-rigth'><?php echo (number_format(pg_fetch_result($rsDet, 0, $precampo."\"t_pest_sa\""),2)) ?> </td>
+												</tr>
+												<tr>
+													<td class='lista_titulo' colspan="2"><b><?php echo($nivel_logro_texto) ?></b></td>
+													<td class='texto1 text-rigth'><?php echo (pg_fetch_result($rsDet, 0, $precampo."\"_nivel_p\"")) ?> </td>
+												</tr>
+											</table>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</table>
+
+						<br>
+						<table class='fuente_general' width="100%">
+							<thead>
+								<tr>
+									<th><b>Fuente:</b>
+										<br><?php echo pg_fetch_result($rsDet, 0, "\"fuente\""); ?>
+									</th>
+								</tr>
+							</thead>
+						</table>
+						<?php
+						$capa = 'consulta_ece_2do_secundaria_2019';
+						if (!isset($_GET['excel'])) {
+							$ruta = $capa . '.phtml?excel=excel&capa=' . $player . '&olayer=' . $player . '&ocampo=' . $pcampo . '&ovalor=' . $pvalor;
+							include 'inc/consulta_pie.php';
+						}
+						?>
+					</td>
+				</tr>
+			</table>
+			</body>
+			<script language="javascript" type="text/javascript">
+				$(document).ready(function() {
+					$("#u1").h2c_acordeon();
+					$("#u2").h2c_acordeon();
+					$("#u3").h2c_acordeon();
+					$("#u4").h2c_acordeon();
+					$("#u5").h2c_acordeon();
+				});
+			</script>
+
+			</html>
+			<?php include_once("./analyticstracking.php"); ?>

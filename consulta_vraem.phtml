@@ -1,0 +1,115 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+@session_start();
+if (isset($_SESSION['usuario'])) {
+	$cod_user = $_SESSION['usuario'];
+}
+
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = $_GET['ovalor'];
+	include("conexion_postgres.phtml");
+	$linkPG = Conectarse_POSTGRES();
+
+	$nldficha = $pvalor;
+	// Browse Data
+	$sQueryS = " SELECT *";
+	$sQueryF = " FROM peru_vraem";
+	$sQueryW = " order by amb_vraem, nom_dpto,nom_prov, nom_dist";
+
+	$sQuery 		= $sQueryS . $sQueryF . $sQueryW;
+	$rsDet 			= pg_query( $linkPG , $sQuery );
+	$rsConsulta 	= pg_query( $linkPG , $sQuery);
+	$numRowsVraem 	= pg_num_rows($rsConsulta);
+	$titulo_ventana = 'Valle de los r&iacute;os Apur&iacute;mac, Ene y Mantaro - VRAEM';
+	$titulo 		= $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='5%'>Nro</th>
+						<th width='25%'>Tipo de &Aacute;mbito</th>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						
+					  </tr>
+					</thead>
+					<tbody>
+					
+						<?php
+							$i=0;
+							while($i<$numRowsVraem){
+							$j=$i+1;
+							if ($i%2) {
+								$classe = "class='rowpar'";
+							} else {
+								$classe = "";
+							}
+								print "<tr ".$classe."><td align='center' class='texto11'>".$j."</td>";
+								print "<td align='center' class='texto11'>".strtoupper(pg_fetch_result($rsDet,$i,"\"amb_vraem\""))."</td>";
+								print "<td align='center' class='texto11'>".pg_fetch_result($rsDet,$i,"\"nom_dpto\"")."</td>";
+								print "<td align='center' class='texto11'>".pg_fetch_result($rsDet,$i,"\"nom_prov\"")."</td>";
+								print "<td align='center' class='texto11'>".pg_fetch_result($rsDet,$i,"\"nom_dist\"")."</td></tr>";
+							$i++;
+							}
+						?> 		  
+						  
+						</tbody>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+
+	<?php
+	$name='consulta_ccpp';
+	$capa='consulta_vraem';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+
+</html> 
+<?php include_once("./analyticstracking.php");?>

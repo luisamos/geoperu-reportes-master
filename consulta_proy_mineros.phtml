@@ -1,0 +1,261 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	//if($_GET['gid_']!=''){ $pvalor = limpiarNumeros($_GET['gid_']);}else if($_GET['ovalor']!=''){$pvalor = limpiarNumeros($_GET['ovalor']);}
+	$pvalor = $_GET['ovalor'];
+	$linkPG = Conectarse_POSTGRES();
+	$gid = $pvalor;
+	if($player=='peru_proy_mineros_expl'){
+		$nom_tabla = 'peru_proy_min_exp';
+		$nombre='Nombre del Proyecto Minero';
+		$tex_tema='Tema del proyecto minero';
+		$tex_metal='Mineral predominante';
+		$titulo_ventana = 'proyectos mineros en  exploraci&oacute;n';
+	}elseif($player=='peru_proy_mineros_prod'){
+		$nom_tabla = 'peru_proy_min_pro';
+		$nombre='Nombre de la unidad minera';
+		$tex_tema='M&eacute;todo de explotaci&oacute;n';
+		$tex_metal='Metal de explotaci&oacute;n';
+		$titulo_ventana = 'Unidades mineras  en  producci&oacute;n';
+	}
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM ".$nom_tabla."";
+	$sQueryW = " WHERE gid = ".$gid."";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+<table width="100%" class="marco_general">
+  <tr><td>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%'>Departamento</th>
+				<th width='25%'>Provincia</th>
+				<th width='25%'>Distrito</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+		echo("<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+			  </tr>");
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;DATOS DEL PROYECTO MINERO		</td>
+		  </tr>
+		</table>
+		<table width="100%" class="general">
+			<thead>
+			  <tr>
+			  <?php
+			  if($player=='peru_proy_mineros_expl'){ ?>
+				<th width='25%'><?php echo($nombre);?></th>
+				<!--th width='25%'><?php echo($tex_tema);?></th-->
+				<th width='12%'>Empresa</th>
+				<th width='13%'><?php echo($tex_metal);?></th>
+				<!--th width='25%'>Etapa</th-->
+			  <?php } 
+			  elseif ($player=='peru_proy_mineros_prod'){ ?>
+				<th width='25%'><?php echo($nombre);?></th>
+				<th width='25%'><?php echo($tex_tema);?></th>
+				<th width='12%'>Empresa</th>
+				<th width='13%'><?php echo($tex_metal);?></th>
+				<!--th width='25%'>Etapa</th-->
+
+			<?php } ?>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+
+
+
+if($player=='peru_proy_mineros_expl'){
+
+						print " <tr><td class='texto'  >".pg_fetch_result($rsDet,0,"\"proyecto\"")."</td>
+								<!--td class='texto' >".pg_fetch_result($rsDet,0,"\"tema\"")."</td-->
+								<td class='texto'  >".pg_fetch_result($rsDet,0,"\"empresa\"")."</td>
+								<td class='texto'  >".pg_fetch_result($rsDet,0,"\"min_pre\"")."</td>
+								<!--td class='texto'  >".pg_fetch_result($rsDet,0,"\"etapa\"")."</td></tr-->
+								
+								";
+					}elseif($player=='peru_proy_mineros_prod'){
+						print "<tr><td class='texto'  >".pg_fetch_result($rsDet,0,"\"unidad\"")."</td>
+								<td class='texto'  >".pg_fetch_result($rsDet,0,"\"mexp\"")."</td>
+								<td class='texto'  >".pg_fetch_result($rsDet,0,"\"empresa\"")."</td>
+								<td class='texto'  >".pg_fetch_result($rsDet,0,"\"metal\"")."</td>
+								<!--td class='texto'  >".pg_fetch_result($rsDet,0,"\"etapa\"")."</td-->
+								
+							</tr>";
+					}
+
+
+
+				  
+				  
+		print"</tbody></table>";
+		?>
+		</td>
+	  </tr>
+	</table>
+	<br>
+<?php
+
+
+		?>
+			<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;Reporte DE PROYECTOS MINEROS <?php echo( ' LA region - '.pg_fetch_result($rsDet,0,"\"nom_dpto\"")); ?></td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+			  <?php
+			  if($player=='peru_proy_mineros_expl'){ ?>
+			  	<th>#</th>
+				<th>Departamento</th>
+				<th>Provincia</th>
+				<th>Distrito</th>
+				<th><?php echo($nombre);?></th>
+				<!--th><?php echo($tex_tema);?></th-->
+				<th>Empresa</th>
+				<th><?php echo($tex_metal);?></th>
+				<!--th>Etapa</th-->
+				<th>Longitud X</th>
+				<th>Latitud Y</th>
+				<?php } 
+			  elseif ($player=='peru_proy_mineros_prod'){ ?>
+				<th>#</th>
+				<th>Departamento</th>
+				<th>Provincia</th>
+				<th>Distrito</th>
+				<th><?php echo($nombre);?></th>
+				<th><?php echo($tex_tema);?></th>
+				<th>Empresa</th>
+				<th><?php echo($tex_metal);?></th>
+				<!--th>Etapa</th-->
+				<th>Longitud X</th>
+				<th>Latitud Y</th>
+				<?php } ?>
+			  </tr>
+			</thead>
+		<?php
+			$nom_dpto = pg_fetch_result($rsDet,0,"\"nom_dpto\"");
+			
+			$rsCon 		= pg_query($linkPG , "select * from ".$nom_tabla." where nom_dpto='".$nom_dpto."';");
+			$numRowRsCon = pg_num_rows($rsCon);
+			$j=0;
+			while($j<$numRowRsCon){
+				$k=$j+1;
+				if(pg_fetch_result($rsCon,$j,"\"gid\"")==pg_fetch_result($rsDet,0,"\"gid\"")){
+					$classet='class="titulo11"';
+				} else {
+					$classet='class="numero11" align="left"';
+				}
+					echo( "<tr><td  align='center' ".$classet." >".$k."</td>
+							<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"nom_dpto\"")."</td>
+							<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"nom_prov\"")."</td>
+							<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"nom_dist\"")."</td>");
+					if($player=='peru_proy_mineros_expl'){
+						echo( " <td ".$classet." >".pg_fetch_result($rsCon,$j,"\"proyecto\"")."</td>
+								<!--td ".$classet." >".pg_fetch_result($rsCon,$j,"\"tema\"")."</td-->
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"empresa\"")."</td>
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"min_pre\"")."</td>
+								<!--td ".$classet." >".pg_fetch_result($rsCon,$j,"\"etapa\"")."</td-->
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"long\"")."</td>
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"lati\"")."</td>");
+					}elseif($player=='peru_proy_mineros_prod'){
+						print "<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"unidad\"")."</td>
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"mexp\"")."</td>
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"empresa\"")."</td>
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"metal\"")."</td>
+								<!--td ".$classet." >".pg_fetch_result($rsCon,$j,"\"etapa\"")."</td-->
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"longitud\"")."</td>
+								<td ".$classet." >".pg_fetch_result($rsCon,$j,"\"latitud\"")."</td>
+							";
+					}
+					print "
+					
+					</tr>";
+					
+				$j++;
+			}
+	?>
+			</table>
+			</td></tr>
+		</table><br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name=$titulo;;
+	$capa='consulta_proy_mineros';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&olayer='.$player.'&ocampo='.$pcampo.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+ 
+</html>
+<?php include_once("./analyticstracking.php");?>

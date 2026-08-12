@@ -1,0 +1,156 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_pma_via_ccpp";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+		$titulo_ventana = 'VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA 2018 - CENTRO POBLADO '.pg_fetch_result($rsDet,0,"\"nom_ccpp\"");
+		$titulo = 'VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA 2018 </br> CENTRO POBLADO '.pg_fetch_result($rsDet,0,"\"nom_ccpp\"");
+	//$titulo = $name;
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th width="20%">DEPARTAMENTO</th>
+							<th width="20%">PROVINCIA</th>
+							<th width="20%">DISTRITO</th>
+							<th width="20%">CENTRO POBLADO</th>
+							<th width="20%">UBIGEO</th>
+							
+		
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_ccpp\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_ccpp\"")."</td>";
+							
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA 2018</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+						<?php
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>Centro poblado </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nom_ccpp\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>&Iacute;ndice de Vulnerabilidad a la Inseguridad Alimentaria 2018 </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"i_via18\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>Nivel de Vulnerabilidad a la Inseguridad Alimentaria 2018 </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"n_via18\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>Poblaci&oacute;n 2017 (Hab.) </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pob2017\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>Poblaci&oacute;n urbana seg&uacute;n encuesta </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pob_urb\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>Poblaci&oacute;n rural seg&uacute;n encuesta </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pob_rur\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>&Aacute;rea de encuesta </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"area_e\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b79Z>Nro de viviendas </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"num_viv\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>Nro de hogares </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"num_hog\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>&Iacute;ndice de disponibilidad </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"i_dispon18\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>&Iacute;ndice de acceso </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"i_acces18\"")."&nbsp;</td>";print "</tr>";
+							print "<tr>";print "<td width='50%' class='lista_titulo'><b>&Iacute;ndice de utilizaci&oacute;n </b></td>";print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"i_utiliz18\"")."&nbsp;</td>";print "</tr>";
+						?>		
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_pma_via_ccpp';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+	$("#u1").h2c_acordeon();
+	$("#u2").h2c_acordeon();
+	$("#u3").h2c_acordeon();
+	$("#u4").h2c_acordeon();
+	$("#u5").h2c_acordeon();
+	$("#u6").h2c_acordeon();
+	});
+</script>
+</html> 

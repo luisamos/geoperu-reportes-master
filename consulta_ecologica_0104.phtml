@@ -1,0 +1,213 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_ecologicas_0104";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo_ventana = 'REPORTE DE UNIDADES ECOL&Oacute;GICAS ';
+		$titulo = 'REPORTE DE UNIDADES ECOL&Oacute;GICAS ';
+	//$titulo = $name;
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th width="20%">UNIDAD ECOL&Oacute;GICA 4</th>
+							
+							
+										
+		
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"ue_4\"")."</td>";
+							
+							
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DE UNIDADES ECOL&Oacute;GICAS </td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					 
+					
+						<?php
+							print "<tr>";
+							print "<td width='50%' class='lista_titulo'><b>Unidad Ecol&oacute;gica</b></td>";
+							print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"ue\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Unidad Ecol&oacute;gica 2</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"ue_2\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Unidad Ecol&oacute;gica 3</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"ue_3\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Unidad Ecol&oacute;gica 4</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"ue_4\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Gran Paisaje</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"gpaisaje\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Paisaje</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"paisaje\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Sub Paisaje</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"s_paisaje\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Elemento del Paisaje</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"e_paisaje\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Tipo de pendiente</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pend\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Porcentaje de Pendiente</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pendiente\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Unidad de Estratigr&aacute;fica</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"codi1\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Descripci&oacute;n Litol&oacute;gica</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"descrip_1\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Era</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"era\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Sistema</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"sistema\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Serie</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"serie\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Tipo de Roca</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"tipo_roca\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Litolog&iacute;a</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"litologia\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Piso Altitudinal</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"piso_altit\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Zona de Vida</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"u_bioclima\"")."&nbsp;</td>";
+							print "</tr>";
+							
+						?>
+								
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_ecologica_0104';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+	$("#u1").h2c_acordeon();
+	$("#u2").h2c_acordeon();
+	$("#u3").h2c_acordeon();
+	$("#u4").h2c_acordeon();
+	$("#u5").h2c_acordeon();
+	$("#u6").h2c_acordeon();
+	});
+</script>
+</html> 

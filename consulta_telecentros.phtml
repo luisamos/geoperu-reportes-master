@@ -1,0 +1,117 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pvalor = $_GET['ovalor'];
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$sQuery = " SELECT * FROM data_telecentros where id_data_telecentros = '".$pvalor."'";
+	$linkPG = Conectarse_POSTGRES();
+	$rsDet  = pg_query( $linkPG , $sQuery );
+	
+
+		$titulo_ventana = 'Centros de Acceso P&uacute;blico (CAP) Telecentros - '.pg_fetch_result($rsDet,0,"\"entidad\"");
+		$titulo = 'Centros de Acceso P&uacute;blico (CAP) Telecentros - '.pg_fetch_result($rsDet,0,"\"entidad\"");
+
+					
+	
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" class="marco_general">
+  <tr><td><table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%'>Departamento</th>
+				<th width="25%">Provincia</th>
+				<th width="25%">Provincia</th>
+				<th width='25%'>Ubigeo</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+			print"<tr><td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+			print"<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+			print"<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+			print"<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>";
+			print"</tr>";
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table></td></tr>
+	<tr><td>
+</br>
+  <table width="100%" class="marco_individual">
+		<tr>
+			<td colspan="3">
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;Datos de los Centros de Acceso P&Uacute;blico (CAP) Telecentros	</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+<?php
+	echo('<thead>
+			  <tr>
+				<th width="50%">Centro Poblado o localidad</th>
+				<th width="50%">Entidad</th>
+			  </tr>
+			</thead>');
+	echo('<tbody>
+				<tr><td class="texto">'.pg_fetch_result($rsDet,0,"\"c_pob_loc\"").'</td>
+					<td class="texto">'.pg_fetch_result($rsDet,0,"\"entidad\"").'</td>
+				</tr>');
+  
+  
+  echo('</tbody></table>');
+?> 
+
+</td></tr></table><br> <table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+</td></tr>
+</table>
+ <?php
+	$capas=$titulo_general;
+	$name=$capas.strtoupper(pg_fetch_result($rsDet,0,"\"nom_dpto\""));
+	$capa='consulta_telecentros';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+</body></html>
+<?php include_once("./analyticstracking.php");?>

@@ -1,0 +1,250 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = $_GET['ovalor'];
+	$linkPG = Conectarse_POSTGRES();
+	$nom_dpto=limpiarCadena($_GET['nom_dpto_']);
+	$cod_dpto = limpiarNumeros($_GET['cod_dpto_']);
+	$fuente = $_GET['fuente_'];
+	$producto=$_GET['producto_'];
+	$f_cafe = limpiarNumeros($_GET['f_cafe_']);
+	$f_papa = limpiarNumeros($_GET['f_papa_']);
+	$f_arroz = limpiarNumeros($_GET['f_arroz_']);
+	$f_algodon = limpiarNumeros($_GET['f_algodon_']);
+	$f_esparr = limpiarNumeros($_GET['f_esparr_']);
+	$f_canna = limpiarNumeros($_GET['f_canna_']);
+	$f_maiz = limpiarNumeros($_GET['f_maiz_']);
+	$f_fruta = limpiarNumeros($_GET['f_fruta_']);
+	$f_menest = limpiarNumeros($_GET['f_menest_']);
+	$f_horyleg = limpiarNumeros($_GET['f_horyleg_']);
+	$f_c_amaz = limpiarNumeros($_GET['f_c_amaz_']);
+	$f_c_and = limpiarNumeros($_GET['f_c_and_']);
+	$f_cereal = limpiarNumeros($_GET['f_cereal_']);
+	$f_tuberc = limpiarNumeros($_GET['f_tuberc_']);
+	$f_ind = limpiarNumeros($_GET['f_ind']);
+	if($f_cafe==1){
+	$campo ='f_cafe';
+	$capa  ='CAFE';
+	$valor = $f_cafe;
+	}else if($f_papa==1){
+	$campo ='f_papa';
+	$capa  ='PAPA';
+	$valor = $f_papa;
+	}else if($f_arroz==1){
+	$campo ='f_arroz';
+	$capa  ='ARROZ';
+	$valor = $f_arroz;
+	}else if($f_algodon==1){
+	$campo ='f_algodon';
+	$capa  ='ALGODON';
+	$valor = $f_algodon;
+	}else if($f_esparr==1){
+	$campo ='f_esparr';
+	$capa  ='ESPERRAGOS';
+	$valor = $f_esparr;
+	}else if($f_canna==1){
+	$campo ='f_canna';
+	$capa  ='CA�A';
+	$valor = $f_canna;
+	}else if($f_maiz==1){
+	$campo ='f_maiz';
+	$capa  ='MAIZ';
+	$valor = $f_maiz;
+	}else if($f_fruta==1){
+	$campo ='f_fruta';
+	$capa  ='FRUTA';
+	$valor = $f_fruta;
+	}else if($f_menest==1){
+	$campo ='f_menest';
+	$capa  ='MENESTRA';
+	$valor = $f_menest;
+	}else if($f_horyleg==1){
+	$campo ='f_horyleg';
+	$capa  ='HORTALIZAS Y LEGUMBRES';
+	$valor = $f_horyleg;
+	}else if($f_c_amaz==1){
+	$campo ='f_c_amaz';
+	$capa  ='CULTIVOS AMAZONICOS';
+	$valor = $f_c_amaz;
+	}else if($f_c_and==1){
+	$campo ='f_c_and';
+	$capa  ='CULTIVOS ANDINOS';
+	$valor = $f_c_and;
+	}else if($f_cereal==1){
+	$campo ='f_cereal';
+	$capa  ='CEREAL';
+	$valor = $f_cereal;
+	}else if($f_tuberc==1){
+	$campo ='f_tuberc';
+	$capa  ='TUBERCULO';
+	$valor = $f_tuberc;
+	}else if($f_ind==1){
+	$campo ='f_ind';
+	$capa  ='CULTIVOS INDUSTRIALES';
+	$valor = $f_ind;
+	}
+
+	// Browse Data
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM data_minag";
+	$sQueryW = " WHERE ".$campo." = ".$valor." and cosecha > 0 and cod_dpto = '".$cod_dpto."'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'CULTIVOS DEPARTAMENTO - '.strtoupper(pg_fetch_result($rsDet,0,"\"nom_prod\""));
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+<table width="100%" class="marco_general">
+  <tr><td>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%' align='center'>Departamento</th>
+				<th width='25%' align='center'>Ubigeo</th>
+			  <tr>
+			</thead>
+			<tbody>
+			  <tr>
+				<?php 
+					print "<td align='center' class='texto'>".$nom_dpto."</td>";
+					print "<td align='center' class='texto'>".$cod_dpto."</td>";
+				?> 		  
+			  </tr>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp; cultivo DEPARTAMENTAL <?php echo $producto;?></td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead><tr><th width='17%'>PRODUCTO</th>
+					  <th width='17%'>SIEMBRA (Ha.)</th>
+					  <th width='17%'>COSECHA (Ha.)</th>
+					  <th width='17%'>PRODUCCI&Oacute;N  (Ha.)</th>
+					  <th width='16%'>RENDIMIENTO (Tn.)</th>
+					  <th width='16%'>PRECIO (S/./Kg.)</th></tr></thead>
+<?php
+    $numrows = pg_num_rows($rsDet);
+	$i=0;
+	while($i<$numrows){
+		if($i%2){
+			$classe="class='rowpar'";
+		} else {
+			$classe="";
+		}
+		print"<tr ".$classe."><td class='texto11'>".pg_fetch_result($rsDet,$i,"\"nom_prod\"")."</td>
+			  <td class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"siembra\""),2)."</td>
+			  <td class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"cosecha\""),2)."</td>
+			  <td class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"prod\""),2)."</td>
+			  <td class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"rend\""),2)."</td>
+			  <td class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"precio\""),2)."</td>
+			  </tr>";
+		$i++;
+	}
+?>
+			</table>
+			</td></tr>
+		</table><br>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp; OTROS DEPARTAMENTOS DONDE SE PRODUCE - <?php echo strtoupper(pg_fetch_result($rsDet,0,"\"nom_prod\""));?></td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+
+			<?php
+				$consulta = "select * from peru_minag where ".$campo." = ".$valor;
+				$rsDetconsulta = pg_query( $linkPG,$consulta);
+				$numRowsp = pg_num_rows($rsDetconsulta);
+				$k=0;
+				while ($k<$numRowsp) {
+					$l=$k+1;
+					print "<tr><td class='texto11' width='10px'><a href='consulta_minag.phtml?".$campo." = ".$valor."&cod_dpto_=".pg_fetch_result($rsDetconsulta,$k,"\"cod_dpto\"")."&nom_dpto_=".pg_fetch_result($rsDetconsulta,$k,"\"nom_dpto\"")."'>".$l."</a></td><td class='texto11'>&nbsp;".pg_fetch_result($rsDetconsulta,$k,"\"nom_dpto\"")."</td></tr>";
+					$k++;		  
+				}
+			?>
+
+		</table>			  
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='CULTIVOS '.$capa.' - DEPARTAMENTO '.strtoupper($nom_dpto);
+	$capa='consulta_minag';
+	if (!isset($_GET['excel'])) {
+		$vars = $vars . '&nom_dpto_=' . $nom_dpto;
+		$vars = $vars . '&cod_dpto_=' . $cod_dpto;
+		$vars = $vars . '&fuente_=' . $fuente;
+		$vars = $vars . '&producto_=' . $producto;
+		$vars = $vars . '&f_cafe_=' . $f_cafe;
+		$vars = $vars . '&f_papa_=' . $f_papa;
+		$vars = $vars . '&f_arroz_=' . $f_arroz;
+		$vars = $vars . '&f_algodon_=' . $f_algodon;
+		$vars = $vars . '&f_esparr_=' . $f_esparr;
+		$vars = $vars . '&f_canna_=' . $f_canna;
+		$vars = $vars . '&f_maiz_=' . $f_maiz;
+		$vars = $vars . '&f_fruta_=' . $f_fruta;
+		$vars = $vars . '&f_menest_=' . $f_menest;
+		$vars = $vars . '&f_horyleg_=' . $f_horyleg;
+		$vars = $vars . '&f_c_amaz_=' . $f_c_amaz;
+		$vars = $vars . '&f_c_and_=' . $f_c_and;
+		$vars = $vars . '&f_cereal_=' . $f_cereal;
+		$vars = $vars . '&f_tuberc_=' . $f_tuberc;
+		$vars = $vars . '&f_ind_=' . $f_ind;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.$vars;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?> 

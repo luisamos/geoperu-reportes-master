@@ -1,0 +1,162 @@
+<?php
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	if($_GET['gid_']!=''){ $pvalor = limpiarNumeros($_GET['gid_']);}else if($_GET['ovalor']!=''){$pvalor = limpiarNumeros($_GET['ovalor']);}
+	$linkPG = Conectarse_POSTGRES();
+	$gid = $pvalor;
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM data_pres_regional";
+	$sQueryW = " WHERE \"gid\" = '".$gid."'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Distribucion del presupuesto regional - region '.pg_fetch_result($rsDet,0,"\"nom_region\"");
+	$titulo = 'Distribucion del presupuesto regional 2020</br> region '.pg_fetch_result($rsDet,0,"\"nom_region\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+<table width="100%" class="marco_general">
+  <tr><td>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%'>Region</th>
+				<th width='25%'>Ubigeo</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_region\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_region\"")."</td>
+			  </tr>";
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;Datos del Mapa de Presupuesto Regional	</td>
+		  </tr>
+		</table>
+		<table width="100%" class="general">
+			<thead>
+			  <tr>
+				<th width='25%'>Nombre del gobierno regional</th>
+				<th width='25%'>Prespuesto regional total. Proyectos y actividades (nuevos soles)</th>
+				<th width='12%'>Presupuesto institucional modificado de los proyectos (nuevos soles)</th>
+				<th width='13%'>Presupuesto institucional modificado de las actividades (nuevos soles)</th>
+				<th width='25%'>Poblaci&oacute;n proyectada al 2020 (habitantes)</th>
+			  </tr>
+			</thead>
+<?php
+			print "<tbody><tr><td align='center' class='numero11'>".pg_fetch_result($rsDet,$i,"\"entid_reg\"")."</td>
+					<td align='center' class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"tot_pr\""),2)."</td>
+					<td align='center' class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"pim_proy\""),2)."</td>
+					<td align='center' class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"pim_activ\""),2)."</td>
+					<td align='center' class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"pob_proy\""))."</td>
+				  </tr>";
+		print"</tbody></table>";
+		?>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;reporte de Canon regional a nive nacional</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='2%'>#</th>
+				<th width='25%'>Nombre del gobierno regional</th>
+				<th width='25%'>Prespuesto regional total. Proyectos y actividades (nuevos soles)</th>
+				<th width='12%'>Presupuesto institucional modificado de los proyectos (nuevos soles)</th>
+				<th width='13%'>Presupuesto institucional modificado de las actividades (nuevos soles)</th>
+				<th width='25%'>Poblaci&oacute;n proyectada al 2020 (habitantes)</th>
+			  </tr>
+			</thead>
+		<?php
+			$rsCon 		= pg_query($linkPG , "select * from data_pres_regional order by nom_region;");
+			$numRowRsCon = pg_num_rows($rsCon);
+			$j=0;
+			while($j<$numRowRsCon){
+				$k=$j+1;
+				if($k%2){
+					$classet='class="titulo11"';
+				} else {
+					$classet='class="numero11"';
+				}
+				
+					print "<tr><td align='center' ".$classet." >".$k."</td>
+					<td align='center' ".$classet." >".pg_fetch_result($rsCon,$j,"\"nom_region\"")."</td>
+					<td align='center' ".$classet." >".number_format(pg_fetch_result($rsCon,$j,"\"tot_pr\""),2)."</td>
+					<td align='center' ".$classet." >".number_format(pg_fetch_result($rsCon,$j,"\"pim_proy\""),2)."</td>
+					<td align='center' ".$classet." >".number_format(pg_fetch_result($rsCon,$j,"\"pim_activ\""),2)."</td>
+					<td align='center' ".$classet." >".number_format(pg_fetch_result($rsCon,$j,"\"pob_proy\""))."</td>
+				  </tr>";
+				  
+				$j++;
+			}
+	?>
+			</table>
+			</td></tr>
+		</table><br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+		$capas='presupuesto regional 2016 ';
+		$name=$capas.strtoupper(pg_fetch_result($rsDet,0,"\"nom_region\""));
+		$capa='consulta_presupuesto_reg';
+		if (!isset($_GET['excel'])) {
+			$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+			include 'inc/consulta_pie.php';
+		}
+		if (isset($_SESSION['usuario'])) {
+			grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+		}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+ 
+</html>
+<?php include_once("./analyticstracking.php");?>

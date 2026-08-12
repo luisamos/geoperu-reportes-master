@@ -1,0 +1,371 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	if($_GET['gid_']!=''){ $gid = limpiarNumeros($_GET['gid_']);}else if($_GET['ovalor']!=''){$gid = limpiarNumeros($_GET['ovalor']);}
+	$cod_fecha 	=	$_GET['cod_fecha_'];
+	if($_GET['cod_dpto_']!=''){ $cod_dpto   =   limpiarNumeros($_GET['cod_dpto_']);}else if($_GET['cod_dpto']!=''){$cod_dpto   =   limpiarNumeros($_GET['cod_dpto']);}
+	$linkPG = Conectarse_POSTGRES(); 
+	// Browse Data
+	$sQueryS = "SELECT * from ";   
+	$sQueryF = "data_conflictos";
+	$sQueryW = " WHERE id_conf = '" . $gid. "'";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$fecha=pg_fetch_result($rsDet,0,"\"fecha\"");
+	$cod_est = pg_fetch_result($rsDet,0,"\"cod_est\"");
+	if($cod_est==2){
+		$tituloCod_est='';
+	}elseif($cod_est==1){
+		$tituloCod_est=' pre ';
+	}elseif($cod_est==3){
+		$tituloCod_est=' post ';
+	}
+	$cod_mes = pg_fetch_result($rsDet,0,"\"cod_mes\"");
+	if($cod_mes==''){
+		$consMes=pg_query($linkPG,"select count(*),cod_fecha from data_conflictos group by cod_fecha");	
+	$v=0;
+	while($v<pg_num_rows($consMes)){
+		$updaMes = pg_query($linkPG,"update data_conflictos set cod_mes=".abrevMes(substr(pg_fetch_result($consMes,$v,"\"cod_fecha\""),0,3))." where cod_fecha = '".pg_fetch_result($consMes,$v,"\"cod_fecha\"")."'");
+	$v++;
+	}
+	}
+	$titulo_ventana = 'INFORMACI&Oacute;N DE '.$tituloCod_est.' CONFLICTOS SOCIALES';
+	$titulo = $titulo_ventana.'<br>'.$fecha;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='25%'>Departamento</th>
+					<th width='25%'>Provincia</th>
+					<th width='25%'>Distrito</th>
+					<th width='25%'>Ubigeo</th>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;DATOS DEl <?php echo($tituloCod_est);?> CONFLICTO SOCIAL</td>
+			  </tr>
+			</table>
+			<table width="100%" class="listado">
+<?php
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Nombre del conflicto</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"nom_confl\"") . "</td>";
+		print "</tr>";
+		
+		print "<tr>";
+		print "<td width='20%' class='lista_titulo'><b>Tipo de Conflicto</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"tip_conf\"") . "</td>";
+		print "</tr>";
+
+		
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Problem&aacute;tica del conflicto</b></td>";
+		print "<td class='lista_texto'>" .pg_fetch_result($rsDet,0,"\"descrip\"");
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Estado de Conflicto</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"estado\"") . "</td>";
+		print "</tr>";
+
+		/*print "<tr>";
+		print "<td class='lista_titulo'><b>Nivel de conflicto</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"nivel\"") . "</td>";
+		print "</tr>";*/
+		
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Ambito de influencia</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"amb_infl\"") . "</td>";
+		print "</tr>";
+					
+	  print "<tr bgcolor='#ECF8FF' >";
+	print "<td   width='200' class='lista_titulo'><B>Acciones</td>";
+	print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"acciones\"");
+	print "</tr>";
+		/*print "<tr>";
+		print "<td class='lista_titulo'><b>Actores</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"actores\"")."</td>";
+		print "</tr>";
+		print "<tr>";*/
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Causa del Conflicto</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"tip_causa\"")."</td>";
+		print "</tr>";
+		print "<tr>";
+	/* print "<td class='thead'><B>Responsable</td>";
+	print "<td><div align='left'>" . pg_fetch_result($rsDet,0,"\"a_respons\"") . "</td>";
+	print "</tr>"; */
+	?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<!--<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;Consolidado de <?php echo($tituloCod_est);?>conflictos sociales en Departamento - &uacute;ltimo a&ntilde;o</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+			<?php
+				$annioActual= pg_fetch_result($rsDet,0,"\"cod_anno\"");
+				$mesActual= pg_fetch_result($rsDet,0,"\"cod_mes\"");
+				$mesAnterior 	= 12-$mesActual;
+				$annioAnterior 	= $annioActual-1;
+				if($mesActual==12){
+					$colAnno1 = '';
+					$colAnno2 = '<th colspan="'.$mesActual.'">'.$annioActual.'</th>';
+				}else{
+					$colAnno1 = '<th colspan="'.$mesAnterior.'">'.$annioAnterior.'</th>';
+					$colAnno2 = '<th colspan="'.$mesActual.'">'.$annioActual.'</th>';
+				}
+			?>
+					<thead>
+					
+					<tr><th>#</th>
+						<th rowspan="2">Caso</th>
+						<th  rowspan="2">Tipo de conflicto</th>
+						<th rowspan="2">Ambito</th>
+						<th rowspan="2">Provincia</th>
+						<th rowspan="2">Distrito</th>
+						<th rowspan="2">Fecha</th>	  
+							  <?php 
+						echo($colAnno1.$colAnno2.'</tr><tr>');
+							$u=$mesActual-1;
+							  while($u<12){
+								  if($u=='0'){$mes='E';}
+								  else if($u=='1'){$mes='F';}else if($u=='2'){$mes='M';}else if($u=='3'){$mes='A';}else if($u=='4'){$mes='M';}else if($u=='5'){$mes='J';}else if($u=='6'){$mes='J';}else if($u=='7'){$mes='A';}else if($u=='8'){$mes='S';}else if($u=='9'){$mes='O';}else if($u==10){$mes='N';}else if($u==11){$mes='D';}
+								  echo('<th>'.$mes.'</th>');
+							  $u++;
+							  }
+							  $n=0;
+							  while($n<$mesActual){
+								  if($n==0){$mes='E';}else if($n==1){$mes='F';}else if($n==2){$mes='M';}else if($n==3){$mes='A';}else if($n==4){$mes='M';}else if($n==5){$mes='J';}else if($n==6){$mes='J';}else if($n==7){$mes='A';}else if($n==8){$mes='S';}else if($n==9){$mes='O';}else if($n==10){$mes='N';}else if($n==11){$mes='D';}
+								   echo('<th>'.$mes.'</th>');
+							  $n++;
+							  }
+							  
+   							         ?>
+							  
+							  </tr></thead>
+<?php
+		$consulta  = "select * from data_conflictos   where  cod_dpto = '".$cod_dpto."'  and  cod_fecha = '".$cod_fecha."' and cod_est=".$cod_est."";
+		$consulta .= "union select * from data_conflictos where  cod_dpto = ''  and  cod_fecha = '".$cod_fecha."'and cod_est=".$cod_est."";
+		$rsConsulta 		= pg_query( $linkPG , $consulta);
+		$numRowsSBS = pg_num_rows($rsConsulta);
+		$i=0;
+		while($i<$numRowsSBS){
+			$nivel=pg_fetch_result($rsConsulta,$i,"\"nivel\"");
+			if($nivel==1){
+				$alcanse = "Nacional";
+			}elseif($nivel==2){
+				$alcanse = "Regional";
+			}elseif($nivel==3){
+				$alcanse = "Provincial";
+			}elseif($nivel==4){
+				$alcanse = "Distrital";
+			}
+			$j=$i+1;
+			if($i%2){
+				$classe = "class='rowpar'";
+			}else{
+				$classe = "";
+			}
+			if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+				$enlace=$j;
+			} else {
+				$enlace='<a href="consulta_conflictosocial.phtml?gid_='.pg_fetch_result($rsConsulta,$i,"\"id_conf\"").'&cod_fecha_='.pg_fetch_result($rsConsulta,$i,"\"cod_fecha\"").'&cod_dpto_='.$cod_dpto.'">'.$j.'</a> ';
+			}
+			echo('<tr '.$classe.'><td class="texto11">'.$enlace.'</td>
+					  <td class="texto11">'.substr(pg_fetch_result($rsConsulta,$i,"\"nom_confl\""),0,50).'...</td>
+					  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"tip_conf\"").'</td>
+					  <td class="texto11">'.$alcanse.'</td>
+					  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"nom_prov\"").'</td>
+					  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"nom_dist\"").'</td>');
+					  $conInicioConflicto=pg_query($linkPG,"select * from data_conflictos where codig_conf=".pg_fetch_result($rsConsulta,$i,"\"codig_conf\"")." order by cod_anno,cod_mes ");				  
+					  echo('<td class="texto11">'.pg_fetch_result($conInicioConflicto,0,"\"fecha\"").'</td>');
+						$cod_tipo=pg_fetch_result($rsConsulta,$i,"\"cod_tipo\"");
+						if($cod_tipo==1){
+							$estilo= 'style="background-color:#73B273;border:solid 1px;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==2){
+							$estilo= 'style="background-color:#D6ED00;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==3){
+							$estilo= 'style="background-color:#E3E3B2;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==4){
+							$estilo= 'style="background-color:#FBEA51;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==5){
+							$estilo= 'style="background-color:#894465;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==6){
+							$estilo= 'style="background-color:#D0494E;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==7){
+							$estilo= 'style="background-color:#E10052;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==8){
+							$estilo= 'style="background-color:#00C5E1;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==9){
+							$estilo= 'style="background-color:#F7A61F;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==10){
+							$estilo= 'style="background-color:#C587F3;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==11){
+							$estilo= 'style="background-color:#9EAAD7;border:solid 1px;border-color:#B0B0B0"';
+						}elseif($cod_tipo==12){
+							$estilo= 'style="background-color:#CCCCCC;border:solid 1px;border-color:#B0B0B0"';
+						}
+						$k=$mesActual;
+						while($k<12){
+							if($k==0){$mes='Ene';}elseif($k==1){$mes='Feb';}elseif($k==2){$mes='Mar';}elseif($k==3){$mes='Abr';}elseif($k==4){$mes='May';}elseif($k==5){$mes='Jun';}elseif($k==6){$mes='Jul';}elseif($k==7){$mes='Ago';}elseif($k==8){$mes='Sep';}elseif($k==9){$mes='Oct';}elseif($k==10){$mes='Nov';}elseif($k==11){$mes='Dic';}
+							$codMes=strtoupper($mes).$annioAnterior;
+							$conMin=pg_query($linkPG,"select * from data_conflictos where cod_anno = '".$annioAnterior."' and codig_conf=".pg_fetch_result($rsConsulta,$i,"\"codig_conf\"")." and cod_fecha='".$codMes."'");
+							if(pg_num_rows($conMin)>0){
+								echo('<td '.$estilo.'></td>');
+							}else{
+								echo('<td style="border:solid 1px;border-color:#B0B0B0"></td>');
+							}
+							$k++;
+						}
+						$k=0;
+						while($k<$mesActual){
+							if($k==0){$mes='Ene';}elseif($k==1){$mes='Feb';}elseif($k==2){$mes='Mar';}elseif($k==3){$mes='Abr';}elseif($k==4){$mes='May';}elseif($k==5){$mes='Jun';}elseif($k==6){$mes='Jul';}elseif($k==7){$mes='Ago';}elseif($k==8){$mes='Sep';}elseif($k==9){$mes='Oct';}elseif($k==10){$mes='Nov';}elseif($k==11){$mes='Dic';}
+							$codMes=strtoupper($mes).$annioActual;
+							$conMin=pg_query($linkPG,"select * from data_conflictos where cod_anno = '".$annioActual."' and codig_conf=".pg_fetch_result($rsConsulta,$i,"\"codig_conf\"")." and cod_fecha='".$codMes."'");
+							if(pg_num_rows($conMin)>0){
+								echo('<td '.$estilo.'></td>');
+							}else{
+								echo('<td style="border:solid 1px;border-color:#B0B0B0"></td>');
+							}
+							$k++;
+						}
+						
+						
+					  echo('</tr>');
+			$i++;
+			$TotalConflic=$i;
+		}
+?>
+			</table>
+			</td></tr>
+		</table>-->
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"").' - '.$fecha.' <a href="../../sayhuite_repositorio/PDF/'.$cod_fecha.'.pdf" target="blank"><img src="imajes/descargar.jpg" border ="0" alt="Descargar Willa Willaqniki" width="30px"></a>'); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='CONFLICTO '.strtoupper(pg_fetch_result($rsDet,0,"\"tip_conf\"")).' - MES '.pg_fetch_result($rsDet,0,"\"fecha\"").' - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$capa='consulta_conflictosocial';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$gid.'&cod_dpto='.$cod_dpto;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+</html>
+
+<?php/*
+function abrevMes($a)
+{
+	switch ($a){
+		case 'ENE':
+			return 1;
+			break;
+		case 'FEB':
+			return 2;
+			break;
+		case 'MAR':
+			return 3;
+			break;
+		case 'ABR':
+			return 4;
+			break;
+		case 'MAY':
+			return 5;
+			break;
+		case 'JUN':
+			return 6;
+			break;
+		case 'JUL':
+			return 7;
+			break;
+		case 'AGO':
+			return 8;
+			break;
+		case 'SEP':
+			return 9;
+			break;
+		case 'OCT':
+			return 10;
+			break;
+		case 'NOV':
+			return 11;
+			break;
+		case 'DIC':
+			return 12;
+			break;
+	}
+}*/
+?>
+<?php include_once("./analyticstracking.php");?>

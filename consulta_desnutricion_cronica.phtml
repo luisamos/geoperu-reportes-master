@@ -1,0 +1,377 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+		
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	if($pvalor==''){
+		$cod_dist = limpiarNumeros($_GET['codigo']);
+	}else {
+		$cod_dist = $pvalor;
+	}
+
+	
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM data_des_cron";
+	$sQueryW = " WHERE \"cod_dist\" = '" . $cod_dist. "' and anio=2023 order by gid desc";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	if($player=='peru_des_cro_m3'){//para rango menores a 3
+	$titulo_proy = 'Poblaci&oacute;n proyectada de 0 a 3 a&ntilde;os';
+		$titulo_ventana = 'Reporte desnutrici&oacute;n cr&oacute;nica menores de 3 a&ntilde;os';
+		$titulo = $titulo_ventana.'<br>DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");				
+	}elseif($player=='peru_des_cro_m5'){//para rango menores a 5
+		$titulo_proy = 'Poblaci&oacute;n proyectada de 0 a 5 a&ntilde;os';
+		$titulo_ventana = 'Reporte desnutrici&oacute;n cr&oacute;nica menores de 5 a&ntilde;os';
+		$titulo = $titulo_ventana.'<br>DISTRITO '. pg_fetch_result($rsDet,0,"\"nom_dist\"");			
+	}
+	
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table>
+					</h1>
+				<div>
+					<table width='100%' align='center' class='general'>
+						<thead>
+							<th width='20%'>Departamento</th>
+							<th width='20%'>Provincia</th>
+							<th width='20%'>Distrito</th>
+							<th width='20%'>Ubigeo</th>
+						</thead>
+						<tbody>
+						<?php
+							print "<tr>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+									<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+								</tr>";
+						?>
+						</tbody>
+					</table>
+				</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DESNUTRICI&Oacute;N CR&Oacute;NICA - distrito  <?php echo(pg_fetch_result($rsDet,0,"\"nom_dist\"")); ?></td>
+						  </tr>
+						</table>
+					</h1>
+				<div>
+					<table width='100%' align='center' class='listado'>
+				<?php 
+		  		    print "<tr>";
+					// CON POBLACION PROYECTADA $cabecera = "<td class='lista_titulo'> ".$titulo_proy." </td><td class='lista_titulo'>N&uacute;mero de ni&ntilde;os evaluados Talla / Edad</td><td class='lista_titulo'>Numero de casos</td><td class='lista_titulo'>Desnutrici&oacute;n cr&oacute;nica (%)</td>";
+					$cabecera = "<td class='lista_titulo'>N&uacute;mero de ni&ntilde;os evaluados Talla / Edad</td><td class='lista_titulo'>N&uacute;mero de casos</td><td class='lista_titulo'>Desnutrici&oacute;n cr&oacute;nica (%)</td>";
+
+					print "".$cabecera."</tr>";				
+		  		    print "<tr>";
+					if($player=='peru_des_cro_m3'){
+						//print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"edad_0a3\"")."</td>";
+						print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"neva_te_m3\"")."</td>";
+						print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"num_cas_m3\"")."</td>";
+						print "<td class='lista_textosub'>".number_format(pg_fetch_result($rsDet,0,"\"descrop_m3\""),2)."%</td>";
+					}elseif($player=='peru_des_cro_m5'){
+						//print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"edad_0a5\"")."</td>";
+						print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"neva_te_m5\"")."</td>";
+						print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"num_cas_m5\"")."</td>";
+						print "<td class='lista_textosub'>".number_format(pg_fetch_result($rsDet,0,"\"descrop_m5\""),2)."%</td>";
+					}
+					print "</tr>";
+				?>
+					</table>
+				</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+							<tr>
+								<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DESNUTRICI&Oacute;N CR&Oacute;NICA - PROVINCIA <?php print pg_fetch_result($rsDet,0,"\"nom_prov\"");?></td>
+							</tr>
+						</table>
+					</h1>
+				<div>
+			<?php
+				echo('<table width="100%" align="center" class="general"><td  class="lista_titulo">Distritos</td>');
+				echo($cabecera);
+				$distQuery		=	"select nom_dist,cod_dist,
+															   num_cas_m3 as num_cas_m3,
+															   neva_te_m3 as neva_te_m3, 
+															   descrop_m3 as descrop_m3,
+															   edad_0a5 as edad_0a5 ,
+															   num_cas_m5 as num_cas_m5, 
+															   neva_te_m5 as neva_te_m5, 
+															   descrop_m5 as descrop_m5
+												from data_des_cron where cod_prov ='".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and anio = 2023 order by cod_dist";
+				$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+				$numrowsDist 	= 	pg_num_rows($rsDetDist);
+				$edad=0;
+				$num_cas=0;
+				$neva_te=0;
+				$descrop_m=0;
+				$i=0;
+				$j=1;
+				while($i<$numrowsDist){
+					if($player=='peru_des_cro_m3'){//para rango menores a 3
+						$edad_m= pg_fetch_result($rsDetDist,$i,"\"edad_0a3\"");
+						$num_cas_m= pg_fetch_result($rsDetDist,$i,"\"num_cas_m3\"");
+						$neva_te_m= pg_fetch_result($rsDetDist,$i,"\"neva_te_m3\"");
+						$descrop_m= number_format(pg_fetch_result($rsDetDist,$i,"\"descrop_m3\""),2);
+					}elseif($player=='peru_des_cro_m5'){//para rango menores a 5
+						$edad_m= number_format(pg_fetch_result($rsDetDist,$i,"\"edad_0a5\""));
+						$num_cas_m= number_format(pg_fetch_result($rsDetDist,$i,"\"num_cas_m5\""),2);
+						$neva_te_m= pg_fetch_result($rsDetDist,$i,"\"neva_te_m5\"");
+						$descrop_m= number_format(pg_fetch_result($rsDetDist,$i,"\"descrop_m5\""),2);
+					}
+				if(pg_fetch_result($rsDetDist,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")){
+					$classet='class="titulo11"';
+					$classe='align="center" class="titulo11"';
+				} else {
+					$classet='class="titulo111"';
+					$classe='class="textosub"';
+				}
+				if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+					$enlace=$j;
+				} else {
+					$enlace='<a href="consulta_desnutricion_cronica.phtml?olayer='.$player.'&ocampo='.$pcampo.'&ovalor='.pg_fetch_result($rsDetDist,$i,"\"cod_dist\"").'">'.$j.'</a>';
+				}
+					echo('<tr><td '.$classet.'>'.$enlace.'- '.pg_fetch_result($rsDetDist,$i,"\"nom_dist\"").'</td><td '.$classe.'>'.number_format($neva_te_m).'</td><td '.$classe.'>'.number_format($num_cas_m).'</td><td '.$classe.'>'.$descrop_m.'%</td>');
+				$edad=$edad+$edad_m;
+				$num_cas=$num_cas+$num_cas_m;
+				$neva_te=$neva_te+$neva_te_m;
+				$descrop_m=$descrop_m+$descrop_m;
+		$i++;
+		$j++;
+		
+		echo('</tr>');
+	}
+	echo('<tr><td class="titulosub">Total</td><td class="titulosub">'.number_format($neva_te).'</td><td class="titulosub">'.number_format($num_cas).'</td><td class="titulosub">'.round($num_cas/$neva_te*100,2).'%</td></tr>');
+?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		
+		
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+							<tr>
+								<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DESNUTRICI&Oacute;N CR&Oacute;NICA - DEPARTAMENTO <?php print pg_fetch_result($rsDet,0,"\"nom_dpto\"");?></td>
+							</tr>
+						</table>
+					</h1>
+				<div>
+			<?php
+				echo('<table width="100%" align="center" class="general"><td  class="lista_titulo">Provincia</td>');
+				echo($cabecera);
+				$distQuery		=	"select nom_prov,cod_prov,															   
+															   sum(num_cas_m3) as num_cas_m3,
+															   sum(neva_te_m3) as neva_te_m3, 
+															   sum(num_cas_m3)/nullif(sum(neva_te_m3),0)*100 as descrop_a,
+															   sum(edad_0a5) as edad_0a5, 
+															   sum(num_cas_m5) as num_cas_m5, 
+															   sum(neva_te_m5) as neva_te_m5, 
+															   sum(num_cas_m5)/nullif(sum(neva_te_m5),0)*100 as descrop_b
+												from data_des_cron where cod_dpto ='".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' and anio = 2023 group by nom_prov,cod_prov,cod_dpto  order by cod_dpto";
+												
+												
+				$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+				$numrowsDist 	= 	pg_num_rows($rsDetDist);
+				$edad=0;
+				$num_cas=0;
+				$neva_te=0;
+				$descrop_m=0;
+				$i=0;
+				$j=1;
+				while($i<$numrowsDist){
+					if($player=='peru_des_cro_m3'){//para rango menores a 3
+					    $edad_m= pg_fetch_result($rsDetDist,$i,"\"edad_0a3\"");
+						$num_cas_m= pg_fetch_result($rsDetDist,$i,"\"num_cas_m3\"");
+						$neva_te_m= pg_fetch_result($rsDetDist,$i,"\"neva_te_m3\"");
+						$descrop_m= number_format(pg_fetch_result($rsDetDist,$i,"\"descrop_a\""),2);
+					}elseif($player=='peru_des_cro_m5'){//para rango menores a 5
+					    $edad_m= pg_fetch_result($rsDetDist,$i,"\"edad_0a5\"");
+						$num_cas_m= pg_fetch_result($rsDetDist,$i,"\"num_cas_m5\"");
+						$neva_te_m= pg_fetch_result($rsDetDist,$i,"\"neva_te_m5\"");
+						$descrop_m= number_format(pg_fetch_result($rsDetDist,$i,"\"descrop_b\""),2);
+					}
+				if(pg_fetch_result($rsDetDist,$i,"\"cod_prov\"")==pg_fetch_result($rsDet,0,"\"cod_prov\"")){
+					$classet='class="titulo11"';
+					$classe='align="center" class="titulo11"';
+				} else {
+					$classet='class="titulo111"';
+					$classe='class="textosub"';
+				}
+				
+				echo('<tr><td '.$classet.'>'.pg_fetch_result($rsDetDist,$i,"\"nom_prov\"").'</td><td '.$classe.'>'.number_format($neva_te_m).'</td><td '.$classe.'>'.number_format($num_cas_m).'</td><td '.$classe.'>'.$descrop_m.'%</td>');
+				$edad=$edad+$edad_m;
+				$num_cas=$num_cas+$num_cas_m;
+				$neva_te=$neva_te+$neva_te_m;
+				$descrop_m=$descrop_m+$descrop_m;
+		$i++;
+		$j++;
+		
+		echo('</tr>');
+	}
+	echo('<tr><td class="titulosub">Total</td><td class="titulosub">'.number_format($neva_te).'</td><td class="titulosub">'.number_format($num_cas).'</td><td class="titulosub">'.round($num_cas/$neva_te*100,2).'%</td></tr>');
+?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+							<tr>
+								<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DESNUTRICI&Oacute;N CR&Oacute;NICA nacional </td>
+							</tr>
+						</table>
+					</h1>
+				<div>
+			<?php
+				echo('<table width="100%" align="center" class="general"><td  class="lista_titulo">Departamento</td>');
+				echo($cabecera);
+				$distQuery		=	"select nom_dpto,cod_dpto,
+															   sum(num_cas_m3) as num_cas_m3,
+															   sum(neva_te_m3) as neva_te_m3, 
+															   sum(num_cas_m3)/nullif(sum(neva_te_m3),0)*100 as descrop_a,
+															   sum(edad_0a5) as edad_0a5,
+															   sum(num_cas_m5) as num_cas_m5, 
+															   sum(neva_te_m5) as neva_te_m5, 
+															   sum(num_cas_m5)/nullif(sum(neva_te_m5),0)*100 as descrop_b
+												from data_des_cron where anio = 2023 group by nom_dpto,cod_dpto order by cod_dpto";
+				$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+				$numrowsDist 	= 	pg_num_rows($rsDetDist);
+				$edad=0;
+				$num_cas=0;
+				$neva_te=0;
+				$i=0;
+				$j=1;
+				while($i<$numrowsDist){
+					if($player=='peru_des_cro_m3'){//para rango menores a 3
+					    $edad_m= pg_fetch_result($rsDetDist,$i,"\"edad_0a3\"");
+						$num_cas_m= pg_fetch_result($rsDetDist,$i,"\"num_cas_m3\"");
+						$neva_te_m= pg_fetch_result($rsDetDist,$i,"\"neva_te_m3\"");
+						$descrop_m= number_format(pg_fetch_result($rsDetDist,$i,"\"descrop_a\""),2);
+					}elseif($player=='peru_des_cro_m5'){//para rango menores a 5
+					    $edad_m= pg_fetch_result($rsDetDist,$i,"\"edad_0a5\"");
+						$num_cas_m= pg_fetch_result($rsDetDist,$i,"\"num_cas_m5\"");
+						$neva_te_m= pg_fetch_result($rsDetDist,$i,"\"neva_te_m5\"");
+						$descrop_m= number_format(pg_fetch_result($rsDetDist,$i,"\"descrop_b\""),2);
+					}
+				if(pg_fetch_result($rsDetDist,$i,"\"cod_dpto\"")==pg_fetch_result($rsDet,0,"\"cod_dpto\"")){
+					$classet='class="titulo11"';
+					$classe='align="center" class="titulo11"';
+				} else {
+					$classet='class="titulo111"';
+					$classe='class="textosub"';
+				}
+				echo('<tr><td '.$classet.'>'.pg_fetch_result($rsDetDist,$i,"\"nom_dpto\"").'</td><td '.$classe.'>'.number_format($neva_te_m).'</td><td '.$classe.'>'.number_format($num_cas_m).'</td><td '.$classe.'>'.$descrop_m.'%</td>');
+				$edad=$edad+$edad_m;
+				$num_cas=$num_cas+$num_cas_m;
+				$neva_te=$neva_te+$neva_te_m;
+		$i++;
+		$j++;
+		
+		echo('</tr>');
+	}
+	echo('<tr><td class="titulosub">Total</td><td class="titulosub">'.number_format($neva_te).'</td><td class="titulosub">'.number_format($num_cas).'</td><td class="titulosub">'.number_format($descrop_m).'%</td></tr>');
+?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo (pg_fetch_result($rsDet,0,"\"fuente\"").pg_fetch_result($rsDet,0,"\"fuente_1\""));?></th></tr></thead>
+		</table>
+	<?php
+	$name=pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$capa='consulta_desnutricion_cronica';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&ocampo='.$pcampo.'&olayer='.$player;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+	});
+</script>
+
+</html>

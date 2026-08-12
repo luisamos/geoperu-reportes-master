@@ -1,0 +1,217 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	$linkPG = Conectarse_POSTGRES();
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_violenciagenero_femenicidios";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo_ventana = 'CASOS FEMINICIDIOS AÑO 2020 - '. pg_fetch_result($rsDet,0,"nom_dist");
+		$titulo = 'CASOS FEMINICIDIOS AÑO 2020 - '. pg_fetch_result($rsDet,0,"nom_dist");
+	//$titulo = $name;
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<!--<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','nom_dpto'));?></th>
+							<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','nom_prov'));?></th>
+							<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','nom_dist'));?></th>
+							<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','cod_dist'));?></th>-->
+							<th width="20%">DEPARTAMENTO</th>
+							<th width="20%">PROVINCIA</th>
+							<th width="20%">DISTRITO</th>
+							<th width="20%">UBIGEO</th>
+		
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>";
+							
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS GENERALES</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					 
+					
+						<?php
+						$lugar_del = pg_fetch_result($rsDet,0,"\"lugar_del\"");if ($lugar_del==1){$lugar_del='Casa de la v&iacute;ctima';}elseif($lugar_del==2){$lugar_del='Casa de persona agresora';}elseif($lugar_del==3){$lugar_del='Casa de ambos';}elseif($lugar_del==4){$lugar_del='Casa de familia';}elseif($lugar_del==5){$lugar_del='Calle - V&iacute;a p&uacute;blica';}elseif($lugar_del==6){$lugar_del='Lugar desocupado';}elseif($lugar_del==7){$lugar_del='Centro de labores de la v&iacute;ctima';}elseif($lugar_del==8){$lugar_del='Hotel / hostal';}elseif($lugar_del==9){$lugar_del='Otros';}
+						$medidas_to = pg_fetch_result($rsDet,0,"\"medidas_to\"");if ($medidas_to==1){$medidas_to='No tom&oacute; ninguna medida';}elseif($medidas_to==2){$medidas_to='Denuncia policial';}elseif($medidas_to==3){$medidas_to='Denuncia fiscal';}elseif($medidas_to==4){$medidas_to='Solicit&oacute; medidas de protecci&oacute;n a la Autoridad Judicial';}elseif($medidas_to==5){$medidas_to='La persona contaba con sentencia';}elseif($medidas_to==6){$medidas_to='Decididi&oacute; separarse';}elseif($medidas_to==7){$medidas_to='Acept&oacute; ingresar a hogar de refugio temporal';}elseif($medidas_to==8){$medidas_to='Se fu&eacute; a vivir a otra ciudad';}elseif($medidas_to==9){$medidas_to='Otros';}
+						$situacion = pg_fetch_result($rsDet,0,"\"situacion\"");if ($situacion==1){$situacion='Detenido';}elseif($situacion==2){$situacion='Pr&oacute;fugo';}elseif($situacion==3){$situacion='Sentenciado';}elseif($situacion==4){$situacion='Se suicid&oacute;';}elseif($situacion==5){$situacion='Libre (en inventigaci&oacute;n';}elseif($situacion==6){$situacion='Otro';}
+						$agresor_tr = pg_fetch_result($rsDet,0,"\"agresor_tr\"");if ($agresor_tr==1){$agresor_tr='SI';}elseif($agresor_tr==0){$agresor_tr='NO';}
+						$alcohol_dr = pg_fetch_result($rsDet,0,"\"alcohol_dr\"");if ($alcohol_dr==1){$alcohol_dr='SI';}elseif($alcohol_dr==0){$alcohol_dr='NO';}
+
+							print "<tr>";
+							//print "<td width='50%' class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','dis_depor')."</b></td>";
+							print "<td width='50%' class='lista_titulo'><b>Distrito donde ocurri&oacute; el feminicidio:</b></td>";
+							print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"dist_fem\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','comdep_ipd')."</b></td>";
+							print "<td class='lista_titulo'><b>Edad de la v&iacute;ctima:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"edad_vict\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','direccion')."</b></td>";
+							print "<td class='lista_titulo'><b>Presunto lugar donde ocurrió Feminicidio:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pre_lug_fe\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','inicio_fin')."</b></td>";
+							print "<td class='lista_titulo'><b>Forma o medio utilizado para el Feminicidio:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"for_med_fe\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','horarios')."</b></td>";
+							print "<td class='lista_titulo'><b>Instrumento o elemento  utilizado para el Feminicidio:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"intr_ut_fe\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','telefono')."</b></td>";
+							print "<td class='lista_titulo'><b>Presunta causa de Feminicidio:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"pres_cs_fe\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','correo_ele')."</b></td>";
+							print "<td class='lista_titulo'><b>Relación de parentesco con el presunto victimario:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"part_vict\"")."&nbsp;</td>";
+							print "</tr>";
+									
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','correo_ele')."</b></td>";
+							print "<td class='lista_titulo'><b>Nacionalidad de la víctima:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nacio_vict\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','correo_ele')."</b></td>";
+							print "<td class='lista_titulo'><b>Calificación Penal:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"calif_pen\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','correo_ele')."</b></td>";
+							print "<td class='lista_titulo'><b>Situación Jurídica:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"situac_jur\"")."&nbsp;</td>";
+							print "</tr>";
+
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','correo_ele')."</b></td>";
+							print "<td class='lista_titulo'><b>Fuente:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"fuente\"")."&nbsp;</td>";
+							print "</tr>";
+						?>
+								
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_casos_feminicidios';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+	$("#u1").h2c_acordeon();
+	$("#u2").h2c_acordeon();
+	$("#u3").h2c_acordeon();
+	$("#u4").h2c_acordeon();
+	$("#u5").h2c_acordeon();
+	$("#u6").h2c_acordeon();
+	});
+</script>
+</html> 

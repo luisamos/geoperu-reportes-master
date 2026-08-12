@@ -1,0 +1,330 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+function valorsino($campo){
+				if($campo=='1'){$valor='S&iacute;';}elseif($campo=='2'){$valor='No';}elseif($campo=='0'){$valor='Sin datos';}
+				return $valor;
+			}
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+    $pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	//$sQueryF = " FROM peru_comisarias";
+	$sQueryF = " FROM peru_conadis";
+	$sQueryW = " WHERE \"gid\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'CONADIS - Población con discapacidad';
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				<?php print" <tr>
+					<th width='25%'>DEPARTAMENTO</th>
+					<th width='25%'>PROVINCIA</th>
+					<th width='25%'>DISTRITO</th>
+					<th width='25%'>CÓDIGO DISTRITO</th>
+				  </tr>";?>
+				</thead>
+				<tbody>
+	<?php
+			print "<tr>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+				  </tr>";
+	?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+        <table width="100%" border="0" cellspacing="0" style="padding-left: 20px; padding-right: 20px">
+  <tbody><tr>
+	<td>
+	<table width="100%" cellspacing="0" cellpadding="1" class="marco_reporte">
+	  <tbody><tr>
+		<td>
+		<table width="100%" cellpadding="10" cellspacing="0">
+		  <tbody><tr>
+			<td colspan="7" class="titulo_reporte" style="font-size:20px;">DATOS DEL CONADIS</td>
+		  </tr>
+		</tbody></table>
+	  </td></tr>
+	</tbody></table>
+  </td></tr>
+</tbody></table>
+<br>
+
+
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Población censada 2017: </td>
+				<td width='50%' class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"pob_cen17\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Total de personas con discapacidad: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"total\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Femenino: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"femenino\""))."</td>
+              </tr>
+              <tr>
+				<td class='lista_titulo'>Masculino: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"masculino\""))."</td>
+			  </tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		
+        <br>
+
+        <table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;Personas con deficiencia</td>
+			  </tr>
+			</table>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Deficiencia intelectual: </td>
+				<td width='50%' class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_in\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Deficiencia psicológica: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_psi\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Deficiencia de lenguaje: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_len\""))."</td>
+              </tr>
+              <tr>
+				<td class='lista_titulo'>Deficiencia de audición: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_au\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Deficiencia de visión: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_vi\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Deficiencia visceral: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_vis\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Deficiencia musculo: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_mu\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Deficiencia generalizada: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_gen\""))."</td>
+              </tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+        <br>
+        <table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;Personas con limitación</td>
+			  </tr>
+			</table>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Limitación conducta: </td>
+				<td width='50%' class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"li_co\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Limitación comunicación: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"li_com\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Limitación cuidado: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"li_cu\""))."</td>
+              </tr>
+              <tr>
+				<td class='lista_titulo'>Limitación locomoción: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"li_lo\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Limitación corporal: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"li_cor\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Limitación destreza: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"li_de\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Limitación gravedad: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"li_gr\""))."</td>
+              </tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+
+        <br>
+        <table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;Personas con diagnóstico</td>
+			  </tr>
+			</table>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Diagnóstico Sindrome de down: </td>
+				<td width='50%' class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"dg_sd\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Diagnóstico de esquizofrenia: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"dg_es\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Diagnóstico invidente: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"dg_in\""))."</td>
+              </tr>
+              <tr>
+				<td class='lista_titulo'>Diagnóstico retrazo mental: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"de_re\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Diagnóstico paralisis: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"dg_pa\""))."</td>
+              </tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+
+        <br>
+        <table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;Grupo de personas por edad</td>
+			  </tr>
+			</table>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Con personas de 0 a 2 años: </td>
+				<td width='50%' class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"0_2\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Con personas de 3 a 5 años: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"3_5\""))."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Con personas de 6 a 11 años: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"6_11\""))."</td>
+              </tr>
+              <tr>
+				<td class='lista_titulo'>Con personas de 12 a 17 años: </td>
+				<td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"12_17\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Con personas de 18 a 29 años: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"18_29\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Con personas de 30 a 44 años: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"30_44\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Con personas de 45 a 59 años: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"45_59\""))."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Con personas de 60 a más: </td>
+                <td class='lista_texto'>".number_format(pg_fetch_result($rsDet,0,"\"60_a_mas\""))."</td>
+              </tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+
+
+		<br>
+
+        
+
+
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='CONADIS - Población con discapacidad';
+	$capa='consulta_conadis';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_conadis'.'&ocampo=gid';
+		
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

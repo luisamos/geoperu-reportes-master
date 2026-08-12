@@ -1,0 +1,222 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM peru_indicad_urb_cerros_mz17 ";
+	$sQueryW = " WHERE \"idmanzana\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+		$titulo_ventana = 'Viviendas Ubicadas en Cerros - Lima Metropolitana';
+		$titulo = 'Viviendas Ubicadas en Cerros - Lima Metropolitana';
+	
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					<thead>
+							  <tr>
+								<th width='50%' align='center'>Departamento</th>
+								<th width='50%' align='center'>Provincia</th>
+								<th width='50%' align='center'>Distrito</th>
+								<th width='50%' align='center'>Centro poblado</th>
+							  </tr>
+							</thead>
+							<tbody>
+				<?php
+						print "<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_ccpp\"")."</td>
+							</tr>";
+				?>
+							</tbody>
+				 	</table>		
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DE LA MANZANA </td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					 
+					
+						<?php
+							print "<tr>";
+							print "<td width='50%' class='lista_titulo'><b>Centro Poblado</b></td>";
+							print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nom_ccpp\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Código de Manzana</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"idmanzana\"")."&nbsp;</td>";
+                            print "</tr>";
+                            
+                            print "<tr>";
+							print "<td class='lista_titulo'><b>Población Censada (Hab.)</b></td>";
+							print "<td class='lista_textosub'>".number_format(pg_fetch_result($rsDet,0,"\"pob_total\""))."&nbsp;</td>";
+                            print "</tr>";
+                            
+                            print "<tr>";
+							print "<td class='lista_titulo'><b>Número de viviendas</b></td>";
+							print "<td class='lista_textosub'>".number_format(pg_fetch_result($rsDet,0,"\"num_viv_op\""))."&nbsp;</td>";
+                            print "</tr>";
+                            
+                            print "<tr>";
+							print "<td class='lista_titulo'><b>Número de hogares</b></td>";
+							print "<td class='lista_textosub'>".number_format(pg_fetch_result($rsDet,0,"\"num_hogare\""))."&nbsp;</td>";
+                            print "</tr>";
+                            
+						?>		
+					</table>				
+					</div>
+				</div>
+			</td>
+          </tr>
+		</table>
+
+	<br>
+
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;VARIABLES</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th><strong>VARIABLE</strong></th>
+								<th><strong>Número</strong></th>
+								<th><strong>%</strong></th>
+							  </tr>
+							</thead>
+				<?php
+					print "<tbody>
+							  <tr>
+								<td class='texto1'>Viviendas sin alumbrado eléctrico</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"c2_p11_2\""))."</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"c2_p11_2p\""),2)."</td>
+							  </tr>
+
+							  <tr>
+								<td class='texto1'>Viviendas sin desagüe</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"vs_sh\""))."</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pvs_sh\""),2)."</td>
+							  </tr>
+
+							  <tr>
+								<td class='texto1'>Viviendas sin agua de red pública</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"vs_agua_rp\""))."</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pvs_agua_r\""),2)."</td>
+							  </tr>
+
+							  <tr>
+								<td class='texto1'>Viviendas con piso de tierra</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"c2_p5_6\""))."</td>
+								<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"c2_p5_6p\""),2)."</td>
+							  </tr>
+
+							  <tr>
+							  <td class='texto1'>Viviendas con una habitación</td>
+							  <td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"c2_p12_1\""))."</td>
+							  <td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"c2_p12_1p\""),2)."</td>
+							</tr>
+
+							<tr>
+							  <td class='texto1'>Material predominante en las paredes de la vivienda</td>
+							  <td class='numero1' colspan='2'>".pg_fetch_result($rsDet,0,"\"pared_pred\"")."</td>
+							</tr>
+
+							<tr>
+							  <td class='texto1'>Hogares que no cuentan con PC / Tablet / Laptop</td>
+							  <td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"hs_pclptb\""))."</td>
+							  <td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"phs_pclptb\""),2)."</td>
+							</tr>
+						   </tbody>";
+				?>
+						</table><br>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+
+
+		<br>
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_indurb_cerros_lima';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta='consulta_indurb_cerros_lima.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body> 
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		
+	});
+</script>
+</html>
+<?php include_once("../analyticstracking.php");?>

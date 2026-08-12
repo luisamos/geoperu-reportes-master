@@ -1,0 +1,4 @@
+Dockerfile
+docker*.yaml
+docker*.yml
+.git

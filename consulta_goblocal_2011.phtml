@@ -1,0 +1,335 @@
+<?php
+/***************************************************************************************
+Organización: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Descentralización
+Sistema		: 	Sistema Nacional de Información Geográfica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+    $pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$sCodIdDist = $pvalor;
+
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_info_gl";
+	$sQueryW = " WHERE \"gid\" = '" . $sCodIdDist . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+
+	if(pg_fetch_result($rsDet,0,"\"catmuni\"")=='Distrital') {
+		$titulo_ventana = 'GESTI&Oacute;N MUNICIPAL - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+		$titulo = 	'GESTI&Oacute;N MUNICIPAL <BR> DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+		$log	=	'GESTION MUNICIPAL - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+		$articulo ='EL';
+	} else {
+		$titulo_ventana = 'GESTI&Oacute;N MUNICIPAL - PROVINCIA '.pg_fetch_result($rsDet,0,"\"nom_prov\"");
+		$titulo = 'GESTI&Oacute;N MUNICIPAL <BR> PROVINCIA '.pg_fetch_result($rsDet,0,"\"nom_prov\"");
+		$log='GESTION MUNICIPAL - PROVINCIA '.pg_fetch_result($rsDet,0,"\"nom_prov\"");
+		$articulo ='LA';
+	}
+	//$titulo = 'GESTI&Oacute;N - '. pg_fetch_result($rsDet,0,"\"catmuni\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+<table width="100%" class="marco_general">
+  <tr><td>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%' align='center'>Departamento</th>
+<?php	if(pg_fetch_result($rsDet,0,"\"catmuni\"")=='Distrital') {
+			print "<th width='25%'>Provincia</th>";
+			print "<th width='25%'>Distrito</th>";
+		} else {
+			print "<th width='25%'>Provincia</th>";
+		}
+?>
+				<th width='25%'>Ubigeo</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  <tr>
+<?php	if(pg_fetch_result($rsDet,0,"\"catmuni\"")=='Distrital') {
+			print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+			print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+			print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+			print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>";
+		} else {
+			print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+			print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+			print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_prov\"")."</td>";
+		}
+?>
+			  </tr>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;DATOS GENERALES</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='listado'>
+<?php
+		print "<tr>";
+		print "<td colspan='2' align='left' class='lista_titulo'><b>DATOS DE GOBIERNO LOCAL</td>";
+		print " </tr>";
+
+		print "<tr>";
+		print "<td width='55%' class='lista_texto'>Nombres y apellidos del alcalde</td>";
+		print "<td width='45%'  class='texto'>" . pg_fetch_result($rsDet,0,"\"alcalde\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>N&uacute;mero de RUC</td>";
+		print "<td  class='texto'>" . pg_fetch_result($rsDet,0,"\"ruc\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Direcci&oacute;n</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"direccion\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>N&uacute;mero de Tel&eacute;fono</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"telefono\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>N&uacute;mero de Fax</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"fax\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Pagina WEB</td>";
+		print "<td class='texto'><a href=http://".pg_fetch_result($rsDet,0,"\"pag_web\"")." target='_blank'>" . pg_fetch_result($rsDet,0,"\"pag_web\"")."</a></td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Acceso a Internet</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"internet\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Tiene Oficina de Programaci&oacute;n de Inversiones (OPI)?</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"opi\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td colspan='2' align='left' class='lista_titulo'><b>REQUIERE ASISTENCIA TÉCNICA?</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>En planificaci&oacute;n del desarrollo local</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"at_planif\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>En formulaci&oacute;n y ejecuci&oacute;n de Proyectos</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"at_formu\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>En desarrollo local descentralizado</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"at_desarr\"") . "&nbsp;</td>";
+		print "</tr>";
+		
+		print "<tr>";
+		print "<td colspan='2' align='left' class='lista_titulo'><b>REQUIERE CAPACITACIÓN?</td>";
+		print "</tr>";
+		
+		print "<tr>";
+		print "<td class='lista_texto'>En formulaci&oacute;n y ejecuci&oacute;n de Proyectos</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"cap_form\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>En promoci&oacute;n y desarrollo de las MYPES</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"cap_prom\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td colspan='2' align='left' class='lista_titulo'><b>CUENTA CON INSTRUMENTOS DE GESTIÓN Y DESARROLLO URBANO Y/O RURAL?</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Plan de Desarrollo Concertado</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"plan_dc\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Plan de Desarrollo Urbano</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"plan_du\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Plan de Desarrollo Rural</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"plan_dr\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Plan de Desarrollo de Capacidades</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"plan_dcap\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Plan de Desarrollo Econ&oacute;mico Local</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"plan_del\"") . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+
+		print "<td colspan='2' align='left' class='lista_titulo'><b>".$articulo.' '.strtoupper(pg_fetch_result($rsDet,0,"\"catmuni\""))."?</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Tiene servicios de Comunicaci&oacute;n?</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"sscc\"") . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Tiene alumbrado público?</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"alum_elec\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Tiene red de agua potable?</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"agua_pot\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>El agua potable recibe tratamiento?</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"agpot_tra\"") . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Las aguas servidas reciben tratamiento?</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"agser_tra\"") . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Tiene sistema de desag&uuml;e?</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"desague\"") . "&nbsp;</td>";
+		print "</tr>";
+?>
+		</table><br>
+		<table width="100%" align='center' class='fuente_general'>
+		  <tr>
+			<td><b>Fuente:</b>
+				<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+				<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente1\"")); ?>
+			</td>
+		  </tr>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;PRESUPUESTO DE INVERSI&Oacute;N P&Uacute;BLICA</td>
+		  </tr>
+		</table>
+			<table width='100%' align='center' class='listado'>
+<?php
+		print "<tr>";
+		print "<td colspan='2' align='left' class='lista_titulo'><b>PRESUPUESTO (SOLO PROYECTOS)</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td width='55%' class='lista_texto'>Presupuesto Institucional de Apertura - PIA (S/.)</td>";
+		print "<td width='45%' class='texto'>" . number_format( pg_fetch_result($rsDet,0,"\"pia\"")  ,0,".","," ) . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Presupuesto Institucional Modificado - PIM (S/.)</td>";
+		print "<td class='texto'>" . number_format( pg_fetch_result($rsDet,0,"\"pim\"")  ,0,".","," ) . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Compromiso Anual(S/.)</td>";
+		print "<td class='texto'>" . number_format( pg_fetch_result($rsDet,0,"\"comp_anual\"")  ,2,".","," ) . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Atención de Compromiso Mensual (S/.)</td>";
+		print "<td class='texto'>" . number_format( pg_fetch_result($rsDet,0,"\"comp_mens\"")  ,2,".","," ) . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Devengado (S/.)</td>";
+		print "<td class='texto'>" . number_format( pg_fetch_result($rsDet,0,"\"devengado\"")  ,2,".","," ) . "&nbsp;</td>";
+		print "</tr>";
+
+
+		print "<tr>";
+		print "<td class='lista_texto'>Girado (S/.)</td>";
+		print "<td class='texto'>" . number_format( pg_fetch_result($rsDet,0,"\"girado\"") ,2,".","," ) . "&nbsp;</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_texto'>Avance de ejecuci&oacute;n (%)</td>";
+		print "<td class='texto'>" . number_format( pg_fetch_result($rsDet,0,"\"avance\"") , 2,".","," ) . "&nbsp;</td>";
+		print "</tr>";
+?>
+			</table><br>
+			<table class='fuente_general' width="100%"><tr>
+				<?php include 'inc/consulta_pie_proyectos.php';?>
+			</tr></table>
+		<!--	<table class='fuente_general' width="100%"><tr><td><b>Fuente:</b>
+				<br><?php //echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+				<br><?php //echo(pg_fetch_result($rsDet,0,"\"fuente1\"")); ?>
+			</td></tr></table> -->
+			</td></tr>
+		</table>
+	<?php
+	$name=$log;
+	$capa='consulta_goblocal';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?> 

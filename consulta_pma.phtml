@@ -1,0 +1,503 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include("conexion_postgres.phtml");
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$cod_dist = $pvalor;
+
+	// Browse Data
+	$sQueryS = "SELECT * ";
+	$sQueryF = " FROM peru_pma_distrital";
+	$sQueryW = " WHERE \"cod_dist\" = '" . $cod_dist . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+
+	$titulo_ventana = '&Iacute;NDICE A LA VULNERABILIDAD A LA  DESNUTRICI&Oacute;N - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$titulo = '&Iacute;NDICE A LA VULNERABILIDAD A LA  DESNUTRICI&Oacute;N <br> Distrito '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width="100%" align='center' class="general">
+					<thead>
+					  <tr>
+						<th width="25%">Departamento</th>
+						<th width="25%">Provincia</th>
+						<th width="25%">Distrito</th>
+						<th width="25%">Ubigeo</th>
+					  </tr>
+					</thead>
+					<tbody>
+					  <tr>
+					<?php 
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+						print "<td align='center' class='texto'>".$cod_dist."</td>";
+					?> 		  
+					  </tr>
+					</tbody>
+					</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DEL MAPA DE VULNERABILIDAD A LA DESNUTRICI&Oacute;N del distrito</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width="100%" align="center" border="0" cellspacing="0" cellpadding="10">
+						  <tr>
+							<td valign="top" width="60%">
+							<table width='100%' align='center' class='listado'>
+		<?php
+			if(pg_fetch_result($rsDet,0,"\"niv_vu2010\"") == '1'){
+				$vulne='Muy baja';
+				$classe='class="nivel1"';
+			} else if(pg_fetch_result($rsDet,0,"\"niv_vu2010\"") == '2'){
+				$vulne='Baja';
+				$classe='class="nivel2"';
+			} else if(pg_fetch_result($rsDet,0,"\"niv_vu2010\"") == '3'){
+				$vulne='Media';
+				$classe='class="nivel3"';
+			} else if(pg_fetch_result($rsDet,0,"\"niv_vu2010\"") == '4'){
+				$vulne='Alta';
+				$classe='class="nivel4"';
+			} else if(pg_fetch_result($rsDet,0,"\"niv_vu2010\"") == '5'){
+				$vulne='Muy alta';
+				$classe='class="nivel5"';
+			}
+			print "<tr><td width='70%' class='lista_titulo'>Indice de vulnerabilidad a la desnutrici&oacute;n 2010</td><td width='30%' ".$classe.">" .pg_fetch_result($rsDet,0,"\"in_vul2010\"").' '.$vulne. "</td></tr>";
+			print "<tr><td class='lista_titulo'>Nivel de vulnerabilidad a la desnutrici&oacute;n 2010</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"niv_vu2010\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Poblaci&oacute;n 2007</td><td class='numero'>" .number_format(pg_fetch_result($rsDet,0,"\"pob_2007\"")). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Poblaci&oacute;n. Rural</td><td class='numero'>" .number_format(pg_fetch_result($rsDet,0,"\"pob_rural\"")). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Tasa de desnutrici&oacute;n. 2007</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"tas_desnu\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>% pobres extremos</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"por_pobext\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Tasa de mortalidad infantil</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"tas_mortin\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Altitud m.s.n.m.</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"altitud\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Indice vulnerabilidad. Desastres tipo 1</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"ind_tip1\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Ratio viviendas con piso de tierra</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"r_viv_pis\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Ratio viviendas sin desag&uuml;e</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"r_viv_node\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Ratio viviendas sin electricidad</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"r_viv_noel\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Ratio hogares cocinan con kerosene, le&ntilde;a</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"r_hog_coc\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Tasa analfabetismo mujeres</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"ta_muj_ana\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Ratio mujeres de 15-49 a&ntilde;os con primaria incompleta</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"r_mu_1549\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Ratio jefes de hogar con primaria incompleta</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"r_jf_pi\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>Brecha del IDH 2010</td><td class='numero'>" .pg_fetch_result($rsDet,0,"\"b_idh_2010\""). "</td></tr>";
+			print "<tr><td class='lista_titulo'>PEA ocupada 2007</td><td class='numero'>" .number_format(pg_fetch_result($rsDet,0,"\"pea_oc2007\"")). "</td></tr>
+			</table>";
+			print"</td><td width='3%'>&nbsp;</td>
+				<td  width='37%' valign='top'>
+					<table width='100%' align='center' class='general'>
+						<thead><tr><th colspan='2' align='center'>Proyecci&oacute;n de poblaci&oacute;n de ni&ntilde;os de 0 a 4 a&ntilde;os</th></tr></thead>
+						<tr><td align='center' class='titulo1'>A&ntilde;o</td><td align='center' class='titulo1'>Ni&ntilde;os</td></tr>
+						<tr><td class='numero1'>2007</td><td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"a_2007\""))."</td></tr>
+						<tr><td class='numero1'>2008</td><td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"a_2008\""))."</td></tr>
+						<tr><td class='numero1'>2009</td><td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"a_2009\""))."</td></tr>
+						<tr><td class='numero1'>2010</td><td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"a_2010\""))."</td></tr>
+						<tr><td class='numero1'>2011</td><td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"a_2011\""))."</td></tr>
+						<tr><td class='numero1'>2012</td><td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"a_2012\""))."</td></tr>
+					</table>
+					<table width='100%' class='fuente_general'><tr><td><b>Fuente:</b><br>".pg_fetch_result($rsDet,0,"\"fuente1\"")."</td></tr></table>";
+		?>
+							</td>
+						  </tr>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL DE LA PROVINCIA <?php echo pg_fetch_result($rsDet,0,"\"nom_prov\"");?></td>
+						  </tr>
+						</table></h1>
+					<div>
+<?php
+//lista de distritos por cada provincias
+	$distQuery		=	"select * from peru_pma_distrital where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' order by cod_dist ";
+	$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+    $numrowsDist 	= 	pg_num_rows($rsDetDist);
+	print("<table width='100%' align='center' class='general'>");
+	print("<tr><td width='50%' class='titulo1'><b>Distritos</b></td>
+			<td width='10%' class='nivel1'><b>Muy baja</b></td>
+			<td width='10%' class='nivel2'><b>Baja</b></td>
+			<td width='10%' class='nivel3'><b>Media</b></td>
+			<td width='10%' class='nivel4'><b>Alta</b></td>
+			<td width='10%' class='nivel5'><b>Muy alta</b></td>
+			</tr>");
+	$i=0;
+	$j=1;
+	while($i<$numrowsDist){
+		echo('<tr>');
+		if (pg_fetch_result($rsDetDist,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")) {
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+			$enlace=$j;
+		} else {
+			$enlace='<a href="consulta_pma.phtml?olayer=peru_alimentos&ocampo=cod_dist&ovalor='.$pvalor.'">'.$j.'</a>';
+		}
+		echo('<td '.$classet.'>'.$enlace.'- '.pg_fetch_result($rsDetDist,$i,"\"nom_dist\"").'</td>');
+		if(pg_fetch_result($rsDetDist,$i,"\"niv_vu2010\"") == '1'){
+			echo('<td '.$classe.'><img src="imajes/check.png" width="15" height="15"/>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td>');
+		}else if(pg_fetch_result($rsDetDist,$i,"\"niv_vu2010\"") == '2'){
+			echo('<td '.$classe.'>&nbsp;</td><td '.$classe.'><img src="imajes/check.png" width="15" height="15"/>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td>');
+		}else if(pg_fetch_result($rsDetDist,$i,"\"niv_vu2010\"") == '3'){
+			echo('<td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'><img src="imajes/check.png" width="15" height="15"/>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td>');
+		}else if(pg_fetch_result($rsDetDist,$i,"\"niv_vu2010\"") == '4'){
+			echo('<td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'><img src="imajes/check.png" width="15" height="15"/>&nbsp;</td><td '.$classe.'>&nbsp;</td>');
+		}else if(pg_fetch_result($rsDetDist,$i,"\"niv_vu2010\"") == '5'){
+			echo('<td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'>&nbsp;</td><td '.$classe.'><img src="imajes/check.png" width="15" height="15"/>&nbsp;</td>');
+		}
+		$i++;
+		$j++;
+		echo('</tr>');
+	}
+	echo('<tr><td class="titulo1"><b>Total</td>');
+	for($q=1;$q<=5;$q++){
+		$cantidad= "select count(*) as cantidad from peru_pma_distrital where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' and niv_vu2010 ='".$q."'";
+		$rsDetCantidad = pg_query($linkPG , $cantidad);
+		$total=pg_fetch_result($rsDetCantidad,0,"\"cantidad\"");
+			if($q ==1){
+				$classe='class="nivel1"';
+			} else  if($q ==2){
+				$classe='class="nivel2"';
+			} else 	if($q ==3){
+				$classe='class="nivel3"';
+			} else if($q ==4){
+				$classe='class="nivel4"';
+			} else	if($q ==5){
+				$classe='class="nivel5"';
+			}
+		echo('<td '.$classe.'><b>'.$total.'</b></td>');
+	}
+echo('</tr></table>');
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u4" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL DEL DEPARTAMENTO <?php print pg_fetch_result($rsDet,0,"\"nom_dpto\"");?></td>
+						  </tr>
+						</table></h1>
+					<div>
+<?php
+//lista de  provincia por cada departamento
+	$provQuery="select count(cod_prov), nom_prov, cod_prov from peru_pma_distrital where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."'GROUP BY cod_prov,nom_prov";
+	$rsDetprov = pg_query($linkPG , $provQuery);
+    $numrowsprov = pg_num_rows($rsDetprov);
+	print("<table width='100%' align='center' class='general'>");
+	print("<tr><td width='40%' class='titulo1'><b>Provincias</b></td>
+			<td width='10%' class='nivel1'><b>Muy baja</b></td>
+			<td width='10%' class='nivel2'><b>Baja</b></td>
+			<td width='10%' class='nivel3'><b>Media</b></td>
+			<td width='10%' class='nivel4'><b>Alta</b></td>
+			<td width='10%' class='nivel5'><b>Muy alta</b></td>
+			<td width='10%' align='center' class='titulo1'><b>Total</b></td>
+			</tr>");
+	$m=0;
+	$n=1;
+	while ($m<$numrowsprov) {
+		if(pg_fetch_result($rsDetprov,$m,"\"cod_prov\"")==pg_fetch_result($rsDet,0,"\"cod_prov\"")){
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		echo('<tr><td '.$classet.'>'.$n.'- '.pg_fetch_result($rsDetprov,$m,"\"nom_prov\"").'</td>');
+
+		$acumulador=0;
+		//$classe='';
+		for ($d=1;$d<=5; $d++) {
+	
+			$consultaDisxP = "select count(*) as cantidaddistxprov
+									from peru_pma_distrital
+									where 	 niv_vu2010 ='".$d."' and 
+											 cod_prov = '".pg_fetch_result($rsDetprov,$m,"\"cod_prov\"")."'";
+			$cantiDiss = pg_query($linkPG , $consultaDisxP);
+			if(pg_fetch_result($cantiDiss,0,"\"cantidaddistxprov\"")>0){	
+				/*if($d == '1'){
+					$classe='class="nivel1"';
+				}else if($d == '2'){
+					$classe='class="nivel2"';
+				}else if($d == '3'){
+					$classe='class="nivel3"';
+				}else if($d == '4'){
+					$classe='class="nivel4"';
+				}else if($d == '5'){
+					$classe='class="nivel5"';
+				}*/
+				$cantdisporpro=pg_fetch_result($cantiDiss,0,"\"cantidaddistxprov\"");
+			} else {
+				$cantdisporpro='&nbsp;';
+				//$classe='';
+			}
+			$acumulador=$acumulador+$cantdisporpro;
+			echo('<td '.$classe.'>'.$cantdisporpro.'</td>');
+		}
+		$m++;
+		$n++;
+		echo('<td align="center" '.$classet.'>'.$acumulador.'</td></tr>');
+	}
+	echo('<tr><td class="titulo1"><b>Total</b></td>');
+	$acumulador2 =0;
+	$classe='';
+	for($u=1;$u<=5;$u++){
+		$canti= "select count(*) as canti from peru_pma_distrital where niv_vu2010 ='".$u."' and cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."'";
+		$rsDetCantidad = pg_query($linkPG , $canti);
+		$total=pg_fetch_result($rsDetCantidad,0,"\"canti\"");
+			if($u ==1){
+				$classe='class="nivel1"';
+			} else  if($u ==2){
+				$classe='class="nivel2"';
+			} else 	if($u ==3){
+				$classe='class="nivel3"';
+			} else if($u ==4){
+				$classe='class="nivel4"';
+			} else	if($u ==5){
+				$classe='class="nivel5"';
+			}
+		echo('<td '.$classe.'><b>'.$total.'</b></td>');
+		$acumulador2= $acumulador2+$total;
+	}
+echo('<td align="center" class="titulo1"><b>'.$acumulador2.'</b></td></tr>
+	<tr><td class="titulo1"><b>Porcentaje</b></td>');
+	$classe='';
+	for($ul=1;$ul<=5;$ul++){
+		$cantil= "select count(*) as cantill from peru_pma_distrital where niv_vu2010 ='".$ul."' and cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."'";
+		$rsDetCantidadl = pg_query($linkPG , $cantil);
+		$totales=pg_fetch_result($rsDetCantidadl,0,"\"cantill\"")/$acumulador2*100;
+			if($ul ==1){
+				$classe='class="nivel1"';
+			} else  if($ul ==2){
+				$classe='class="nivel2"';
+			} else 	if($ul ==3){
+				$classe='class="nivel3"';
+			} else if($ul ==4){
+				$classe='class="nivel4"';
+			} else	if($ul ==5){
+				$classe='class="nivel5"';
+			}
+		echo('<td '.$classe.'><b>'.number_format($totales,2,".","," ).'%</b></td>');
+	}
+echo('<td align="center" class="titulo1"><b>100%</b></td></tr></table>');
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u5" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL NACIONAL</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					  <tr><td width='40%' class='titulo1'><b>Departamento</b></td>
+						<td width='10%' class='nivel1'><b>Muy baja</b></td>
+						<td width='10%' class='nivel2'><b>Baja</b></td>
+						<td width='10%' class='nivel3'><b>Media</b></td>
+						<td width='10%' class='nivel4'><b>Alta</b></td>
+						<td width='10%' class='nivel5'><b>Muy alta</b></td>
+						<td width='10%' align='center' class='titulo1'><b>Total</b></td>
+					  </tr>
+<?php
+//lista de distritos A NIVEL NACIONAL
+	$depQuery="select count(cod_dpto) as cantdep, nom_dpto, cod_dpto from peru_pma_distrital  group by cod_dpto,nom_dpto order  by cod_dpto";
+	$rsDetDep = pg_query($linkPG , $depQuery);
+    $numrowsDep = pg_num_rows($rsDetDep);
+	$x=0;
+	$y=1;
+	while($x<$numrowsDep){
+		if(pg_fetch_result($rsDetDep,$x,"\"cod_dpto\"")==pg_fetch_result($rsDet,0,"\"cod_dpto\"")){
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		echo('<tr><td '.$classet.'>'.$y.'- '.pg_fetch_result($rsDetDep,$x,"\"nom_dpto\"").'</td>');
+		$acumulador3=0;
+		//$classe='';
+		for($f=1;$f<=5; $f++){
+		
+			$consultaDisxD = "select count(*) as cantidaddistxdep
+									from peru_pma_distrital
+									where 	niv_vu2010 ='".$f."' and cod_dpto = '".pg_fetch_result($rsDetDep,$x,"\"cod_dpto\"")."'";
+			$cantiDiss = pg_query($linkPG , $consultaDisxD);
+			if(pg_fetch_result($cantiDiss,0,"\"cantidaddistxdep\"")>0){
+				$cantdep=pg_fetch_result($cantiDiss,0,"\"cantidaddistxdep\"");
+				/*if($f == '1'){
+					$classe='class="nivel1"';
+				}else if($f == '2'){
+					$classe='class="nivel2"';
+				}else if($f == '3'){
+					$classe='class="nivel3"';
+				}else if($f == '4'){
+					$classe='class="nivel4"';
+				}else if($f == '5'){
+					$classe='class="nivel5"';
+				}*/
+			}else{
+				$cantdep='&nbsp;';
+				//$classe='';
+			}
+			echo('<td '.$classe.'>'.$cantdep.'</td>');
+			$acumulador3 = $acumulador3+$cantdep;
+		}
+		$x++;
+		$y++;
+		echo('<td align="center" '.$classet.'>'.$acumulador3.'</td></tr>');
+	}
+	echo('<tr><td class="titulo1"><b>Total</b></td>');
+	$acumulador4=0;
+	$classe='';
+	for($g=1;$g<=5;$g++){
+		$can= "select count(*) as canti from peru_pma_distrital where niv_vu2010 ='".$g."'";
+		$rsDetCantidadpa = pg_query($linkPG , $can);
+		$total=pg_fetch_result($rsDetCantidadpa,0,"\"canti\"");
+		if($g ==1){
+			$classe='class="nivel1"';
+		} else  if($g ==2){
+			$classe='class="nivel2"';
+		} else 	if($g ==3){
+			$classe='class="nivel3"';
+		} else if($g ==4){
+			$classe='class="nivel4"';
+		} else	if($g ==5){
+			$classe='class="nivel5"';
+		}
+		echo('<td align="center" '.$classe.'><b>'.$total.'</b></td>');
+		$acumulador4= $acumulador4 +$total;
+	}
+
+	echo('<td align="center" class="titulo1"><b>'.$acumulador4.'</b></td></tr>
+	<tr><td class="titulo1"><b>Porcentaje</b></td>');
+	$classe='';
+	for($gl=1;$gl<=5;$gl++){
+		$canl= "select count(*) as cantil from peru_pma_distrital where niv_vu2010 ='".$gl."'";
+		$rsDetCantidadpal = pg_query($linkPG , $canl);
+		$totall=pg_fetch_result($rsDetCantidadpal,0,"\"cantil\"")/$acumulador4*100;
+		if($gl ==1){
+			$classe='class="nivel1"';
+		} else  if($gl ==2){
+			$classe='class="nivel2"';
+		} else 	if($gl ==3){
+			$classe='class="nivel3"';
+		} else if($gl ==4){
+			$classe='class="nivel4"';
+		} else	if($gl ==5){
+			$classe='class="nivel5"';
+		}
+		echo('<td align="center" '.$classe.'><b>'.number_format( $totall,2,".","," ).'%</b></td>');
+	}
+	echo('<td align="center" class="titulo1"><b>100%</b></td></tr>');
+				?>
+					</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table><br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	$name='INDICE A LA VULNERABILIDAD A LA  DESNUTRICION - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$capa='consulta_pma';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

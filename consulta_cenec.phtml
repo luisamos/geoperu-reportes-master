@@ -1,0 +1,618 @@
+<?php
+/***************************************************************************************
+Organizaci&oacute;n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar&iacute;a de Descentralizaci&oacute;n
+Sistema		: 	Sistema Nacional de Informaci&oacute;n Geogr&aacute;fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	
+		
+		
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$ovalor = 	$_GET['ovalor'];
+	
+	//if($_GET['gid_']!=''){ $gid = limpiarNumeros($_GET['gid_']);}else if($_GET['ovalor']!=''){$gid = limpiarNumeros($_GET['ovalor']);}
+
+	if($_GET['cod_dpto_']!=''){ $cod_dpto   =   limpiarNumeros($_GET['cod_dpto_']);}else if($_GET['cod_dpto']!=''){$cod_dpto   =   limpiarNumeros($_GET['cod_dpto']);}
+	
+	$cod_dist = $ovalor;
+	//$cod_dist = '030201';
+	$linkPG = Conectarse_POSTGRES(); 
+	// Browse Data
+	$sQueryS = "SELECT * from ";   
+	$sQueryF = "data_cenec";
+	$sQueryW = " WHERE cod_dist = '" .$cod_dist."'";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'IV Censo Nacional Econ&oacute;mico - 2008';
+	$titulo = $titulo_ventana.'<br>'.$fecha;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u1" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='25%'>Departamento</th>
+					<th width='25%'>Provincia</th>
+					<th width='25%'>Distrito</th>
+					<th width='25%'>Ubigeo</th>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u2" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;Descripci&oacute;n</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width="100%" class="listado">
+<?php
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo'><b>N&uacute;mero de establecimientos</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"num_estab\"")) . "</td>";
+		print "</tr>";
+		
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Actividad econ&oacute;mica</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"actv_econ\"") ."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sector Econ&oacute;mico</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"sec_econ\"")."</td>";
+		print "</tr>";
+		
+	?>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u3" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;TIPO DE ACTIVIDAD ECON&oacute;MICA</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width="100%" class="listado">
+<?php
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo'><b>Pesca y acuicultura</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_pes_acu\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Explotaci&oacute;n de minas y canteras</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_exp_mc\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Industrias manufactureras</b></td>";
+		print "<td class='lista_texto'>" .number_format(pg_fetch_result($rsDet,0,"\"ae_ind_man\""))."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Suministro de electricidad, gas, vapor y aire acondicionado</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_se_g_va\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Suministro de agua; alcantarillado, gesti&oacute;n de desechos y actividades de saneamiento</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_sagd_as\"")) . "</td>";
+		print "</tr>";
+					
+		print "<tr bgcolor='#ECF8FF' >";
+		print "<td   width='200' class='lista_titulo'><B>Construcci&oacute;n</td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_const\""))."<td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Comercio al por mayor y al por menor; reparaci&oacute;n de los veh&iacute;culos de motor y de las motocicletas</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_co_rveh\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Transporte y almacenamiento</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_tra_alm\""))."</td>";
+		print "</tr>";
+				print "<tr>";
+		print "<td class='lista_titulo'><b>Alojamiento y servicios de comida</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_alo_sco\""))."</td>";
+		print "</tr>";
+				print "<tr>";
+		print "<td class='lista_titulo'><b>Informaci&oacute;n y comunicaci&oacute;n</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_inf_com\""))."</td>";
+		print "</tr>";
+				print "<tr>";
+		print "<td class='lista_titulo'><b>Actividades financieras y de seguros</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_fin_seg\""))."</td>";
+		print "</tr>";
+				print "<tr>";
+		print "<td class='lista_titulo'><b>Actividades inmobiliarias</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_inmob\""))."</td>";
+		print "</tr>";
+				print "<tr>";
+		print "<td class='lista_titulo'><b>Actividades profesionales, cient&iacute;ficas y t&eacute;cnicas</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_pr_ctec\""))."</td>";
+		print "</tr>";
+				print "<tr>";
+		print "<td class='lista_titulo'><b>Actividades administrativas y servicios de apoyo</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_adm_sap\""))."</td>";
+		print "</tr>";
+				print "<tr>";
+		print "<td class='lista_titulo'><b>Ense&ntilde;anza</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_ense\""))."</td>";
+		print "</tr>";
+		
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Servicios sociales y relacionados con la Salud humana</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_ss_sh\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Artes, entretenimiento y recreaci&oacute;n</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_aen_rec\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Otras actividades de servicio</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"ae_oas\""))."</td>";
+		print "</tr>";
+	?>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u4" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;ACTIVIDAD ECON&Oacute;MICA</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='33%'>Extractivo</th>
+					<th width='33%'>Transformaci&oacute;n</th>
+					<th width='34%'>Servicios</th>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"ae_se_ext1\""))."</td>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"ae_se_tra2\""))."</td>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"ae_se_ser3\""))."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u5" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;ORGANIZACI&oacute;N JUR&Iacute;DICA POR CLASE</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='33%'>En sociedades</th>
+					<th width='33%'>Individualmente</th>
+					<th width='34%'>Otro tipo de organizaci&oacute;n</th>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"org_ju_soc\""))."</td>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"org_ju_ind\""))."</td>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"org_ju_oto\""))."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u6" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;CATEGOR&Iacute;A DE ESTABLECIMIENTO</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='25%'>&Uacute;nico</th>
+					<th width='25%'>Principal</th>
+					<th width='25%'>Sucursal</th>
+					<th width='25%'>Auxiliar</th>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"cat_est_un\""))."</td>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"cat_est_pr\""))."</td>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"cat_est_su\""))."</td>
+				<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"cat_est_au\""))."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+	<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u7" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;ORGANIZACI&oacute;N JUR&Iacute;DICA</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width="100%" class="listado">
+<?php
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo'><b>Persona natural</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_pnat\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad an&oacute;nima</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_sano\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad an&oacute;nima abierta</b></td>";
+		print "<td class='lista_texto'>" .number_format(pg_fetch_result($rsDet,0,"\"or_ju_saab\""))."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad an&oacute;nima cerrada</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_sace\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad civil</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_sciv\"")) . "</td>";
+		print "</tr>";					
+		print "<tr bgcolor='#ECF8FF' >";
+		print "<td   width='200' class='lista_titulo'><B>Sociedad comunal de responsabilidad limitada</td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_scrl\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad individual de responsabilidad limitada</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_sirl\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad en comandita simple</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_scs\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad en comandita por acciones</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_sca\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Sociedad colectiva</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_sco\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Asociaci&oacute;n</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_aso\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Fundaci&oacute;n</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_fun\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Cooperativa</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_coop\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Otro tipo</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"or_ju_ot\""))."</td>";
+		print "</tr>";
+
+	?>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u8" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;ESTRATO DE PERSONAL OCUPADO</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width="100%" class="listado">
+<?php
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo'><b>sin personal</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"est_poc_0\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>de 1 a 10 personas</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"est_poc_1\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>de 11 a 50 personas</b></td>";
+		print "<td class='lista_texto'>" .number_format(pg_fetch_result($rsDet,0,"\"est_poc_2\""))."</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>de 51 a 100 personas</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"est_poc_3\"")) . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>de 101 a 150 personas</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"est_poc_4\"")) . "</td>";
+		print "</tr>";					
+		print "<tr bgcolor='#ECF8FF' >";
+		print "<td   width='200' class='lista_titulo'><B>de 151 a 200 personas</td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"est_poc_5\""))."</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>de 201 a m&aacute;s personas</b></td>";
+		print "<td class='lista_texto'>" . number_format(pg_fetch_result($rsDet,0,"\"est_poc_6\""))."</td>";
+		print "</tr>";
+		
+
+	?>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u9" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;ESTRATO DE VENTAS NETAS</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width="100%" class="listado">
+<?php
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo'><b>S/. 0.0 </b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_venet0\"") . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Hasta S/. 517,500</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_venet1\"") . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>M&aacute;s S/. 517,500 Hasta S/. 2'932,500</b></td>";
+		print "<td class='lista_texto'>" .pg_fetch_result($rsDet,0,"\"est_venet2\"");
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>M&aacute;s de S/. 2'932,500 Hasta S/.5'865,000</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_venet3\"") . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>M&aacute;s de S/. 5'865,000 Hasta S/.10'005,000</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_venet4\"") . "</td>";
+		print "</tr>";					
+		print "<tr bgcolor='#ECF8FF' >";
+		print "<td   width='200' class='lista_titulo'><B>M&aacute;s de S/. 10'005,000</td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_venet5\"");
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Descripci&oacute;n de  Ventas Netas</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"des_ven_ne\"")."</td>";
+		print "</tr>";	
+
+	?>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<div id="u10" style="width: 100%;">
+					<h1>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;ESTRATO DE PRODUCCI&oacute;N</td>
+			  </tr>
+			</table>
+			</h1>
+					<div>
+			<table width="100%" class="listado">
+<?php
+		print "<tr>";
+		print "<td width='50%' class='lista_titulo'><b>Estrato de Producci&oacute;n Censal: S/. 0.0</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_pcen0\"") . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>Hasta S/. 517 500</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_pcen1\"") . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>M&aacute;s S/. 517,500 Hasta S/. 2'932,500</b></td>";
+		print "<td class='lista_texto'>" .pg_fetch_result($rsDet,0,"\"est_pcen2\"");
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>M&aacute;s de S/. 2'932,500  Hasta S/.5'865,000</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_pcen3\"") . "</td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_titulo'><b>M&aacute;s de S/. 5'865,000  Hasta S/.10'005,000</b></td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_pcen4\"") . "</td>";
+		print "</tr>";					
+		print "<tr bgcolor='#ECF8FF' >";
+		print "<td   width='200' class='lista_titulo'><B>M&aacute;s de S/. 10'005,000</td>";
+		print "<td class='lista_texto'>" . pg_fetch_result($rsDet,0,"\"est_pcen5\"");
+		print "</tr>";
+		
+
+	?>
+			</table>
+			</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+			<?php	
+	$name=$titulo_ventana;
+	$capa='consulta_cenec';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$ovalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?>
+			</th></tr></thead>
+		</table>
+		
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+		$("#u6").h2c_acordeon();
+		$("#u7").h2c_acordeon();
+		$("#u8").h2c_acordeon();
+		$("#u9").h2c_acordeon();
+		$("#u10").h2c_acordeon();
+	});
+</script>
+</html>
+<?php //include_once("../analyticstracking.php");?>

@@ -1,0 +1,218 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	$cod_reg = $pvalor;
+
+	// Browse Data
+	$sQueryS = " SELECT p.cod_reg as cod_reg, d.nomb_dpto as nomb_dpto,descr_rg as descr_rg, p.fuente as fuente ";   
+	$sQueryF = " FROM data_comida_qariwarma d, peru_qaliwarma p ";
+	$sQueryW = " WHERE d.cod_reg = p.cod_reg and  p.cod_reg = '".$cod_reg."' limit 1";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'QALI WARMA';
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th width='50%' align='center'>Departamento</th>
+							  </tr>
+							</thead>
+							<tbody>
+				<?php
+						print "<tr>
+								<td align='center' class='texto' style='border-right: 1px solid white;'>".pg_fetch_result($rsDet,0,"\"nomb_dpto\"")."</td>
+							  </tr>";
+				?>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS GENERALES</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width="100%" align="center" class="general">
+						<thead><tr><th>#</th><th>Departamento</th><th>Provincia</th><th>Comit&eacute; de Compra</th><th>N&ordm; Alumnos</th><th>N&ordm; DE Instituciones Educativa</th></tr></thead>
+					  
+	<?php
+		$consutaCarateristicas = "select * from data_qariwarma where cod_reg =".$cod_reg;
+		$rCaracteristicas = pg_query( $linkPG , $consutaCarateristicas );
+		$x=0;
+		$numRowCaracteristicas = pg_num_rows($rCaracteristicas);
+		while($x<$numRowCaracteristicas){
+			$r=$x+1;
+			if($x%2){
+				$classer = "class='rowpar'";
+			}else{
+				$classer = "";
+			}
+			echo('<tr '.$classer.'><td class="texto11">'.$r.'</td>
+			<td class="texto11">'.pg_fetch_result($rCaracteristicas,$x,"\"nom_dpto\"").'</td>
+			<td class="texto11">'.pg_fetch_result($rCaracteristicas,$x,"\"nom_prov\"").'</td>
+			<td class="numero11">'.pg_fetch_result($rCaracteristicas,$x,"\"comite\"").'</td>
+			<td class="numero11">'.number_format(pg_fetch_result($rCaracteristicas,$x,"\"alumnos\"")).'</td>
+			<td class="numero11">'.number_format(pg_fetch_result($rCaracteristicas,$x,"\"institucion\"")).'</td></tr>');
+			$x++;
+		}
+	?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;RACIONES ALIMENTARIAS</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						  <tr>
+	<?php
+		for( $k=0;$k<4;$k++){
+			if($k==0){
+				$columna = 'desayuno';
+			} else if($k==1){
+				$columna = 'solido';
+			} else if($k==2){
+				$columna = 'almuerzo';
+			} else if($k==3){
+				$columna = 'fruta';
+			}
+			$consulta 	= "select ".$columna." from data_comida_qariwarma where cod_reg =".$cod_reg." and ".$columna." <>''";
+			$rsConsulta = pg_query( $linkPG , $consulta);
+			$numRows = pg_num_rows($rsConsulta);
+
+			print  "<td valign='top' width='25%'>
+						<table width='100%' align='center' class='general'>
+							<thead><tr><th>#</th><th>";
+				if($k==1){
+					echo('S&oacute;lido o acompa&ntilde;amiento al bebible');
+				}  else {
+					echo $columna;
+				}
+				print "</th></tr></thead>";
+			$i=0;
+			while($i<$numRows){
+				$j=$i+1;
+				if($i%2){
+					$classe = "class='rowpar'";
+				}else{
+					$classe = "";
+				}
+				if($k==0){
+					$columna = 'desayuno';
+					echo('<tr '.$classe.'><td class="texto11" width="10px">'.$j.'</a></td>
+						  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"desayuno\"").'</td></tr>');
+				} else if($k==1){
+					$columna = 'solido';
+					echo('<tr '.$classe.'><td class="texto11" width="10px">'.$j.'</a></td>
+						  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"solido\"").'</td></tr>');
+				} else if($k==2){
+					$columna = 'almuerzo';
+					echo('<tr '.$classe.'><td class="texto11" width="10px">'.$j.'</a></td>
+						  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"almuerzo\"").'</td></tr>');
+				} else if($k==3){
+					$columna = 'fruta';
+					echo('<tr '.$classe.'><td class="texto11" width="10px">'.$j.'</a></td>
+						  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"fruta\"").'</td></tr>');
+				}
+				$i++;
+			}
+			echo('</table>');
+		}
+		echo('</td></tr>');
+	?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	$name=$titulo_ventana.' '.pg_fetch_result($rsDet,0,"\"nomb_dpto\"");
+	$capa='consulta_qaliwarma';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+  </td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

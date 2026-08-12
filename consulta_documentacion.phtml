@@ -1,0 +1,172 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+@session_start();
+//$_SESSION['usuario'] = 'a'; //para comentar
+$cod_perfil 		= $_SESSION['cod_perfil'];
+if (isset($_POST['accion'])) {
+	$accion = $_POST['accion'];
+} else {
+//Accion: N = Nuevo, M = Mantenimiento
+	$accion = 'M';
+}
+
+include_once('../programas/conexion_postgres.phtml');
+$link = Conectarse_POSTGRES();
+include_once('../usuarios/inc/funciones.php');
+include ('injection/funciones.php');
+
+if (isset($_SESSION['usuario'])) {
+	$cod_user = $_SESSION['usuario'];
+}
+
+?>
+<script type="text/javascript" src="usuarios/js/general.js"></script>
+<body>
+<form action="programas/consulta_usuarios.phtml" method="post" name="form" id="frmmantusuarios">
+<input type='hidden' name='accion' value='<?php echo $accion; ?>' />
+<input type='hidden' name='cod_user' value='<?php echo $cod_user; ?>' />
+
+<style type="text/css">
+.tabla1{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	border: 1px solid #cacaca;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 1px;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+.tabla2{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:12px;
+	border-collapse: collapse;
+	padding: 5px;
+}
+.lista_titulo{
+	text-align: left;
+	font-weight: normal;
+	background-color: #d8d8d8;
+	border: 1px solid white;
+	padding: 5px;
+}
+.lista_titulo_principal{
+	text-align: center;
+	font-weight: normal;
+	background-color: #125565;
+	color:#ffffff;
+	border: 1px solid white;
+	padding: 10px;
+	font-size:14px;
+	border-collapse: collapse;
+}
+.lista_texto{
+	text-align: left;
+	font-weight: normal;
+	background-color: #fff;
+	border: 1px solid #CACACA;
+	padding-left: 3px;
+}
+/*.ml-button-12 {
+	background-color: #F39C45;
+	border: 1px solid #A87017;
+	-moz-box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	-webkit-box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	background-image: -o-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	color: #A8580B;
+	text-shadow: rgba(254,252,252,0.5) 0px 1px 0px;
+}*/
+
+/*Hover*/
+.ml-button-12:hover {
+	background-color: #125565;
+	background-image: -o-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+}
+
+/*Active*/
+/*.ml-button-12:active {
+	background-color: #E77E21;
+	-moz-box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	-webkit-box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	background-image: -o-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	text-shadow: none;
+}*/
+</style>
+<table width="100%" align="center" class="tabla1">
+	<tr>
+		<td colspan = "2" align="center" class="lista_titulo_principal">DOCUMENTOS DEL PROYECTO</td>
+	</tr>
+	<tr>
+		<td>
+			<table width="100%" align="center" class="tabla2">
+				<tr>
+					<td class="lista_titulo" align="left"></td>
+				</tr>
+				<!-- <tr>
+					<td class="lista_texto">
+						<a href="http://www.sayhuite.gob.pe/sayhuite_repositorio/guia_rapida_sayhuite.pdf" target="_blank" >
+							<img src="http://www.sayhuite.gob.pe/sayhuite_m1/sayhuite/usuarios/images/guiarapida.png" border="0" hspace="5" vspace="5"/>
+						</a>			
+						<a href="http://www.sayhuite.gob.pe/sayhuite_repositorio/PDF/instructivo_sayhuite.pdf" target="_blank">
+							<img src="http://www.sayhuite.gob.pe/sayhuite_m1/sayhuite/usuarios/images/instructivo.png" border="0" hspace="5" vspace="5"/>
+						</a>	
+					</td>
+				</tr> -->
+				<tr>
+					<td class="lista_titulo" align="left">Videos Sayhuite :</td>
+				</tr>
+				<tr>
+					<td class="lista_texto">
+						<table>
+							<tr>
+								<!--td><div id="player" style="overflow: hidden;"><iframe width="420" height="315" src="//www.youtube.com/embed/TP7iz6D9JUA?fs=1&autoplay=0" frameborder="0" allowfullscreen></iframe></div></td -->
+								<!-- <td><div id="player" style="overflow: hidden;"><iframe width="420" height="315" src="//www.youtube.com/embed/RMmu017HahE?fs=1&autoplay=0" frameborder="0" allowfullscreen></iframe></div></td> -->
+								<td><div id="player" style="overflow: hidden;"><iframe width="420" height="315" src="https://www.youtube.com/embed/DvD0Nn4hmy4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></td>
+								<!--<td><div id="player" style="overflow: hidden;"><iframe width="420" height="315" src="//www.youtube.com/embed/RMmu017HahE?fs=1&autoplay=0" frameborder="0" allowfullscreen></iframe></div></td>-->
+							</tr>
+						</table>			
+					</td>
+				</tr>
+				<!--<tr>
+				<tr>
+					<td class="lista_titulo" align="left">Otros :</td>
+				</tr>
+				
+					<td class="lista_texto">
+						<a href="http://www.sayhuite.gob.pe/sayhuite_repositorio/PDF/brochure_sayhuite.pdf" target="_blank"><img src="http://www.sayhuite.gob.pe/sayhuite/usuarios/images/Brochure.png" border="0"/></a>
+						<a href="http://www.sayhuite.gob.pe/sayhuite_repositorio/PDF/diptico_sayhuite.pdf"  target="_blank"><img src="http://www.sayhuite.gob.pe/sayhuite/usuarios/images/Dptico.png" border="0"/></a>
+					</td>
+				</tr>-->
+			</table>
+		</td>
+	</tr>
+</table>
+<table align="center">
+	<tr>
+		<td>
+			<input type="reset" name="cmdgrabar" value="Cerrar" class="ml-button-12" />
+		</td>
+	</tr>
+</table>
+</form>
+</body>

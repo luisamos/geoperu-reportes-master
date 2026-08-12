@@ -1,0 +1,105 @@
+<?php
+/***************************************************************************************
+Organización: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Descentralización
+Sistema		: 	Sistema Nacional de Información Geográfica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+	$sQueryS = "SELECT * FROM peru_provincias WHERE cod_prov = '".$pvalor."'";
+	$rsDet = pg_query( $linkPG , $sQueryS);    
+?>
+
+	
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u4" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;PROYECCI&Oacute;N DE POBLACI&Oacute;N POR G&eacute;NERO</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead><tr><th>A&ntilde;o</th><th>Hombres</th><th>Mujeres</th><th>Total</th></tr></thead>
+		<?php
+			$consulta_proyeccion_poblacion 	=	"select * from  data_proyeccion_poblacion where cod_prov = '".$pvalor."' and cod_tipo = '02'  order by anio";
+			$rsDet_proyeccion_poblacion 	=	pg_query( $linkPG ,$consulta_proyeccion_poblacion);
+			$num_rows_proyeccion 	= 	pg_num_rows($rsDet_proyeccion_poblacion);
+			$i=0;
+
+			while($i<$num_rows_proyeccion){
+				if($i%2){
+					$classe = "class='rowpar'";
+				} else {
+					$classe='';
+				}
+				print"<tr ".$classe."><td align='center' class='numero11'>".pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"anio\"")."</td>
+						<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"hombre\""))."</td>
+						<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"mujer\""))."</td>
+						<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"total\""))."</td></tr>";
+				$i++;
+			}
+			$consulta_proyeccion_fuente 	=	"select count(fuente) as fuentes, fuente from  data_proyeccion_poblacion where cod_prov = '".$pvalor."' and cod_tipo = '02' group by fuente";
+			$rsDet_proyeccion_fuente 	=	pg_query( $linkPG ,$consulta_proyeccion_fuente);
+		?>
+					</table><br>
+					<table width='100%' align='center' class='fuente_general'>
+		<?php
+		print "<tr><td><b>Fuente: </b><br>".pg_fetch_result($rsDet_proyeccion_fuente,0,"\"fuente\"")."</td></tr>";
+		?>
+					</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u5" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;PROYECCI&Oacute;N DE POBLACI&Oacute;N POR A&Ntilde;OS QUINQUENALES</td>
+						  </tr>
+						</table></h1>
+					<div>
+		<?php
+			$consulta_proyeccion_quinquenal 	=	"select * from  data_proyeccion_quinquenal where cod_prov = '".$pvalor."' and cod_tipo = 2  order by anio";
+			$rsDet_proyeccion_quinquenal 	=	pg_query( $linkPG ,$consulta_proyeccion_quinquenal);
+			$num_rows_quinquenal 	= 	pg_num_rows($rsDet_proyeccion_quinquenal);
+		   $j=0;
+			print "<table width='100%' align='center' class='general'>";
+			print "<thead><tr><th>A&ntilde;o</th><th>0 a 14 a&ntilde;os</th><th>15 a 24 a&ntilde;os</th><th>25 a 64 a&ntilde;os</th><th>65 a m&aacute;s a&ntilde;os</th><th>Total</th></tr></thead>";
+
+			while($j<$num_rows_quinquenal){
+				if($j%2){
+					$classe ="class='rowpar'";
+				} else {
+					$classe='';
+				}
+				print"<tr ".$classe."><td align = 'center' class='numero11'>".pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"anio\"")."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"cero_a_14\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"s15_a_24\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"s25_a_64\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"s65amas\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"total\""))."</td>
+				</tr>";
+				$j++;
+			}
+			$consulta_quinquenal_fuente 	=	"select count(fuente) as fuentes, fuente from  data_proyeccion_quinquenal where cod_prov = '".$pvalor."' and cod_tipo = 2 group by fuente";
+			$rsDet_quinquenal_fuente 	=	pg_query( $linkPG ,$consulta_quinquenal_fuente);
+			print "</table><br>";
+			print "<table width='100%' align='center' class='fuente_general'>";
+			print "<tr><td><b>Fuente: </b><br>".pg_fetch_result($rsDet_quinquenal_fuente,0,"\"fuente\"")."</td></tr></table>";
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+	<?php
+	

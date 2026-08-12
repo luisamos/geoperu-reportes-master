@@ -1,0 +1,319 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+function valorsino($campo){
+				if($campo=='1'){$valor='S&iacute;';}elseif($campo=='2'){$valor='No';}elseif($campo=='0'){$valor='Sin datos';}
+				return $valor;
+			}
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+    $pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	//$sQueryF = " FROM unidades_min_produccion_mayo2022";
+	$sQueryF = " FROM vw_peru_tumbes_establecimientos_salud";
+	$sQueryW = " WHERE \"gid\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'ESTABLECIMIENTO DE SALUD';
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				<?php print" <tr>
+					<th width='20%'>DEPARTAMENTO</th>
+					<th width='20%'>PROVINCIA</th>
+					<th width='20%'>DISTRITO</th>
+					<th width='20%'>UBIGEO</th>
+				  </tr>";?>
+				</thead>
+				<tbody>
+	<?php
+			print "<tr>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+				  </tr>";
+	?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+        <table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;DATOS DEL ESTABLECIMIENTO DE SALUD</td>
+			  </tr>
+			</table>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Nombre del establecimiento de salud</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"nombre\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Nivel de importancia del recurso para la respuesta y recuperación temprana</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"jerarquiza\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Exposición a peligro de tsunami</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"tsunami\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Accesibilidad</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"accesib\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Institución de la cual depende el establecimiento</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"institucio\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Código único</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_unico\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Dirección del establecimiento de salud</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"direccion\"")."</td>
+			</tr>
+			<tr>
+				<td width='50%' class='lista_titulo'>Código DISA</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_disa\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Código RED</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_red\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Código Microred</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_mic\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Nombre de la Dirección de Salud (DISA) a la cual pertenece</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"disa\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Nombre de la Red a la cual pertenece</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"red\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Nombre de la Microred a la cual pertenece</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"microred\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Unidad Ejecutora</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"unid_ejec\"")."</td>
+			</tr>
+			<tr>
+				<td width='50%' class='lista_titulo'>Categoría</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"categoria\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Número de teléfono</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"telefono\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Horario de atención</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"horario\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Año de construcción</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"año_const\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Año de inicio de actividad (fuente RENAES)</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"inicio_act\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Responsable</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"responsabl\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Estado</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"estado\"")."</td>
+			</tr>
+			<tr>
+				<td width='50%' class='lista_titulo'>Situación</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"situacion\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Condición</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"condicion\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Inspección</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"inspeccion\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Número total de ambulancias</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"tot_ambu\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Existencia de un helipuerto</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"helipuerto\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Material</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"material\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Número de pisos</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"pisos\"")."</td>
+			</tr> 
+			<tr>
+				<td width='50%' class='lista_titulo'>Área construida en metros cuadrados (m²)</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"area_cons\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Área total ocupada en metros cuadrados (m²)</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"area_total\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Número de pacientes atendidos anualmente y sin repetición</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"atendidos\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Número de camas en emergencia</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"camas_emer\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Número de camas de cuidados intensivos (cuidados intensivos adultos y pediatría)</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"camas_uci\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Número de camas de hospitalización</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"tot_camas\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Número total de salas de operación (quirófanos)</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"salas_oper\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Existencia de un servicio de shock trauma (equipos de reanimación).</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"shock_trau\"")."</td>
+			</tr>
+			<tr>
+				<td width='50%' class='lista_titulo'>Existencia de sala de parto</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"sala_parto\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Existencia de un banco de sangre</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"banco_sang\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Existencia de un laboratorio general</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"lab_gral\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Existencia de un laboratorio de emergencia (laboratorio propio del servicio de emergencia).</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"lab_emer\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Número de Médicos</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"num_medico\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Número de Odontólogos</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"num_odont\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Número de Obstetras</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"num_obstet\"")."</td>
+			</tr>
+			<tr>
+				<td width='50%' class='lista_titulo'>Número de Psicólogos</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"num_psico\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Número de Nutricionistas</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"num_nutric\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Número de Químicos</td>
+				<td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"num_quimic\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Número de Enfermeros</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"num_enferm\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>Núemro de auxiliares</td>
+                <td class='texto'>".pg_fetch_result($rsDet,0,"\"num_auxil\"")."</td>
+              </tr>
+			  <tr>
+			  <td class='lista_titulo'>Número de personal administrativo</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"num_admin\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Cota</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"cota\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Coordenada geográfica Y</td>
+			  <td align='' class='texto'>".pg_fetch_result($rsDet,0,"\"latitud\"")."</td>
+			</tr>
+			<tr>
+			  <td class='lista_titulo'>Coordenada geográfica X</td>
+			  <td class='texto'>".pg_fetch_result($rsDet,0,"\"longitud\"")."</td>
+			</tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>  
+
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\""))?><?php echo(pg_fetch_result($rsDet,0,"\"fuente1\""));?>
+		</th></tr></thead></table>
+	<?php
+	$name='CONADIS - Población con discapacidad';
+	$capa='peru_discapacidad_pobla_discap_';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_conadis'.'&ocampo=gid';
+		
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

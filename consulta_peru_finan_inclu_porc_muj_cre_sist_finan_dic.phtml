@@ -1,0 +1,136 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$gid = limpiarNumeros($_GET['ovalor']);
+	
+	$linkPG = Conectarse_POSTGRES(); 
+	// Browse Data
+	$sQueryS = " SELECT *  ";   
+	$sQueryF = " FROM vw_peru_finan_inclu_porc_muj_cre_sist_finan_dic2022";
+	$sQueryW = " WHERE gid = '" . $gid. "'";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'PORCENTAJE DE MUJERES ADULTAS CON CRÉDITO EN EL SISTEMA FINANCIERO DEL AÑO 2011 AL 2022 ';
+	$titulo = $titulo_ventana;
+	
+	
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='20%'>Departamento</th>
+					<th width='20%'>Ubigeo</th>
+				  </tr>
+				</thead>
+				<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."</td>
+			  </tr>";
+?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;DATOS DE PORCENTAJE (%)</td>
+			  </tr>
+			</table>
+			<table align='center' width="100%" class="listado" >
+			
+<?php
+
+		print "<tr>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2011 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2012 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2013 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2014 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 20151 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2016 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2017 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2018 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2019 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2020 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2021 (%)</b></td>";
+		print "<td align='center' width='8%' class='lista_titulo center' colspan='1'><b >Año 2022 (%)</b></td>";
+		print "</tr>";
+
+		print "<tr>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2011\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2012\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2013\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2014\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2015\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2016\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2017\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2018\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2019\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2020\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2021\"")."%</td>";
+		print "<td class='lista_textosub center'>".pg_fetch_result($rsDet,0,"\"ano_2022\"")."%</td>";
+		print "</tr>";			
+	
+	?>
+			</table>
+			
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='Cobertura Movil Movistar';
+	$capa='peru_infra_cobertura_movil_movistar';
+	if (!isset($_GET['excel'])) {
+		$ruta='consulta_telefonia_movil.phtml?excel=excel&capa='.$capa.'&ovalor='.$gid;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+</html>
+
+
+<?php include_once("./analyticstracking.php");?>

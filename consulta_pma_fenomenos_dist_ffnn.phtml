@@ -1,0 +1,179 @@
+<?php
+/***************************************************************************************
+Organización: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Descentralización
+Sistema		: 	Sistema Nacional de Información Geográfica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+	/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM data_pma_fenomenos_dist ";
+	$sQueryW = " WHERE \"cod_dist\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$niv_rec_fn=pg_fetch_result($rsDet,0,"\"niv_rec_fn\"");
+				switch ($niv_rec_fn) {
+				case 1:
+					$niv_rec_fn_='Bajo';
+					break;
+				case 2:
+					$niv_rec_fn_='Medio';
+					break;
+				case 3:
+					  $niv_rec_fn_='Alto';
+					break;
+				case 4:
+					$niv_rec_fn_='Muy alto';
+					break;
+				}	
+		$titulo_ventana = '&Iacute;NDICE DE  RECURRENCIA DE FEN&Oacute;MENOS DE ORIGEN NATURAL - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+		$titulo = '&Iacute;NDICE DE  RECURRENCIA DE FEN&Oacute;MENOS DE ORIGEN NATURAL - </br> DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+		$subtitulo='<tr>
+						<td width="100%" colspan="2"class="titulo1">Nivel de recurrencia FFNN 2004-2014	</td>
+						<td class="titulo1">'.$niv_rec_fn_.'</td>
+					</tr>
+					<tr>
+						<td width="100%" colspan="2" class="titulo1">&Iacute;ndice   de recurrencia FFNN 2004-2014</td>
+						<td class="titulo1">'.pg_fetch_result($rsDet,0,"\"irfn_04_14\"").'</td>
+					</tr>';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th width='25%' align='center'>Departamento</th>
+								<th width="25%" align='center'>Provincia</th>
+								<th width="25%">Distrito</th>
+								<th width='25%' align='center'>Ubigeo</th>
+							  </tr>
+							</thead>
+							<tbody>
+	<?php
+					print "<tr>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+						</tr>";
+	?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DEL MAPA</td>
+						  </tr>
+						</table></h1>
+					<div>
+		<?php
+		print "<table width='100%' align='center' class='general'>
+				<!--thead>
+				  <tr>
+					<th height='34' colspan='2'><strong>VARIABLE / INDICADOR</strong></th>
+					<th><strong>Cifras Absolutas</strong></th>
+					<th><strong>%</strong></th>
+				  </tr>
+				</thead-->
+			<tbody>".$subtitulo;
+		echo('
+			  <tr>
+				<td rowspan="2" class="texto1"><b>Estabilidad</b></td>
+				<td class="texto1">Recurrencia fen&oacute;menos naturales 2004-2014</td>
+				<td class="texto1">'.pg_fetch_result($rsDet,0,"\"r_fn_04_14\"").'</td>
+			  </tr>
+			  <tr>
+				<td class="texto1">Poblaci&oacute;n afectada 2004-2012</td>
+				<td class="texto1">'.pg_fetch_result($rsDet,0,"\"pbaf_04_12\"").'</td>
+			  </tr>');
+	print"</tbody></table>";
+		
+?>
+				</div></div>
+			</td>
+		  </tr>
+
+		</table>
+		<?php print "<br><table width='100%' class='fuente_general'><tr>
+			<td><b>Fuente :</b></br>".pg_fetch_result($rsDet,0,"\"fuente\"");
+			
+			echo('...(Descarga estudio <a href="docs/PMA_MAPA_DE_VULNARABILIDAD_BAJA.pdf" target="blank"><img src="imajes/descargar.jpg" border ="0" alt="PMA" width="12px"></a>)');
+			
+			
+			print"</td>
+		</tr></table><br>";?>
+		
+		<?php include('indicadores_socioeconomicos_distrito.phtml');?>
+	<?php
+	$name=$titulo_ventana;
+	$capa='consulta_pma_fenomenos_dist_ffnn';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body> 
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+		$("#u6").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

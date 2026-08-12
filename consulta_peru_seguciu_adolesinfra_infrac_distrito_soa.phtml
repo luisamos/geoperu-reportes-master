@@ -1,0 +1,184 @@
+
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM vw_peru_seguciu_adolesinfra_infrac_distrito_soa";
+	$sQueryW = " WHERE gid = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'INFRACCIONES POR DISTRITO SEGÚN SOA';
+	$titulo = 'INFRACCIONES POR DISTRITO SEGÚN SOA';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <!--tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Codigo Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dpto\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_prov\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dist\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"cod_dist\"")) ?></td>
+					</tr>
+	
+					</tbody>
+				</table>
+			</td>
+		  </tr-->
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+					  
+				</table>
+
+				<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra el orden financiero y monetario</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_or_fi\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra el patrimonio</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_patr\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la administración pública</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_ad_pu\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la familia</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_fam\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la fe pública</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_fe_pu\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la libertad</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_lib\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la libertad personal</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_li_pe\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la libertad sexual</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_li_se\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la salud pública</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_sa_pu\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Contra la seguridad pública</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_se_pu\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la tranquilidad pública</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_tr_pu\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones contra la vida, el cuerpo y la salud</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cont_v_c_s\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones por otros tipos de delitos</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"otros\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Total de infracciones producidas a nivel distrital</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"total_del\"")."</td>
+			  	</tr>
+
+
+			";
+		?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$name='INFRACCIONES POR DISTRITO SEGÚN SOA';
+	$capa='INFRACCIONES POR DISTRITO SEGÚN SOA';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_discapacidad_regiones'.'&ocampo=gid';
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

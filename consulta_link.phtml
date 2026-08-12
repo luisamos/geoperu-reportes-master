@@ -1,0 +1,205 @@
+
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYHUITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+@session_start();
+//$_SESSION['usuario'] = 'a'; //para comentar
+
+include_once('../programas/conexion_postgres.phtml');
+include ('injection/funciones.php');
+$link = Conectarse_POSTGRES();
+include_once('../usuarios/inc/funciones.php');
+
+if (isset($_SESSION['usuario'])) {
+	$onclick = 'onclick="PM.Custom.showGroupMismapas()"';
+}
+
+?>
+<body>
+
+		
+<form action="../programas/consulta_link.phtml" method="post" name="form" id="frmmismapas">
+
+<input type='hidden' name='accion' value='<?php echo $accion; ?>' />
+<input type='hidden' name='cod_user' value='<?php echo $cod_user; ?>' />
+
+<style type="text/css">
+.tabla1{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	border: 1px solid #ccc;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 1px;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+.tabla2{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:12px;
+	border-collapse: collapse;
+	padding: 5px;
+}
+.lista_titulo{
+	text-align: right;
+	font-weight: normal;
+	background-color: #ffffff;
+	border: 1px solid white;
+	padding: 5px;
+}
+.lista_titulob{
+	text-align: center;
+	font-weight: normal;
+	background-color: #ffffff;
+	border: 1px solid white;
+	padding: 5px;
+}
+
+.lista_titulo_principal{
+	text-align: center;
+	font-weight: normal;
+	background-color: #125565;
+	color:#ffffff;
+	border: 1px solid white;
+	padding: 10px;
+	font-size:14px;
+	border-collapse: collapse;
+}
+.lista_texto{
+	text-align: left;
+	font-weight: normal;
+	background-color: #fff;
+	border: 1px solid #ffffff;
+	padding-left: 3px;
+}
+
+.lista_textob{
+	text-align: center;
+	font-weight: normal;
+	background-color: #fff;
+	border: 1px solid #ffffff;
+	padding-left: 3px;
+}
+
+.ml-button-12 {
+	background-color: #F39C45;
+	border: 1px solid #A87017;
+	-moz-box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	-webkit-box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	background-image: -o-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	color: #A8580B;
+	text-shadow: rgba(254,252,252,0.5) 0px 1px 0px;
+}
+
+/*Hover*/
+.ml-button-12:hover {
+	background-color: #EAB26C;
+	background-image: -o-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+}
+
+/*Active*/
+.ml-button-12:active {
+	background-color: #E77E21;
+	-moz-box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	-webkit-box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	background-image: -o-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	text-shadow: none;
+}
+
+
+</style>
+
+<table width="100%" align="center" class="tablesorter" id="myTable">
+<thead>
+
+  <tr>
+	<th>			
+
+		
+
+		<?php
+
+//lista de distritos por cada provincias
+$linkPG = Conectarse_POSTGRES();
+$cabecera = "</strong></th>
+	
+
+
+					<th  width='10%'  class='lista_titulob'><b>Fecha</b></th>
+				<th  width='10%'  class='lista_titulob'><b>Estado </b></th>
+				<th  width='10%'  class='lista_titulob'><b>Descripci&oacute;n</b></th>
+					
+				</tr></thead>";
+
+	$distQueryb		=	"select cod_user,email, fecregistro , url, mapa, case tipo when '1' then 'Enviado' else 'Guardado' end as tipo from tab_mismapas where cod_user='".$_SESSION['usuario']."' 
+union all
+select cod_user,email, fecregistro , url, mapa, 'Recibido' as tipo from tab_mismapas where email='".$_SESSION['usuario']."' order by fecregistro desc";
+	$rsDetDistb 		= 	pg_query($linkPG , $distQueryb);
+    $numrowsDistb 	= 	pg_num_rows($rsDetDistb);
+	
+	print("<table width='100%' class='tablesorter' id='myTable' align='center'>");
+	
+	echo("
+	<thead>	
+	<tr>
+		<th  bgcolor='#b86d26' colspan='5'><div align='center' class='lista_titulo_principal'>MIS MAPAS</div></th>
+	  </tr>
+	  
+	<tr>
+	<th class='lista_titulob' width='20%'><strong> Nombre mapa".$cabecera );
+	$i=0;
+		while($i<$numrowsDistb){
+		/*$urlinicial = explode("ALL&",pg_fetch_result($rsDetDistb,$i,"\"url\""));
+		$primero = $urlinicial[0];
+		$segundo = $urlinicial[1];
+		echo('<br>$primero '.$i.' = '.$primero);
+		echo('<br>$segundo '.$i.' = '.$segundo);*/
+			echo("<td  width='20%'  class='lista_texto'>
+				<a href='".pg_fetch_result($rsDetDistb,$i,"\"url\"")."&u=".$_SESSION['usuario']."&ac=0"."' target='_blank'>".pg_fetch_result($rsDetDistb,$i,"\"mapa\"")."</a>&nbsp;</td>
+					<td  width='15%'   class='lista_texto'>".pg_fetch_result($rsDetDistb,$i,"\"fecregistro\"")."&nbsp;</td>
+            <td  width='15%'   class='lista_texto'>".pg_fetch_result($rsDetDistb,$i,"\"tipo\"")."&nbsp;</td>
+	 <td  width='20%'  class='lista_texto'><a href='".pg_fetch_result($rsDetDistb,$i,"\"url\"")."&u=".$_SESSION['usuario']."&ac=0"."' target='_blank'> Ver </a>&nbsp;</td>");
+		
+					$i++;
+					echo('</tr>');	
+					//echo('</table>');
+				}
+			
+		?>
+	
+	</th>
+  </tr>
+</thead>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				
+
+<table border = "0" align="center">
+	  <tr>
+		<td>
+			<input class="ml-button-12" type="button" name="cmdregresar" value="Regresar" onclick="PM.Custom.showGroupMisMapas();" />
+		</td>
+	  </tr></table>
+</form>
+</body>

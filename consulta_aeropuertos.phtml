@@ -1,0 +1,214 @@
+
+<?php
+/**************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_infra_aeropuertos";
+	$sQueryW = " WHERE gid = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'INFRAESTRUCTURA AEROPORTUARIA - DEPARTAMENTO '.pg_fetch_result($rsDet,0,"nom_dpto");
+	$titulo = 'INFRAESTRUCTURA AEROPORTUARIA <br> DEPARTAMENTO ' . pg_fetch_result($rsDet,0,"nom_dpto");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Ubigeo</th>
+					  </tr>
+					</thead>
+					<tbody>
+	<?php
+			print "<tr>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+					</tr>";
+	?>
+					</tbody>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+			<thead>
+		<?php
+		print "<tr>
+				<td class='lista_titulo'>Lugar / Nombre:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"nombre\"")."</td>
+			  </tr>
+
+			  <tr>
+				<td class='lista_titulo'>Nombre de la instalaci&oacute;n aeroportuaria:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"label\"")."</td>
+			  </tr>
+
+			  <tr>
+				<td class='lista_titulo'>Tipo de instalaci&oacute;n aeroportuaria</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"desc_tipo\"")."</td>
+			  </tr>
+
+			  <tr>
+				<td class='lista_titulo'>Nivel de escala</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"escala\"")."</td>
+			  </tr>
+
+			  <tr>
+				<td class='lista_titulo'>Codigo</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"codaero\"")."</td>
+			  </tr>
+
+			  <tr>
+				<td class='lista_titulo'>Código de corredor logístico</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"codclog\"")."</td>
+			  </tr>
+
+			  <tr>
+				<td class='lista_titulo'>Estado operacional</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"estado\"")."</td>
+			  </tr>
+
+			  <tr>
+				<td class='lista_titulo'>Administrador de la infraestructura aeroportuaria:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"administ\"")."</td>
+			  </tr>
+
+			  <tr>
+			  <td class='lista_titulo'>Jerarqu&iacute;a</td>
+			  <td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"jerarquia\"")."</td>
+		  	  </tr>
+
+			  <tr>
+			  <td class='lista_titulo'>Titularidad</td>
+			  <td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"titular\"")."</td>
+			  </tr>	
+			 
+			  <tr>
+				<td class='lista_titulo'>Coordenada Geogr&aacute;fica (Latitud)</td>
+				<td class='lista_texto'>".round(pg_fetch_result($rsDet,0,"\"lat\""),3)."</td>
+			  </tr>		
+			  
+			  <tr>
+				<td class='lista_titulo'>Coordenada Geogr&aacute;fica (Longitud)</td>
+				<td class='lista_texto'>".round(pg_fetch_result($rsDet,0,"\"lon\""),3)."</td>
+			  </tr>";
+		?>
+		</thead>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<!-- <table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<!-- <table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;REPORTE DE LA INFRAESTRUCTURA AEROPORTUARIA DEL DEPARTAMENTO</td>
+					  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead><tr><th>#</th><th>Nombre</th><th>Provincia</th><th>Distrito</th></tr></thead> -->
+		<!-- <?php
+			$consulta 			= "select * from peru_aeropuertos where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."' order by nom_prov,nom_dist,label";
+			$rsConsulta 		= pg_query( $linkPG , $consulta);
+			$numRowsAeropuertos = pg_num_rows($rsConsulta);
+			$i=0;
+			while ($i<$numRowsAeropuertos) {
+				$j=$i+1;
+				if ($i%2) {
+					$classe = "class='rowpar'";
+				} else {
+					$classe = "";
+				}
+				if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+					$enlace=$j;
+				} else {
+					$enlace='<a href="consulta_aeropuertos.phtml?ovalor='.pg_fetch_result($rsConsulta,$i,"\"gid\"").'">'.$j.'</a>';
+				}
+				echo('<tr '.$classe.'><td align="center" class="texto11">'.$enlace.'</td>
+						  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"label\"").'</td>
+						  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"nom_prov\"").'</td>
+						  <td class="texto11">'.pg_fetch_result($rsConsulta,$i,"\"nom_dist\"").'</td></tr>');
+				$i++;
+			}
+		// ?> -->
+				<!-- </table></td></tr>
+		</table><br> -->
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$capa='consulta_aeropuertos';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>
+
+

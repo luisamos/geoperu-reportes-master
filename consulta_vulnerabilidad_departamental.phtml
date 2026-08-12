@@ -1,0 +1,269 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include("conexion_postgres.phtml");
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES(); 
+
+	$cod_dpto = $pvalor;
+
+	// Browse Data
+	$sQueryS = "SELECT *";   
+	$sQueryF = " FROM peru_midis_vulnerabilidad_dpto";
+	$sQueryW = " WHERE \"cod_dpto\" = '".$cod_dpto. "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+
+	$titulo_ventana = 'VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA - DEPARTAMENTO '. pg_fetch_result($rsDet,0,"nom_dpto");
+	$titulo = ' VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA<br>DEPARTAMENTO ' . pg_fetch_result($rsDet,0,"nom_dpto");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th width='25%' align='center'>Departamento</th>
+							<th width='25%' align='center'>Ubigeo</th>
+						  </tr>
+						</thead>
+						<tbody>
+		<?php
+					print "<tr>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+							<td align='center' class='texto'>".$cod_dpto."</td>
+						  </tr>";
+		?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DE LA VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA del DEPARTAMENTO</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width="100%" class="general">
+	<?php
+		if(pg_fetch_result($rsDet,0,"\"cod_n_vul\"") ==1){
+			$nivel = "Muy Baja";
+			$classe='class="nivel1"';
+		} else if(pg_fetch_result($rsDet,0,"\"cod_n_vul\"") ==2){
+			$nivel = "Baja";
+			$classe='class="nivel2"';
+		} else if(pg_fetch_result($rsDet,0,"\"cod_n_vul\"") ==3){
+			$nivel = "Media";
+			$classe='class="nivel3"';
+		} else if(pg_fetch_result($rsDet,0,"\"cod_n_vul\"") ==4){
+			$nivel = "Alta";
+			$classe='class="nivel4"';
+		} else if(pg_fetch_result($rsDet,0,"\"cod_n_vul\"") ==5){
+			$nivel = "Muy Alta";
+			$classe='class="nivel5"';
+		}
+		print "<tr>
+				<td colspan='3' width='75%' class='lista_titulo'>Indice de Vulnerabilidad a la Inseguridad Alimentaria 3/</td>
+				<td  width='25%' class='numero1'>".pg_fetch_result($rsDet,0,"\"i_vul_ia\"")."</td>
+			  </tr>
+			  <tr>
+				<td colspan='3' class='lista_titulo'>Nivel de vulnerabilidad a la Inseguridad Alimentaria</td>
+				<td align='center' ".$classe." class='numero1'>".$nivel."</td>
+			  </tr>
+			  <tr>
+				<td width='20%' rowspan='8' class='lista_titulo'>INDICADORES BASE</td>
+				<td width='50%' colspan='2' class='lista_textosub'>Poblaci&oacute;n 2012 1/</td>
+				<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_2012\""))."</td>
+			  </tr>
+			  <tr>
+				<td colspan='2' class='lista_textosub'>Hombres 2012 1/</td> <td class='numero1'>".number_format( pg_fetch_result($rsDet,0,"\"hom_2012\""))."</td>
+			  </tr>
+			  <tr>
+				<td colspan='2' class='lista_textosub'>Mujeres 2012 1/</td> <td class='numero1'>".number_format( pg_fetch_result($rsDet,0,"\"muj_2012\""))."</td>
+			  </tr>
+			  <tr>
+				<td colspan='2' class='lista_textosub'>% Poblaci&oacute;n rural 2007 2/</td> <td  class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_r2007\""),2)."</td>
+			  </tr>
+			  <tr>
+				<td colspan='2' class='lista_textosub'>Poblaci&oacute;n en proceso de inclusi&oacute;n MIDIS 3/</td>  <td  class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_inclu\""),2)."</td>
+			  </tr>
+			  <tr>
+				<td colspan='2' class='lista_textosub'>% Pobres 2011 4/</td>  <td  class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pobr_09\""),2)."</td>
+			  </tr>
+			  <tr>
+				<td colspan='2' class='lista_textosub'>% Pobres extremos 2011 4/</td>  <td  class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pobr_ex_09\""),2)."</td>
+			  </tr>
+			  <tr>
+				<td colspan='2' class='lista_textosub'>Tasa de desnutrici&oacute;n 2011 5/</td>  <td  class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"t_des_09\""),2)."</td>
+			  </tr>";
+	?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL NACIONAL</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						  <tr><td width='5%' class='titulo1'><b>#</b></td>
+							<td width='45%' class='titulo1'><b>DEPARTAMENTO</b></td>
+							<td width='10%' class='nivel1'><b>Muy Baja</b></td>
+							<td width='10%' class='nivel2'><b>Baja</b></td>
+							<td width='10%' class='nivel3'><b>Media</b></td>
+							<td width='10%' class='nivel4'><b>Alta</b></td>
+							<td width='10%' class='nivel5'><b>Muy Alta</b></td>
+						  </tr>
+	<?php
+		$ConsultaRegion="select cod_dpto, nom_dpto , cod_n_vul  from peru_midis_vulnerabilidad_dpto";
+		$rsDetRegion = pg_query( $linkPG , $ConsultaRegion );
+		$numRows = pg_num_rows($rsDetRegion);
+		$i=0;
+		while($i<$numRows){
+			if (pg_fetch_result($rsDetRegion,$i,"\"cod_dpto\"")==pg_fetch_result($rsDet,0,"\"cod_dpto\"")) {
+				$classet='class="titulo11"';
+				$classe='align="center" class="titulo11"';
+			} else {
+				$classet='class="titulo111"';
+				$classe='class="textosub"';
+			}
+			$j=$i+1;
+			if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+				$enlace=$j;
+			} else {
+				$enlace='<a href="consulta_vulnerabilidad_departamental.phtml?ovalor='.pg_fetch_result($rsDetRegion,$i,"\"cod_dpto\"").'">'.$j.'</a>';
+			}
+			echo('<tr><td '.$classet.'>'.$enlace.'</td><td '.$classet.'>'.pg_fetch_result($rsDetRegion,$i,"\"nom_dpto\"").'</td>');
+			for($m=1;$m<6;$m++){
+				if(pg_fetch_result($rsDetRegion,$i,"\"cod_n_vul\"") ==1 && $m==1){
+					$chek='<img src="imajes/check.png" width="15" height="15"/>';
+				} else if(pg_fetch_result($rsDetRegion,$i,"\"cod_n_vul\"") ==2 && $m==2){
+					$chek='<img src="imajes/check.png" width="15" height="15"/>';
+				} else if(pg_fetch_result($rsDetRegion,$i,"\"cod_n_vul\"") ==3 && $m==3){
+					$chek='<img src="imajes/check.png" width="15" height="15"/>';
+				} else if(pg_fetch_result($rsDetRegion,$i,"\"cod_n_vul\"") ==4 && $m==4){
+					$chek='<img src="imajes/check.png" width="15" height="15"/>';
+				} else if(pg_fetch_result($rsDetRegion,$i,"\"cod_n_vul\"") ==5 && $m==5){
+					$chek='<img src="imajes/check.png" width="15" height="15"/>';
+				} else {
+					$chek='';
+				}
+				echo('<td '.$classe.'>'.$chek.'</td>');
+			}
+			echo('</tr>');
+			$i++;
+		}
+		echo('<tr><td colspan="2" class="lista_titulo"><b>Total</b></td>');
+		for($r=1;$r<6;$r++){
+			if($r==1){
+				$classe = 'class="nivel1"';
+			}else if($r==2){
+				$classe = 'class="nivel2"';
+			}elseif($r==3){
+				$classe = 'class="nivel3"';
+			}elseif($r==4){
+				$classe = 'class="nivel4"';
+			}elseif($r==5){
+				$classe = 'class="nivel5"';
+			}
+			$consultaTotal = "select count(*) as cantidad  from peru_midis_vulnerabilidad_dpto where cod_n_vul ='".$r."'";
+			$rsTotalRegion = pg_query( $linkPG , $consultaTotal );
+			echo('<td '.$classe.'><b>'.pg_fetch_result($rsTotalRegion,0,"\"cantidad\"").'</b></td>');
+		}
+		echo '</tr>';
+		?>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table class='fuente_general' width="100%"><thead>
+		<tr><th><?php echo(pg_fetch_result($rsDet,0,"\"fuente6\"")); ?>
+		</th></tr>
+		<tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente1\"")); ?>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente2\"")); ?>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente3\"")); ?>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente4\"")); ?>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente5\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='VULNERABILIDAD A LA INSEGURIDAD ALIMENTARIA - DEPARTAMENTO '. pg_fetch_result($rsDet,0,"nom_dpto");
+	$capa='consulta_vulnerabilidad_departamental';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

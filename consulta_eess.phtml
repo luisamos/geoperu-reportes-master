@@ -1,0 +1,257 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_personal_salud_eess";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	if($player=='peru_personal_salud_medico_eess'){//MEDICOS
+	$profesion = "medico"; $cantidad = pg_fetch_result($rsDet,0,"\"medico\"");				
+	}elseif($player=='peru_personal_salud_enferm_eess'){//ENFERMEROS
+	$profesion = "enferm"; $cantidad = pg_fetch_result($rsDet,0,"\"enferm\"");				
+	}elseif($player=='peru_personal_salud_odontologos_eess'){//ODONTOLOGOS
+	$profesion = "odont";$cantidad = pg_fetch_result($rsDet,0,"\"odont\"");				
+	}elseif($player=='peru_personal_salud_obste_eess'){//ODONTOLOGOS
+	$profesion = "obste";$cantidad = pg_fetch_result($rsDet,0,"\"obste\"");				
+	}elseif($player=='peru_personal_salud_psico_eess'){//OBTETRAS
+	$profesion = "psico";$cantidad = pg_fetch_result($rsDet,0,"\"nutric\"");				
+	}elseif($player=='peru_personal_salud_nutri_eess'){//NUTRICIONISTA
+	$profesion = "nutric";$cantidad = pg_fetch_result($rsDet,0,"\"nutric\"");				
+	}elseif($player=='peru_personal_salud_med_vet_eess'){//MEDICO VETERINARIO
+	$profesion = "med_veter";$cantidad = pg_fetch_result($rsDet,0,"\"med_veter\"");				
+	}elseif($player=='peru_personal_salud_biologo_eess'){//BIOLOGO
+	$profesion = "biolo";$cantidad = pg_fetch_result($rsDet,0,"\"biolo\"");				
+	}elseif($player=='peru_personal_salud_ing_san_eess'){//INGENIERO SANITARIO
+	$profesion = "inge_san";$cantidad = pg_fetch_result($rsDet,0,"\"inge_san\"");				
+	}elseif($player=='peru_personal_salud_quim_farm_eess'){//QUIMICO FARMACEUTICO
+	$profesion = "qui_farm";$cantidad = pg_fetch_result($rsDet,0,"\"qui_farm\"");				
+	}elseif($player=='peru_personal_salud_tecno_med_ter_fis_eess'){//TECNOLOGO MEDICO TERAPIA FISICA Y REHABILITACION
+	$profesion = "tm_tfyreh";$cantidad = pg_fetch_result($rsDet,0,"\"tm_tfyreh\"");				
+	}elseif($player=='peru_personal_salud_tecno_med_cli_ana_pato_eess'){//TECNOLOGO MEDICO LABORATORIO CLINICO Y ANATOMIA PATOLOGICA
+	$profesion = "tmlc_ap";$cantidad = pg_fetch_result($rsDet,0,"\"tmlc_ap\"");				
+	}elseif($player=='peru_personal_salud_tecno_med_rad_eess'){//TECNOLOGO MEDICO RADIOLOGIA
+	$profesion = "tm_radio";$cantidad = pg_fetch_result($rsDet,0,"\"tm_radio\"");				
+	}elseif($player=='peru_personal_salud_tecno_med_ter_len_eess'){//TECNOLOGO MEDICO TERAPIA DE LENGUAJE
+	$profesion = "tm_tdlen";$cantidad = pg_fetch_result($rsDet,0,"\"tm_tdlen\"");				
+	}elseif($player=='peru_personal_salud_tecno_med_opt_eess'){//TECNOLOGO MEDICO OPTOMETRIA
+	$profesion = "tm_opt";$cantidad = pg_fetch_result($rsDet,0,"\"tm_opt\"");				
+	}elseif($player=='peru_personal_salud_tecno_med_ter_ocu_eess'){//TECNOLOGO MEDICO TERAPIA OCUPACIONAL
+	$profesion = "tm_tocup";$cantidad = pg_fetch_result($rsDet,0,"\"tm_tocup\"");				
+	}elseif($player=='peru_personal_salud_trab_social_eess'){//TRABAJADOR/A SOCIAL
+	$profesion = "tra_soc";$cantidad = pg_fetch_result($rsDet,0,"\"tra_soc\"");				
+	}elseif($player=='peru_personal_salud_tec_esp_eess'){//TECNICO ESPECIALIZADO
+	$profesion = "tec_esp";$cantidad = pg_fetch_result($rsDet,0,"\"tec_esp\"");				
+	}elseif($player=='peru_personal_salud_prof_no_esp_eess'){//PROFESIONAL DE LA SALUD NO ESPECIFICADO
+	$profesion = "ps_n_esp";$cantidad = pg_fetch_result($rsDet,0,"\"ps_n_esp\"");				
+	}elseif($player=='peru_personal_salud_quim_eess'){//QUIMICO
+	$profesion = "quimi";$cantidad = pg_fetch_result($rsDet,0,"\"quimi\"");				
+	}elseif($player=='peru_personal_salud_tecno_med_eess'){//TECNOLOGO MEDICO
+	$profesion = "tecno_med";$cantidad = pg_fetch_result($rsDet,0,"\"tecno_med\"");				
+	}
+	
+
+	$titulo = 'PROFESIONALES POR ESTABLECIMIENTOS DE SALUD - '. pg_fetch_result($rsDet,0,"nom_dist");
+		//$titulo = 'COMPLEJOS DEPORTIVOS REGIONALES IPD - '. pg_fetch_result($rsDet,0,"nom_dpto");
+	//$titulo = $name;
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th width="20%"><?php echo(getTablaCampo('peru_personal_salud_eess','nom_dpto'));?></th>
+							<th width="20%"><?php echo(getTablaCampo('peru_personal_salud_eess','nom_prov'));?></th>
+							<th width="20%"><?php echo(getTablaCampo('peru_personal_salud_eess','nom_dist'));?></th>
+							<th width="20%"><?php echo(getTablaCampo('peru_personal_salud_eess','cod_dist'));?></th>
+							
+		
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"ps_n_esp\"")."</td>";
+							
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DEL ESTABLECIMIENTO DE SALUD</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					 
+					
+						<?php
+							print "<tr>";
+							
+							
+							
+							print "<td width='50%' class='lista_titulo'><b>".getTablaCampo('peru_personal_salud_eess',$profesion)."</b></td>";
+							print "<td width='50%' class='lista_textosub'>".$cantidad."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>".getTablaCampo('peru_personal_salud_eess','est_nombre')."</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"est_nombre\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>".getTablaCampo('peru_personal_salud_eess','codi_ipres')."</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"cod_ipress\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							print "<td class='lista_titulo'><b>".getTablaCampo('peru_personal_salud_eess','categ')."</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"categ\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>".getTablaCampo('peru_personal_salud_eess','clasificac')."</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"clasificac\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Descripción Tipo de Establecimiento</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"tipo_estab\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Dirección regional de salud</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"diresa\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Nombre de la RED</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"redtdscl\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							print "<td class='lista_titulo'><b>Nombre de la MICRORED</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"mretdscl\"")."&nbsp;</td>";
+							print "</tr>";
+							
+						?>
+								
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+			<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;OTROS PROFESIONALES EN EL ESTABLECIMIENTO DE SALUD</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+						<?php
+							$prof= array ("medico","enferm","obste","odont","biolo","inge_san","med_veter","nutric","psico","quimi","qui_farm","tecno_med","tmlc_ap","tm_opt","tm_radio","tm_tdlen",  "tm_tfyreh",  "tm_tocup","tra_soc","tec_esp");
+					
+							for ($i = 0; $i <count($prof); $i++) {
+   							
+							print "<tr>";
+							print "<td width='50%' class='lista_titulo'><b>".getTablaCampo('peru_personal_salud_eess',$prof[$i])."</b></td>";
+							print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,$prof[$i])."&nbsp;</td>";
+							print "</tr>";
+							}	
+						?>
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_eess';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+	$("#u1").h2c_acordeon();
+	$("#u2").h2c_acordeon();
+	$("#u3").h2c_acordeon();
+	$("#u4").h2c_acordeon();
+	$("#u5").h2c_acordeon();
+	$("#u6").h2c_acordeon();
+	});
+</script>
+</html> 

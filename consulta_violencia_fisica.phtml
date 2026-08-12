@@ -1,0 +1,230 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+
+	$gid = $pvalor;
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_cem_violencia";
+	$sQueryW = " WHERE \"gid\" = '" . $gid . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo_ventana = 'VIOLENCIA F&Iacute;SICA - '. pg_fetch_result($rsDet,0,"nom_dist");
+		$titulo = 'VIOLENCIA F&Iacute;SICA - '. pg_fetch_result($rsDet,0,"nom_dist");
+	//$titulo = $name;
+	include ('inc/consulta_cabecera.php');
+?>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<!--<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','nom_dpto'));?></th>
+							<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','nom_prov'));?></th>
+							<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','nom_dist'));?></th>
+							<th width="20%"><?php// echo(getTablaCampo('peru_comp_depor_reg','cod_dist'));?></th>-->
+							<th width="20%">DEPARTAMENTO</th>
+							<th width="20%">PROVINCIA</th>
+							<th width="20%">DISTRITO</th>
+						
+		
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+		
+							
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS GENERALES</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					 
+					
+						<?php
+							print "<tr>";
+							//print "<td width='50%' class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','dis_depor')."</b></td>";
+							print "<td width='50%' class='lista_titulo'><b>N&uacute;mero de casos de violencia en el distrito:</b></td>";
+							print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"num_casos\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','comdep_ipd')."</b></td>";
+							print "<td class='lista_titulo'><b>Casos de Violencia F&iacute;sica:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"tv_fisic\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','direccion')."</b></td>";
+							print "<td class='lista_titulo'><b>Puntapi&eacute;s o patadas:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"puntapies\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr>";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','inicio_fin')."</b></td>";
+							print "<td class='lista_titulo'><b>Pu&ntilde;etazos:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"v100\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','horarios')."</b></td>";
+							print "<td class='lista_titulo'><b>Bofetadas:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"bofetadas\"")."&nbsp;</td>";
+							print "</tr>";
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','telefono')."</b></td>";
+							print "<td class='lista_titulo'><b>Jalones de cabello:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"jalones_ca\"")."&nbsp;</td>";
+							print "</tr>";
+									
+							print "<tr>";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','capital')."</b></td>";
+							print "<td class='lista_titulo'><b>Otras agresiones:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"otras_agre\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','correo_ele')."</b></td>";
+							print "<td class='lista_titulo'><b>Empujones, tirar al suelo:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"empujones\"")."&nbsp;</td>";
+							print "</tr>";	
+							
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Golpes con palos: </b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"golpes_con\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Latigazo, correazo, pegar con sogas: </b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"latigazo\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Ahorcamiento o intento de asfixia</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"ahorcamien\"")."&nbsp;</td>";
+							print "</tr>";
+							
+						    print "<tr >";
+							//print "<td class='lista_titulo'><b>".getTablaCampo('peru_comp_depor_reg','correo_ele')."</b></td>";
+							print "<td class='lista_titulo'><b>Heridas con arma punzo cortante o arma de fuego:</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"heridas_co\"")."&nbsp;</td>";
+							print "</tr>";	
+							
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Golpes con otros objetos contundentes: </b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"golpes_c_a\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Negligencia: </b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"negligenci\"")."&nbsp;</td>";
+							print "</tr>";
+							
+							print "<tr>";
+							print "<td class='lista_titulo'><b>Otro tipo de violencia f&iacute;sica</b></td>";
+							print "<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"otra_vfis\"")."&nbsp;</td>";
+							print "</tr>";
+						?>
+								
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_violencia_fisica';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+	$("#u1").h2c_acordeon();
+	$("#u2").h2c_acordeon();
+	$("#u3").h2c_acordeon();
+	$("#u4").h2c_acordeon();
+	$("#u5").h2c_acordeon();
+	$("#u6").h2c_acordeon();
+	});
+</script>
+</html> 

@@ -1,0 +1,171 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	$gid = $pvalor;
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM peru_cons_for_minagri";
+	$sQueryW = " WHERE \"gid\" = '".$gid."'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'concesiones forestales';
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+<table width="100%" class="marco_general">
+  <tr><td>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='25%'>Departamento</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"region\"")."</td>
+			  </tr>";
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;datos generales</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='listado'>
+<?php
+		print "<tr>";
+		print "<td colspan='2' align='left' class='lista_titulo'><b>Detalle de la Concesi&oacute;n Forestal</b></td>";
+		print " </tr>";
+
+		print "<tr>";
+		print "<td  width='30%' class='lista_texto'>&Aacute;rea aprobada</td>";
+		print "<td class='texto' width='60%'>" . number_format(pg_fetch_result($rsDet,0,"\"area_aprob\""),2) . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Modalidad de la concesi&oacute;n</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"modalidad\"") . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Nombre del titular</td>";
+		print "<td class='texto'>" . strtoupper(pg_fetch_result($rsDet,0,"\"titular\"")). "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Situaci&oacute;n de la Concesi&oacute;n</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"situa_desc\"") . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Nro de contrato</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"contrato\"") . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Fecha de inicio</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"fecha_ini\"") . "&nbsp;</td>";
+		print "</tr>";
+		print "<tr>";
+		print "<td class='lista_texto'>Fecha de termino</td>";
+		print "<td class='texto'>" . pg_fetch_result($rsDet,0,"\"fecha_ter\"") . "&nbsp;</td>";
+		print "</tr>";
+		
+?>		
+</table>
+	</td></tr>
+</table>
+<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;consolidado region <?php echo(pg_fetch_result($rsDet,0,"\"region\"")) ?> -- <?php echo pg_fetch_result($rsDet,0,"\"modalidad\"")?></td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='listado'>
+<?php
+		print "<tr>";
+		print "<td align='left' class='lista_titulo'><b>Nombre del titular</b></td>";
+		print "<td align='left' class='lista_titulo'><b>Situaci&oacute;n de la Concesi&oacute;n</b></td>";
+		print "<td align='left' class='lista_titulo'><b>&Aacute;rea aprobada</b></td>";
+		print " </tr>";
+		$consConsolidad= pg_query($linkPG,"select * from peru_cons_for_minagri where region= '".pg_fetch_result($rsDet,0,"\"region\"")."' and cod_modal = ".pg_fetch_result($rsDet,0,"\"cod_modal\""));
+		$numRow=pg_num_rows($consConsolidad);
+		$i=0;
+		while($i<$numRow){
+			if($i%2){
+				$clas='class = "lista_texto"';
+			}else{
+				$clas='class = "texto"';
+			}
+			echo('<tr><td '.$clas.'>'.strtoupper(pg_fetch_result($consConsolidad,$i,"\"titular\"")).'</td>
+			<td '.$clas.'>'.pg_fetch_result($consConsolidad,$i,"\"situa_desc\"").'</td>
+			<td '.$clas.'>'.number_format(pg_fetch_result($consConsolidad,$i,"\"area_aprob\""),2).'</td></tr>');
+		$i++;
+		}
+
+		
+?>		
+</table>
+	</td></tr>
+</table>
+<br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente_e\"")); ?>
+		</th></tr></thead></table>
+	<?php	
+	$name=$titulo_ventana;
+	$capa='consulta_conseciones_forestales_minagri';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+</body>
+ 
+</html>
+<?php include_once("./analyticstracking.php");?>

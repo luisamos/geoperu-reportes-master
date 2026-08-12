@@ -1,0 +1,324 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['name'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+if (isset($_SESSION['usuario'])) {
+	$cod_user = $_SESSION['usuario'];
+}*/
+
+	$titulo_ventana = 'RESUMEN EJECUTIVO';
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+	$ubigeo = $_GET['ubigeo']
+?>
+
+<style type="text/css">
+<!--
+body {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size:14px;
+}
+thead {
+	font-size: 12px;
+	font-weight: bold;
+}
+tbody {
+	font-size: 10px;
+}
+td {
+	font-size: 10px;
+}
+input {
+	font-size: 10px;
+}
+#fuera{
+	margin:60px;	
+}
+/* la imagen en su forma normal */
+#ampliar img{
+	-webkit-transform:scale(1); /*Webkit: Scale down image to 0.8x original size*/
+	-moz-transform:scale(1); /*Mozilla scale version*/
+	-o-transform:scale(1); /*Opera scale version*/	
+	-webkit-transition-duration: 0.5s; /*Webkit: Animation duration*/
+	-moz-transition-duration: 0.5s; /*Mozilla duration version*/
+	-o-transition-duration: 0.5s; /*Opera duration version*/
+	opacity: 1;
+}
+/* al pasar el cursor por encima SE AMPLIA*/
+#ampliar img:hover{
+	-webkit-transform:scale(3); /*Webkit:Modificamos tama�o a escala*/
+	-moz-transform:scale(2); /*Mozilla:Modificamos tama�o a escala*/
+	-o-transform:scale(2); /*Opera:Modificamos tama�o a escala*/
+	-webkit-transition-duration: 0.5s; /*Webkit:Duraci�n de la animaci�n*/
+	-moz-transition-duration: 0.5s; /*Mozilla:Duraci�n de la animaci�*/
+	-o-transition-duration: 0.5s; /*Opera:Duraci�n de la animaci�*/	
+	opacity: 1;
+}
+-->
+</style>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Regi&oacute;n</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+				<?php
+				if($ubigeo ==160706){
+				$departamento='LORETO';
+				$provincias='DATEM DEL MARA&Ntilde;ON';
+				$distrito='ANDOAS';
+				$a1='83.9%';
+				$a2='8,124';
+				$a3='9,375';
+				$b1='56.4%';
+				$b2='5,584';
+				$b3='11,772';
+				$c1='32.44%';
+				$c2='1,937';
+				$d1='0 .856';
+				$d2='0.856';
+				$e1='21';
+				$e2='47';
+				$f1='Pl&aacute;cido Chino Dahua';
+				$f2='Fuerza Loretana';
+				} else if($ubigeo =='090104'){
+				$departamento='HUANCAVELICA';
+				$provincias='HUANCAVELICA';
+				$distrito='CONAYCA';
+				$a1='83.9%';
+				$a2='1,158';
+				$a3='1,323';
+				$b1='61.3%';
+				$b2='904';
+				$b3='1,255';
+				$c1='51.32%';
+				$c2='141';
+				$d1='0.837';
+				$d2='0.756';
+				$e1='1';
+				$e2='19';
+				$f1='Pablo Gaspar Martinez';
+				$f2='';
+				}else if($ubigeo =='010403'){
+				$departamento='AMAZONAS';
+				$provincias='CONDORCANQUI';
+				$distrito='R&Iacute;O SANTIAGO';
+				$a1='80.7%';
+				$a2='10,622';
+				$a3='12,606';
+				$b1='40.8%';
+				$b2='5,373';
+				$b3='15,878';
+				$c1='61.25%';
+				$c2='3,052';
+				$d1='0.759';
+				$d2='0.691';
+				$e1='29';
+				$e2='35';
+				$f1='Ricardo Navarro Rojas';
+				$f2='Acci&oacute;n Popular';
+				}else if($ubigeo =='050802'){
+				$departamento='AYACUCHO';
+				$provincias='PAUCAR DEL SARA SARA';
+				$distrito='COLTA';
+				$a1='72.7%';
+				$a2='596';
+				$a3='797';
+				$b1='38%';
+				$b2='306';
+				$b3='1,044';
+				$c1='39.29%';
+				$c2='91';
+				$d1='0.643';
+				$d2='0.544';
+				$e1='2';
+				$e2='21';
+				$f1='Tito Mart&iacute;n Chirihuana Varga';
+				$f2='Mov. Independiente Regional todos con Ayacucho';
+				}else if($ubigeo =='210601'){
+				$departamento='PUNO';
+				$provincias='HUANCAN�';
+				$distrito='HUANCAN�';
+				$a1='71.6%';
+				$a2='15 604';
+				$a3='21,089';
+				$b1='23.2%';
+				$b2='5,711';
+				$b3='19,180';
+				$c1='17.11%';
+				$c2='1,826';
+				$d1='0.627';
+				$d2='0.481';
+				$e1='29';
+				$e2='109';
+				$f1='Hern&aacute;n Ulises Bizarro Chipana';
+				$f2='';
+				}else{
+				
+				}
+
+
+				
+			print "<tr>
+						<td align='center' class='texto'>".$departamento."</td>
+						<td align='center' class='texto'>".$provincias."</td>
+						<td align='center' class='texto'>".$distrito."</td>
+					</tr>";
+				?>
+					</tbody>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;INDICADORES</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+				  <tr>
+					<td class='lista_titulo'>Pobreza Total 2007</td>
+					<td class='texto'><?echo($a1)?></td>
+					<td class='texto'><?echo($a2)?></td>
+					<td class='lista_titulo'>Poblaci&oacute;n 2007</td>
+					<td colspan="2" class='texto'><?echo($a3)?></td>
+				  </tr>
+				  <tr>
+					<td class='lista_titulo'>Pobreza Extrema 2007</td>
+					<td class='texto'><?echo($b1)?></td>
+					<td class='texto'><?echo($b2)?></td>
+					<td class='lista_titulo'>Poblaci&oacute;n 2013</td>
+					<td colspan="2" class='texto'><?echo($b3)?></td>
+				  </tr>
+				  <tr>
+					<td class='lista_titulo'>Tasa de desnutrici&oacute;n 2009</td>
+					<td colspan="2" class='texto'><?echo($c1)?></td>
+					<td class='lista_titulo'>Poblaci&oacute;n Ni&ntilde;os menores de 5    a&ntilde;os 2012</td>
+					<td colspan="2" class='texto'><?echo($c2)?></td>
+				  </tr>
+				  <tr>
+					<td class='lista_titulo'>&Iacute;ndice    de vulnerabilidad a la desnutrici&oacute;n 2010</td>
+					<td colspan="2" class='texto'><?echo($d1)?></td>
+					<td class='lista_titulo'>&Iacute;ndice de vulnerabilidad a la    inseguridad alimentaria 2012</td>
+					<td colspan="2" class='texto'><?echo($d2)?></td>
+				  </tr>
+				  <tr>
+					<td class='lista_titulo'>Nro. Centros Poblados</td>
+					<td colspan="2" class='texto'><?echo($e1)?></td>
+					<td class='lista_titulo'>Nro. Poblados dispersos</td>
+					<td colspan="2" class='texto'><?echo($e2)?></td>
+				  </tr>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;PRESUPUESTO</td>
+				  </tr>
+				</table>
+				<table width="100%">
+				  <tr><td>
+						<div id="fuera">
+							<div id="ampliar"><img src="img/<?echo($ubigeo)?>1.png" width="200"/></div>
+						</div>
+					</td>
+					<td>
+						<div id="fuera">
+							<div id="ampliar"><img src="img/<?echo($ubigeo)?>2.png" width="200"/></div>
+						</div>
+					</td>
+					<td>
+						<div id="fuera">
+							<div id="ampliar"><img src="img/<?echo($ubigeo)?>3.png" width="200"/></div>
+						</div>
+					</td>
+				  </tr>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;GOBERNABILIDAD</td>
+					  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th width='50%' align='center'>ALCALDE</th>
+					<th width='50%' align='center'><?echo($f1)?></th>
+				  </tr>
+				</thead>
+				<tbody>
+				  <tr>
+					<td align='center' class='texto'>Pl&aacute;cido Chino Dahua</td>
+					<td align='center' class='texto'><?echo($f2)?></td>
+				  </tr>
+				</tbody>
+				</table>
+			</td></tr>
+		</table><br>
+	<?php
+	$name='consulta_resumen_ejecutivo';
+	if (!isset($_GET['excel'])) {
+		$ruta=$name.'.phtml?excel=excel&name='.$name;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+
+</html>
+<?php include_once("./analyticstracking.php");?>

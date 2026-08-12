@@ -1,0 +1,148 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');		
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);  
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";   
+	$sQueryF = " FROM premierLinea";
+	$sQueryW = " WHERE codproy = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   		
+	$rsDet = pg_query( $linkPG , $sQuery );
+	//$titulo_ventana = 'INFORMACI&Oacute;N DE AEROPUERTOS - DEPARTAMENTO '.pg_fetch_result($rsDet,0,"nom_dpto");
+	$titulo = 'INFORMACI&Oacute;N DEl Proyecto<br> ' . pg_fetch_result($rsDet,0,"proyecto");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		
+		
+		
+		<!--table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Ubigeo</th>
+					  </tr>
+					</thead>
+					<tbody>
+	<?php
+		/*	print "<tr>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+						<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+					</tr>";*/
+	?>
+					</tbody>
+				</table>
+			</td>
+		  </tr>
+		</table-->
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+		<?php
+		print "<tr>
+				<td width='30%' class='lista_titulo'>NOMBRE DEL PROYECTO:</td>
+				<td width='70%' class='lista_texto'>".pg_fetch_result($rsDet,0,"\"proyecto\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>TIPOLOG&Iacute;A:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"tipologia\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>RESUMEN:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"resumen\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>MODALIDAD:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"modalidad\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>ESTADO:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"estado\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>FINANCIAMIENTO:</td>
+				<td class='lista_texto'>".pg_fetch_result($rsDet,0,"\"inversion\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>FICHA DE PROYECTO:</td>
+				<td class='lista_texto'><a href='".pg_fetch_result($rsDet,0,"\"fichaproy\"")."' target = blank>link</a></td>
+			  </tr>
+			";
+		?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br> ProInverSi&oacute;n - Agencia de promoci&oacute;n de la inversi&oacute;n privada &ndash; Per&uacute;<br>
+			<a href='http://www.proinversion.gob.pe/' target='_blank'>ProInverSi&oacute;n</a></th></tr></thead>
+		</table>
+	<?php
+	$capa='consulta_aeropuertos';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+
+	?>
+	<br>
+	
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+
+</html>

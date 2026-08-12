@@ -1,0 +1,671 @@
+<?php
+/***************************************************************************************
+Organización: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Descentralización
+Sistema		: 	Sistema Nacional de Información Geográfica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+	/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	
+	$cod_dist = $pvalor;
+
+	// Browse Data
+	$sQueryS = "SELECT *";   
+	$sQueryF = " FROM peru_distritos";
+	$sQueryW = " WHERE \"cod_dist\" = '" . $cod_dist . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+
+	$titulo_ventana = 'REPORTE DE INDICADORES - DISTRITO '.pg_fetch_result($rsDet,0,"nom_dist");
+	$titulo = 'REPORTE DE INDICADORES <br>DISTRITO ' . pg_fetch_result($rsDet,0,"nom_dist");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th width='25%' align='center'>Departamento</th>
+								<th width='25%' align='center'>Provincia</th>
+								<th width='25%' align='center'>Distrito</th>
+								<th width='25%' align='center'>Ubigeo</th>
+							  </tr>
+							</thead>
+							<tbody>
+	<?php
+					print "<tr>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+						</tr>";
+	?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;VARIABLES SOCIO - ECON&Oacute;MICAS A NIVEL DISTRITAL</td>
+						  </tr>
+						</table></h1>
+					<div>
+		<?php
+		if (pg_fetch_result($rsDet,0,"\"datos\"")==0) {// Distritos creados recientemente
+			echo("<table width='100%' align='center' class='general'>
+					<tr><td>EL Distrtito <b>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</b> fue creado después del censo 2007, no hay datos.</td></tr>
+				</table><br>
+				<table width='100%' align='center' class='fuente_general'><tr><td><p>Fuente: </br>".pg_fetch_result($rsDet,0,"\"fuente\"")."<br>".pg_fetch_result($rsDet,0,"\"fuente1\"")."</td></tr>
+				</table>");
+		} else if (pg_fetch_result($rsDet,0,"\"datos\"")==1) {// Distritos con variable socio economicas
+		print "<table width='100%' align='center' class='general'>
+				<thead>
+				  <tr>
+					<th height='34' colspan='2'><strong>VARIABLE / INDICADOR</strong></th>
+					<th><strong>Cifras Absolutas</strong></th>
+					<th><strong>%</strong></th>
+				  </tr>
+				</thead>
+			<tbody>
+			<tr>
+				<td class='titulo1'><strong>1</strong></td>
+				<td colspan='3' class='titulo1'><strong>POBLACI&Oacute;N</strong></td>
+		    </tr>
+			<tr>
+				<td class='texto1'> </td>
+				<td width='584' class='texto1'>a) Poblaci&oacute;n Censada</td>
+				<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_cens\""))."</td>
+				<td class='texto1'>&nbsp;</td>
+			</tr>
+			<tr>
+				<td class='texto1'> </td>
+				<td class='texto1'>b) Poblaci&oacute;n en viviendas particulares con  ocupantes presentes</td>
+				<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_viv\""))."</td>
+				<td class='texto1'>&nbsp;</td>
+			</tr>
+		 <tr>
+			<td class='titulo1'><strong>2</strong></td>
+			<td colspan='3' class='titulo1'><strong>POBREZA MONETARIA</strong></td>
+		 </tr>
+		 <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>a) Incidencia de pobreza total</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"inc_pob_to\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_inc_pob\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>b) Incidencia de pobreza extrema</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"inc_pob_ex\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_inc_p_ex\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='titulo11'>2.1</td>
+			<td colspan='3' class='titulo11'>Indicadores de intensidad de la pobreza</td>
+		</tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Brecha de pobreza total</td>
+			<td class='texto11'>&nbsp;</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"bre_pobr\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>b) Severidad de pobreza total</td>
+			<td class='texto11'>&nbsp;</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"serv_pob\""),2)."</td>
+		  </tr>
+			<tr>
+			<td class='titulo11'>2.2</td>
+			<td colspan='3' class='titulo11'>Indicador de desigualdad</td>
+		 </tr>
+		 <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Coeficiente de Gini</td>
+			<td class='texto11'>&nbsp;</td>
+			<td class='numero11'>".pg_fetch_result($rsDet,0,"\"coe_gini\"")."</td>
+		  </tr>
+		 <tr>
+			<td class='titulo11'>2.3</td>
+			<td colspan='3' class='titulo11'>Gasto per c&aacute;pita</td>
+		</tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Gasto per c&aacute;pita en nuevos soles</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"g_per_cap\""),2)."</td>
+			<td class='texto11'>&nbsp;</td>
+		  </tr>
+		 <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>b) Gasto per c&aacute;pita&nbsp; a precios de Lima Metropolitana</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"gper_cap_l\""),2)."</td>
+			<td class='texto11'>&nbsp;</td>
+		  </tr>
+		  <tr>
+			<td class='titulo1'>3</td>
+			<td colspan='3' class='titulo1'>POBREZA NO MONETARIA</td>
+		  </tr>
+		  <tr>
+			<td class='titulo11'>3.1</td>
+			<td colspan='3' class='titulo11'>Poblaci&oacute;n en hogares por n&uacute;mero de    Necesidades B&aacute;sicas Insatisfechas (NBI)</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Con al menos una NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"a_men_1nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_al_men_1\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>b) Con 2 o m&aacute;s NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"al_men_2nb\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_al_men_2\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>c) Con una NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"una_nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_una_nbi\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>d) Con dos NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"dos_nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_dos_nbi\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>e) Con tres NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"tres_nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_tres_nbi\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>f) Con cuatro NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"cuatr_nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_cuat_nbi\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>g) Con cinco NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"cinc_nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_cinc_nbi\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='titulo11'>3.2</td>
+			<td colspan='3' class ='titulo11'>Poblaci&oacute;n en hogares por tipo de Necesidad B&aacute;sica Insatisfecha (NBI)</td>
+			</tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Poblaci&oacute;n en viviendas con    caracter&iacute;sticas f&iacute;sicas inadecuadas</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"nbi_1\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_nbi1\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>b) Poblaci&oacute;n en viviendas con hacinamiento</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"nbi_2\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_nbi2\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>c) Poblaci&oacute;n en viviendas sin desag&uuml;e de    ning&uacute;n tipo</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"nbi_3\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_nbi3\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>d) Poblaci&oacute;n en hogares con ni&ntilde;os que no    asisten a la escuela</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"nbi_4\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_nbi4\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>e) Poblaci&oacute;n en hogares con alta dependencia    econ&oacute;mica</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"nbi_5\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_nbi5\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='titulo11'>3.3</td>
+			<td colspan='3' class='titulo11'>Hogares por n&uacute;mero de Necesidades B&aacute;sicas    Insatisfechas (NBI)</td>
+		</tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Con al menos una NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"al_1nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_1nbih\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>b) Con 2 o m&aacute;s NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"al_2nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_2nbih\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>c) Con una NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"una_nbi_h\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_unanbi\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>d) Con dos NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"dos_nbi_h\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_dosnbi\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>e) Con tres NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"tres_nbi_h\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_tresnbi\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>f) Con cuatro NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"cuatro_nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_cuatro\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>g) Con cinco NBI</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"cinc_nbi_h\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_cinconbi\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='titulo11'>3.4</td>
+			<td colspan='3' class='titulo11'>Hogares por tipo de Necesidad B&aacute;sica Insatisfecha (NBI)</td>
+		</tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Hogares en viviendas con caracter&iacute;sticas    f&iacute;sicas inadecuadas</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"h_1nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_h_1nbi\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>b) Hogares en viviendas con hacinamiento</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"h_2nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_h2nbi\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>c) Hogares en viviendas sin desag&uuml;e de    ning&uacute;n tipo</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"h_3nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_h_3nbi\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>d) Hogares con ni&ntilde;os que no asisten a la    escuela</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"h_4nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_h_4nbi\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>e) Hogares con alta dependencia econ&oacute;mica</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"h_5nbi\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_h_5nbi\""),2)."</td>
+		  </tr>
+		 <tr>
+			<td class='titulo1'>4</td>
+			<td colspan='3' class='titulo1'>HOGAR</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>a) Total de hogares en viviendas    particulares con ocupantes presentes</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"tot_viv_oc\""))."</td>
+			<td>&nbsp;</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>b) Sin agua, ni desag&uuml;e, ni alumbrado    el&eacute;ctrico</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_a_d_l\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_adl\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>c) Sin agua, ni desag&uuml;e de red</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_ag_des\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_ad\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>d) Sin agua de red o pozo</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_ar_p\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_ar_p\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>e) Sin agua de red</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_ar\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_ar\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>f) Sin alumbrado el&eacute;ctrico</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_el\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_ael\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>g) Con piso de tierra</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pis_tie\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_pis_tie\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>h) Con una habitaci&oacute;n</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"una_hab\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_una_hab\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>i) Sin artefactos electrodom&eacute;sticos</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_art_ele\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_art\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>j) Sin servicio de informaci&oacute;n ni    comunicaci&oacute;n</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_comun\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_com\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>k) Que cocinan con kerosene, carb&oacute;n, le&ntilde;a,    bosta/esti&eacute;rcol y otros</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"cocina\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_cocina\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>l) Que cocinan con kerosene, carb&oacute;n, le&ntilde;a,    bosta/esti&eacute;rcol y otros sin chimenea en la cocina</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_chim\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_chim\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>m) Que cocinan con carb&oacute;n, le&ntilde;a,    bosta/esti&eacute;rcol sin chimenea en la cocina</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"coc_sch\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_coc_sch\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='titulo1'>5</td>
+			<td colspan='3' class='titulo1'>EMPLEO</td>
+		</tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>a) PEA ocupada sin seguro de salud</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pea_sseg\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_pea_sseg\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>b) PEA ocupada con trabajo independiente y    que tienen a lo m&aacute;s educaci&oacute;n&nbsp;    secundaria</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pea_trab\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_pea_trab\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>c) Tasa de autoempleo y empleo en    microempresa (TAEMI)</td>
+			<td class='texto1'>&nbsp;</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"taemi\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>d) Porcentaje de fuerza laboral con bajo    nivel educativo (PTBNE)</td>
+			<td class='texto1'>&nbsp;</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_tbne\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>e) Porcentaje de fuerza laboral&nbsp; analfabeta&nbsp;    (PTA)</td>
+			<td class='texto1'>&nbsp;</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pta\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='titulo1'>6</td>
+			<td colspan='3' class='titulo1'>EDUCACI&Oacute;N</td>
+		</tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>a) Poblaci&oacute;n en edad escolar (6 a 16 a&ntilde;os)    que no asiste a la escuela y es analfabeta</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_esc\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_pob_esc\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>b) Edad promedio de los que asisten al sexto    grado de educaci&oacute;n primaria</td>
+			<td class='texto1'>&nbsp;</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_edadsext\""))."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>c) Edad promedio de los que asisten a quinto    a&ntilde;o de secundaria</td>
+			<td class='texto1'>&nbsp;</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_edad_qui\""))."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>d) Poblaci&oacute;n analfabeta de 6 a 11 a&ntilde;os que    tiene&nbsp; 2&ordm; a 6&ordm; grado de educaci&oacute;n    primaria</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_analf\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_pobanalf\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='titulo11'>6.1</td>
+			<td colspan='3' class='titulo11'>Tasa de analfabetismo</td>
+		</tr>
+		<tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>a) Total</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"tot_analf\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_analf\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto11'> </td>
+			<td class='texto11'>b) Femenino</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"analf_feme\""))."</td>
+			<td class='numero11'>".number_format(pg_fetch_result($rsDet,0,"\"p_femenin\""),2)."</td>
+		  </tr>
+		 <tr>
+			<td class='titulo1'>7</td>
+			<td colspan='3' class='titulo1'>SALUD</td>
+		</tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>a) Poblaci&oacute;n que no tiene ning&uacute;n seguro de    salud</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"sin_seg\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_sin_seg\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>b) Poblaci&oacute;n con Seguro Integral de Salud    (SIS)</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"con_sis\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_con_sis\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='titulo1'>8</td>
+			<td colspan='3' class='titulo1'>IDENTIDAD</td>
+		</tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>a) Poblaci&oacute;n de 0 a 17 a&ntilde;os de edad que no    tiene partida de nacimiento</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_no_par\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_par\""),2)."</td>
+		  </tr>
+		  <tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>b) Poblaci&oacute;n de 18 a m&aacute;s a&ntilde;os de edad que no    tiene DNI</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"pob_no_dni\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_no_dni\""),2)."</td>
+		  </tr>
+		<tr>
+			<td class='texto1'> </td>
+			<td class='texto1'>c) Poblaci&oacute;n de 18 y m&aacute;s a&ntilde;os que no tienen    DNI ni partida de nacimiento</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"no_part_dn\""))."</td>
+			<td class='numero1'>".number_format(pg_fetch_result($rsDet,0,"\"p_nodni_pa\""),2)."</td>
+		  </tr>
+		</tbody>
+		</table><br>
+		<table width='100%' class='fuente_general'><tr>
+			<td><b>Fuente :</b></br>".pg_fetch_result($rsDet,0,"\"fuente\"").
+			"<br>".pg_fetch_result($rsDet,0,"\"fuente1\"")."</td>
+		</tr></table>";
+		}
+?>
+				</div></div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;PROYECCI&oacute;N DE POBLACI&oacute;N POR G&Eacute;NERO</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead><tr><th>A&ntilde;o</th><th>Hombres</th><th>Mujeres</th><th>Total</th></tr></thead>
+		<?php
+			$consulta_proyeccion_poblacion 	=	"select * from  data_proyeccion_poblacion where cod_dist = '".$cod_dist."' and cod_tipo = '03' order by anio";
+			$rsDet_proyeccion_poblacion 	=	pg_query( $linkPG ,$consulta_proyeccion_poblacion);
+			$num_rows_proyeccion 	= 	pg_num_rows($rsDet_proyeccion_poblacion);
+			$i=0;
+			while ($i<$num_rows_proyeccion) {
+				if ($i%2) {
+					$classe ="class='rowpar'";
+				} else {
+					$classe='';
+				}
+				print"<tr ".$classe."><td class='numero11'>".pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"anio\"")."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"hombre\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"mujer\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_poblacion,$i,"\"total\""))."</td></tr>";
+				$i++;
+			}
+			$consulta_proyeccion_fuente 	=	"select count(fuente) as fuentes, fuente from  data_proyeccion_poblacion where cod_dist = '".$cod_dist."' and cod_tipo = '03' group by fuente";
+			$rsDet_proyeccion_fuente 	=	pg_query( $linkPG ,$consulta_proyeccion_fuente);
+		?>
+						</table><br>
+						<table width='100%' align='center' class='fuente_general'>
+							<tr><td><b>Fuente:</b><br><?php echo pg_fetch_result($rsDet_proyeccion_fuente,0,"\"fuente\"");?></td></tr>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u4" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;PROYECCI&Oacute;N DE POBLACI&Oacute;N POR A&Ntilde;OS QUINQUENALES</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead><tr><th>A&ntilde;o</th><th>0 a 14 a&ntilde;os</th><th>15 a 24 a&ntilde;os</th><th>25 a 64 a&ntilde;os</th><th>65 a m&aacute;s a&ntilde;os</th><th>Total</th></tr></thead>
+		<?php
+			$consulta_proyeccion_quinquenal 	=	"select * from  data_proyeccion_quinquenal where cod_dist = '".$cod_dist."' and cod_tipo = 3  order by anio";
+			$rsDet_proyeccion_quinquenal 	=	pg_query( $linkPG ,$consulta_proyeccion_quinquenal);
+			$num_rows_quinquenal 	= 	pg_num_rows($rsDet_proyeccion_quinquenal);
+			$j=0;
+
+			while ($j<$num_rows_quinquenal) {
+				if ($j%2) {
+					$classe="class='rowpar'";
+				} else {
+					$classe='';
+				}
+				print"<tr ".$classe."><td class='numero11'>".pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"anio\"")."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"cero_a_14\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"s15_a_24\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"s25_a_64\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"s65amas\""))."</td>
+				<td class='numero11'>".number_format(pg_fetch_result($rsDet_proyeccion_quinquenal,$j,"\"total\""))."</td>
+				</tr>";
+				$j++;
+			}
+			$consulta_quinquenal_fuente 	=	"select count(fuente) as fuentes, fuente from  data_proyeccion_quinquenal where cod_dist = '".$cod_dist."' and cod_tipo = 3 group by fuente";
+			$rsDet_quinquenal_fuente 	=	pg_query( $linkPG ,$consulta_quinquenal_fuente);
+		?>
+						</table><br>
+						<table width='100%' align='center' class='fuente_general'>
+							<tr><td><b>Fuente:</b><br><?php echo pg_fetch_result($rsDet_quinquenal_fuente,0,"\"fuente\"");?></td></tr>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+	<?php
+	$name=$titulo_ventana; //'REPORTE DE INDICADORES A NIVEL DE DISTRITO';
+	$capa='consulta_Distrito';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body> 
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

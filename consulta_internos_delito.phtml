@@ -1,0 +1,207 @@
+
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM vw_peru_internos_delito";
+	$sQueryW = " WHERE gid = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Población Penitenciaria';
+	$titulo = 'Población Penitenciaria';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <!--tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Codigo Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dpto\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_prov\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dist\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"cod_dist\"")) ?></td>
+					</tr>
+	
+					</tbody>
+				</table>
+			</td>
+		  </tr-->
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        <tr>
+        <td width='50%' class='lista_titulo'>Distrito en el que se ubica(n) el (los) establecimiento(s) penitenciario(s)</td>
+        <td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+      </tr>
+        <tr>
+				<td width='50%' class='lista_titulo'>Total de Internos</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"tot_genr\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>N° de internos por Delitos ambientales</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_amb\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>N° de internos por Delitos contra el Estado y la Defensa Nacional</td>
+				<td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_defnac\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>N° de internos por Delitos contra el orden Financiero y Monetario</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_fi_mon\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>N° de internos por Delitos contra el Patrimonio</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_patrim\"")."</td>
+              </tr>
+
+              <tr>
+                <td class='lista_titulo'>N° de internos por Delitos contra la Administracion Pública</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_ad_pub\"")."</td>
+              </tr>
+
+              <tr>
+                <td class='lista_titulo'>N° de internos por Delitos contra la confianza y la buena fe en los negocios</td>
+               <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_cf_neg\"")."</td>
+              </tr>
+              <tr>
+                <td class='lista_titulo'>N° de internos por Delitos contra la familia</td>
+                <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_fam\"")."</td>
+              </tr>
+
+              <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra la fe publica</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_fe_pub\"")."</td>
+              </tr>
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra la humanidad</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_hum\"")."</td>
+              </tr>
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra la libertad</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_lib\"")."</td>
+              </tr>
+
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra la Seguridad Pública</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_se_pub\"")."</td>
+              </tr>
+
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra la Tranquilidad Pública</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_tpubl\"")."</td>
+              </tr>
+
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra la vida, el cuerpo y la salud</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_vc_sal\"")."</td>
+              </tr>
+
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra los Derechos Intelectuales</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_de_int\"")."</td>
+              </tr>
+
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos contra los Poderes del Estado y el Orden Constitucional</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_const\"")."</td>
+              </tr>
+
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Delitos Tributarios</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"del_trib\"")."</td>
+              </tr>
+
+			  <tr>
+              <td class='lista_titulo'>N° de internos por Leyes especiales</td>
+              <td class='texto1'>".pg_fetch_result($rsDet,0,"\"ley_expc\"")."</td>
+              </tr>
+
+
+			";
+		?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$name='Población Penitenciaria';
+	$capa='Población Penitenciaria';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_internos_delito'.'&ocampo=gid';
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

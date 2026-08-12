@@ -1,0 +1,163 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+    $pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	//$sQueryF = " FROM peru_comisarias";
+	$sQueryF = " FROM peru_centros_atencion_covid";
+	$sQueryW = " WHERE \"gid\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Centros de Atención COVID-19';
+	$titulo = $titulo_ventana;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="titulo_general">
+			  <tr>
+				<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+			  </tr>
+			</table>
+			<table width='100%' align='center' class='general'>
+				<thead>
+				<?php print" <tr>
+					<th width='25%'>DEPARTAMENTO</th>
+					<th width='25%'>PROVINCIA</th>
+					<th width='25%'>DISTRITO</th>
+					<th width='25%'>CÓDIGO DISTRITO</th>
+				  </tr>";?>
+				</thead>
+				<tbody>
+	<?php
+			print "<tr>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+					<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+				  </tr>";
+	?>
+				</tbody>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+        <table width="100%" border="0" cellspacing="0" style="padding-left: 20px; padding-right: 20px">
+  <tbody><tr>
+	<td>
+	<table width="100%" cellspacing="0" cellpadding="1" class="marco_reporte">
+	  <tbody><tr>
+		<td>
+		<table width="100%" cellpadding="10" cellspacing="0">
+		  <tbody><tr>
+			<td colspan="7" class="titulo_reporte" style="font-size:20px;">Datos de Centros de Atención</td>
+		  </tr>
+		</tbody></table>
+	  </td></tr>
+	</tbody></table>
+  </td></tr>
+</tbody></table>
+<br>
+
+
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Nombre del Establecimiento: </td>
+				<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nombre\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Código único del establecimiento: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"codunico\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Dirección: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"direccion\"")."</td>
+              </tr>
+              <tr>
+				<td class='lista_titulo'>Código de Micro Red: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"codmired\"")."</td>
+			  </tr>
+			<tr>
+			  <td class='lista_titulo'>Nombre de la DISA: </td>
+			  <td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"disa\"")."</td>
+			</tr>
+			<tr>
+				<td class='lista_titulo'>Nombre de la Red: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"red\"")."</td>
+			</tr>
+			<tr>
+				<td class='lista_titulo'>Nombre de la Micro Red: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"microred\"")."</td>
+			</tr>
+			<tr>
+				<td class='lista_titulo'>Código de Unidad Ejecutora: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"codundejec\"")."</td>
+			</tr>
+			<tr>
+				<td class='lista_titulo'>Nombre de la Unidad Ejecutora: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"undejec\"")."</td>
+			</tr>
+			<tr>
+			<td class='lista_titulo'>Clasificación del Establecimiento: </td>
+			<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"clasif\"")."</td>
+		</tr>
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+
+		<br>
+
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='Centros de Atención COVID-19';
+	$capa='consulta_peru_centros_atencion_covid';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_centros_atencion_covid'.'&ocampo=gid';
+		
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

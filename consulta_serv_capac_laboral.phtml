@@ -1,0 +1,230 @@
+<?php
+/***************************************************************************************
+Organización: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Descentralización
+Sistema		: 	Sistema Nacional de Información Geográfica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+	
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM peru_serv_capac_laboral ";
+	$sQueryW = " WHERE \"cod_dist\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+		$titulo_ventana = 'SERVICIO DE CAPACITACI&Oacute;N LABORAL - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+		$titulo = 'SERVICIO DE CAPACITACI&Oacute;N LABORAL - </br> DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th width="20%">Ubigeo</th>
+							<th width="20%">Departamento</th>
+							<th width="20%">Provincia</th>
+							<th width="20%">Distrito</th>
+							
+		
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+							
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+		</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;REPORTE </td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+						<?php
+							print "<tr>"; print "<td width='50%' class='lista_titulo'><b>CURSOS :	</b></td>"; print "<td width='50%' class='lista_textosub'>	Total de beneficiarios</td>"; print "</tr>";
+							if (pg_fetch_result($rsDet,0,"\"a1\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	ACONDICIONAMIENTO DE MATERIA PRIMA PARA LA PRODUCCIÓN DE CONSERVAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a1\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a2\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	ALBAÑILERIA DE EDIFICACIONES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a2\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a3\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	ATENCIÓN EN SALON DE COMIDA  BEBIDAS / EVENTOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a3\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a4\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	BORDADO PARA CONFECCIÓN TEXTIL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a4\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a5\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	CAJA EN ESTABLECIMIENTOS COMERCIALES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a5\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a6\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	COCINA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a6\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a7\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	CONSTRUCCION DE REDES INTERNAS DE GAS NATURAL RESIDENCIAL Y COMERCIAL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a7\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a8\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	CORTE DE PIEZAS  PARA CONFECCIÓN DE PRENDAS DE VESTIR	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a8\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a9\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	COSECHA ­ RECOLECCIÓN DE HORTALIZAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a9\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a10\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	COSTURA DE PRENDA DE VESTIR	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a10\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a11\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	EMPAQUE DE FRUTAS Y HORTALIZAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a11\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a12\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	ENCOFRADO CON MADERA EN EDIFICACIONES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a12\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a13\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	EVALUACIÓN Y APLICACIÓN FITOSANITARIA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a13\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a14\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	FABRICACIÓN DE CALZADO	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a14\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a15\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	FIERRERÍA DE EDIFICACIONES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a15\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a16\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	HOUSEKEEPING	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a16\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a17\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	INSTALACIONES ELÉCTRICAS EN EDIFICACIONES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a17\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a18\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	JARDINERÍA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a18\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a19\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	LAVANDERÍA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a19\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a20\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	MAESTRO DE OBRA DE EDIFICACIONES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a20\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a21\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	MANEJO DE CULTIVO DE FRUTAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a21\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a22\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	MANEJO DE SISTEMAS DE RIEGO TECNIFICADO	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a22\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a23\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERACIONES DE ALMACÉN	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a23\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a24\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	PANADERIA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a24\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a25\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	PASTELERIA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a25\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a26\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	PULPEADO DE FRUTAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a26\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a27\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	RECEPCIÓN DE HOTEL/HOSTAL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a27\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a28\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	REPRESENTANTE DE VENTAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a28\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a29\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	SERVICIO DE LIMPIEZA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a29\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a30\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TEJIDO A MANO CON FIBRA DE CAMÉLIDOS SUDAMERICANOS Y OTRAS FIBRAS NATURALES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a30\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a31\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TEJIDO A MANO EN FIBRA DE OVINO Y CAMÉLIDOS SUDAMERICANOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a31\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a32\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TRABAJO AL SERVICIO DEL HOGAR	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a32\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a33\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	VENTA DE TANGIBLES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a33\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a34\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	VENTAS EN LA PARTICULARIDAD EN VENTAS DE TANGIBLE	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a34\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a35\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERADOR DE TRACTOR AGRICOLA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a35\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a36\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERADOR LOGISTICO	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a36\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a37\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIA DE MONTACARGA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a37\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a38\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO AGRICOLA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a38\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a39\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO AGROINDUSTRIAL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a39\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a40\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE ACABADO DE INTERIORES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a40\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a41\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE ACABADO DE PRENDAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a41\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a42\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE ACABADOS DE CONSTRUCCION	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a42\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a43\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE ALMACEN	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a43\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a44\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE BENEFICIO Y PROCESAMIENTO DE PRODUCTOS PECUARIOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a44\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a45\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE CONFECCION TEXTIL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a45\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a46\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE CONSTRUCCION CIVIL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a46\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a47\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE CONTROL DE CALIDAD	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a47\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a48\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE COSTURA INDUSTRIAL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a48\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a49\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE DRYWALL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a49\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a50\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE DRYWALL Y PINTURA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a50\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a51\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE EMPAQUE PARA AGROEXPORTACION	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a51\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a52\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE ENCOFRADO Y FIERRERIA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a52\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a53\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE ENVASADO Y EMBALAJE DE ALIMENTOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a53\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a54\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE ENZUNCHADO Y PALETIZADO	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a54\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a55\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE FRESCOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a55\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a56\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE LIMPIEZA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a56\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a57\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE MADURACION DE FRUTAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a57\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a58\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE MAQUINARIA PESADA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a58\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a59\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE PANIFICACION Y VENTAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a59\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a60\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE PLANTA AVICOLA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a60\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a61\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE PROCESOS AGROINDUSTRIALES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a61\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a62\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE PRODUCCION EN LA INDUSTRIA ALIMENTARIA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a62\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a63\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE PRODUCCION Y ATENCION DE SERVICIOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a63\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a64\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE PRODUCCION Y EMPAQUE 	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a64\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a65\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE SALUBRIDAD	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a65\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a66\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO DE SANEAMIENTO Y SALUBRIDAD	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a66\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a67\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO EN ENZUNCHADO Y PALETIZADO	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a67\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a68\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO EN LA INDUSTRIA DE CHOCOLATERIA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a68\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a69\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO EN LINEA DE SELECCION DE CARNICOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a69\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a70\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO EN MOLIENDA DE MATERIA PRIMA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a70\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a71\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO INDUSTRIAL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a71\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a72\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERARIO INSPECTOR DE PRENDAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a72\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a73\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	OPERATIVIDAD DE MÁQUINAS DE COSTURA INDUSTRIALES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a73\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a74\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	ORGANIZADOR DE ALMACEN	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a74\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a75\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	ORGANIZADOR Y REPONEDOR DE GONDOLAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a75\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a76\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	PREVENTOR DE SEGURIDAD Y PERDIDAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a76\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a77\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	PROMOTOR DE VENTAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a77\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a78\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	PROMOTOR DE VENTAS CRUZADAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a78\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a79\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	REPONEDOR DE ALIMENTOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a79\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a80\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TECNICAS DE ATENCION EN RESTAURANTES	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a80\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a81\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TECNICO EN COBRANZAS PARA EL SECTOR FINANCIERO Y RETAIL	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a81\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a82\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TECNICO EN MANIPULACION DE ALIMENTOS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a82\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a83\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TECNICO INSTALADOR DE GAS	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a83\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a84\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TELEOPERADOR DE CENTROS DE INFORMACION	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a84\"")."&nbsp;</td>"; print "</tr>"; }
+							if (pg_fetch_result($rsDet,0,"\"a85\"")>0){ print "<tr>"; print "<td width='50%' class='lista_titulo'><b>	TECNICO EN JARDINERIA Y FLORICULTURA	</b></td>"; print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"a85\"")."&nbsp;</td>"; print "</tr>"; }
+
+						?>
+								
+					</table>				
+					</div>
+				</div>
+		</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_serv_capac_laboral';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+	</td></tr>
+	</table>
+</td></tr>
+</table>
+</body> 
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+		$("#u6").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

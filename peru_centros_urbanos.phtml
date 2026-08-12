@@ -1,0 +1,102 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+    $pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	//$sQueryF = " FROM peru_comisarias";
+	$sQueryF = " FROM peru_centros_urbanos";
+	$sQueryW = " WHERE \"gid\" = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Centros Urbanos SINCEP';
+	$titulo = pg_fetch_result($rsDet,0,"\"jerarquia\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+       
+<br>
+
+
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+			<table width="100%" class="listado">
+	<?php
+		print "<tr>
+				<td width='50%' class='lista_titulo'>Centro Urbano Dinamizador: </td>
+				<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"nomccpp\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Jerarquía Urbana: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"jerarquia\"")."</td>
+			  </tr>
+			  <tr>
+				<td class='lista_titulo'>Rango Jerárquico: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"rango_jer\"")."</td>
+              </tr>
+              <tr>
+				<td class='lista_titulo'>Macro sistema: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"macro_sist\"")."</td>
+			  </tr>
+			<tr>
+			  <td class='lista_titulo'>Sistema Urbano: </td>
+			  <td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"sist_urb\"")."</td>
+			</tr>
+			<tr>
+				<td class='lista_titulo'>Subsistema Urbano: </td>
+				<td class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"subsistema\"")."</td>
+			</tr>
+			
+			";
+	    ?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+
+		<br>
+
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo(pg_fetch_result($rsDet,0,"\"fuente\"")); ?>
+		</th></tr></thead></table>
+	<?php
+	$name='Centros Urbanos SINCEP';
+	$capa='consulta_peru_centros_urbanos';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_centros_urbanos'.'&ocampo=gid';
+		
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

@@ -1,0 +1,295 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['name'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include("conexion_postgres.phtml");
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$id_data_fonie = limpiarNumeros($_GET['ovalor']);
+	
+
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT * ";
+	$sQueryF = "FROM data_fonie";
+	$sQueryW = " WHERE \"id_data_fonie\" = '" . $id_data_fonie . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	$titulo_ventana = 'FONDO PARA LA INCLUSION ECONOMICA (FONIE)- DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$titulo = 'FONDO PARA LA INCLUSION ECONOMICA (FONIE) - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width="100%" align='center' class="general">
+					<thead>
+					  <tr>
+						<th width="30%">Departamento</th>
+						<th width="20%">Provincia</th>
+						<th width="40%">Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+					  <tr>
+					<?php 
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+						print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+					?> 		  
+					  </tr>
+					</tbody>
+					</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL DE LA PROVINCIA <?php echo pg_fetch_result($rsDet,0,"\"nom_prov\"");?></td>
+						  </tr>
+						</table></h1>
+					<div>
+<?php
+//lista de distritos por cada provincias
+	$distQuery		=	"select * from data_fonie where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."' order by nom_dist ";
+	$rsDetDist 		= 	pg_query($linkPG , $distQuery);
+    $numrowsDist 	= 	pg_num_rows($rsDetDist);
+	print("<table width='100%' align='center' class='general'>");
+	print("<tr><td width='50%' class='titulo1'><b>Distritos</b></td>
+			<td width='10%' class='nivel1'><b>FONIE</b></td></tr>");
+	$i=0;
+	$j=1;
+	while($i<$numrowsDist){
+		echo('<tr>');
+		if (pg_fetch_result($rsDetDist,$i,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")) {
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+			$enlace=$j;
+		} else {
+			$enlace='<a href="consulta_ppss_fonie.phtml?olayer=peru_ppss&ocampo=cod_dist&ovalor='.pg_fetch_result($rsDetDist,$i,"\"id_data_fonie\"").'">'.$j.'</a>';
+		}
+		
+		echo('<td '.$classet.'>'.$enlace.'- '.pg_fetch_result($rsDetDist,$i,"\"nom_dist\"").'</td>
+			  <td '.$classe.'><img src="imajes/check.png" width="15" height="15"/>&nbsp;</td>');
+		
+		$i++;
+		$j++;
+		echo('</tr>');
+	}
+	echo('<tr><td class="titulo1"><b>Total</td>');
+
+
+		$cantidad= "select count(*) as cantidad from data_fonie where cod_prov = '".pg_fetch_result($rsDet,0,"\"cod_prov\"")."'";
+		$rsDetCantidad = pg_query($linkPG , $cantidad);
+		$total=pg_fetch_result($rsDetCantidad,0,"\"cantidad\"");
+
+		echo('<td '.$classe.'><b>'.$total.'</b></td>');
+
+echo('</tr></table>');
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u4" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL DE LA DEPARTAMENTO <?php print pg_fetch_result($rsDet,0,"\"nom_dpto\"");?></td>
+						  </tr>
+						</table></h1>
+					<div>
+<?php
+//lista de  provincia por cada departamento
+	$provQuery="select count(cod_prov), nom_prov, cod_prov from data_fonie where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."'GROUP BY cod_prov,nom_prov";
+	$rsDetprov = pg_query($linkPG , $provQuery);
+    $numrowsprov = pg_num_rows($rsDetprov);
+	print("<table width='100%' align='center' class='general'>");
+	print("<tr><td width='50%' class='titulo1'><b>Provincias</b></td>
+			<td width='10%' class='nivel1'><b>FONIE</b></td></tr>");
+	$m=0;
+	$n=1;
+	while ($m<$numrowsprov) {
+		if(pg_fetch_result($rsDetprov,$m,"\"cod_prov\"")==pg_fetch_result($rsDet,0,"\"cod_prov\"")){
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		echo('<tr><td '.$classet.'>'.$n.'- '.pg_fetch_result($rsDetprov,$m,"\"nom_prov\"").'</td>');
+			$consultaDisxP = "select count(*) as cantidaddistxprov
+									from data_fonie
+									where 	 
+											 cod_prov = '".pg_fetch_result($rsDetprov,$m,"\"cod_prov\"")."'";
+			$cantiDiss = pg_query($linkPG , $consultaDisxP);
+
+				$cantdisporpro=pg_fetch_result($cantiDiss,0,"\"cantidaddistxprov\"");
+			
+
+			echo('<td '.$classe.'>'.$cantdisporpro.'</td>');
+		
+		$m++;
+		$n++;
+}
+		echo('</tr>');
+	
+	echo('<tr><td class="titulo1"><b>Total</b></td>');
+
+
+
+		$canti= "select count(*) as canti from data_fonie where cod_dpto = '".pg_fetch_result($rsDet,0,"\"cod_dpto\"")."'";
+		$rsDetCantidad = pg_query($linkPG , $canti);
+		$total=pg_fetch_result($rsDetCantidad,0,"\"canti\"");
+
+		echo('<td '.$classe.'><b>'.$total.'</b></td>');
+		echo('</tr></table>');
+		?>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u5" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;CONSOLIDADO A NIVEL NACIONAL</td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+					  <tr><td width='50%' class='titulo1'><b>Departamento</b></td>
+							<td width='10%' class='nivel1'><b>FONIE</b></td>
+					  </tr>
+<?php
+//lista de distritos A NIVEL NACIONAL
+	$depQuery="select count(cod_dpto) as cantdep, nom_dpto, cod_dpto from data_fonie  group by cod_dpto,nom_dpto order  by cod_dpto";
+	$rsDetDep = pg_query($linkPG , $depQuery);
+    $numrowsDep = pg_num_rows($rsDetDep);
+	$x=0;
+	$y=1;
+	while($x<$numrowsDep){
+		if(pg_fetch_result($rsDetDep,$x,"\"cod_dpto\"")==pg_fetch_result($rsDet,0,"\"cod_dpto\"")){
+			$classet='class="titulo1"';
+			$classe='align="center" class="titulo1"';
+		} else {
+			$classet='class="titulo111"';
+			$classe='class="textosub"';
+		}
+		echo('<tr><td '.$classet.'>'.$y.'- '.pg_fetch_result($rsDetDep,$x,"\"nom_dpto\"").'</td>');
+
+			$consultaDisxD = "select count(*) as cantidaddistxdep
+									from data_fonie
+									where cod_dpto = '".pg_fetch_result($rsDetDep,$x,"\"cod_dpto\"")."'";
+			$cantiDiss = pg_query($linkPG , $consultaDisxD);
+
+				$cantdep=pg_fetch_result($cantiDiss,0,"\"cantidaddistxdep\"");
+
+			echo('<td '.$classe.'>'.$cantdep.'</td>');
+			$x++;
+		$y++;
+		}
+	
+		echo('</tr>');
+
+	echo('<tr><td class="titulo1"><b>Total</b></td>');
+
+		$can= "select count(*) as canti from data_fonie";
+		$rsDetCantidadpa = pg_query($linkPG , $can);
+		$total=pg_fetch_result($rsDetCantidadpa,0,"\"canti\"");
+
+		echo('<td align="center" '.$classe.'><b>'.$total.'</b></td>');
+		$acumulador4= $acumulador4 +$total;
+
+
+	echo('</tr>');
+				?>
+					</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table><br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuentes:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?>
+</tr></thead>
+		</table>
+	<?php
+	$name=$titulo_ventana;
+	$capa='consulta_ppss_fonie';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+	});
+</script>
+</html>

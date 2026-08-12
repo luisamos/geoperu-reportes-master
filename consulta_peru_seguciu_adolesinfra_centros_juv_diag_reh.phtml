@@ -1,0 +1,521 @@
+
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM vw_peru_seguciu_adolesinfra_centros_juv_diag_reh";
+	$sQueryW = " WHERE gid = '" . $pvalor . "'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'CENTROS JUVENILES DE DIAGNÓSTICO Y REHABILITACIÓN (CJDR)';
+	$titulo = 'CENTROS JUVENILES DE DIAGNÓSTICO Y REHABILITACIÓN (CJDR)';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <!--tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Codigo Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dpto\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_prov\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dist\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"cod_dist\"")) ?></td>
+					</tr>
+	
+					</tbody>
+				</table>
+			</td>
+		  </tr-->
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;POBLACIÓN TOTAL POR GÉNERO</td>
+					  </tr>
+					  
+				</table>
+
+				<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de género femenino</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"femenino\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de género masculino</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"masculino\"")."</td>
+			  	</tr>
+
+			";
+		?>
+			</table>
+
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;POBLACIÓN TOTAL POR RANGO DE EDAD</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 14 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_14\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 15 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_15\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 16 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_16\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 17 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_17\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 18 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_18\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 19 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_19\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 20 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_20\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 21 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_21\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 22 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_22\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 23 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_23\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 24 años</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_24\"")."</td>
+				</tr>
+				
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores de 25 años a mas</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"edad_25\"")."</td>
+				</tr>		
+
+			";
+		?>
+			</table>
+
+			<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;POBLACIÓN TOTAL POR SITUACIÓN JURÍDICA</td>
+					  </tr>
+					  
+				</table>
+
+				<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores procesados</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"procesado\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores sentenciados</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"sentenc\"")."</td>
+			  	</tr>
+
+			";
+		?>
+			</table>
+
+			
+			<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;POBLACIÓN TOTAL POR DELITO ESPECÍFICO</td>
+					  </tr>
+					  
+				</table>
+
+				<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por actos contra el pudor</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"act_pudor\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por asociación ilícita</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"asoc_ilic\"")."</td>
+			  	</tr>
+
+				
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por banda criminal</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"banda_crim\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por exposición a peligro o abandono a personas en peligro</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"exp_pelig\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por extorsión</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"extorsion\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por feminicidio</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"feminicid\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por homicidio calificado</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"hom_calif\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por homicidio simple</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"hom_simple\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por hurto agravado</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"hurto_agra\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por lesiones graves</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"les_graves\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por lesiones leves</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"les_leves\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por marcaje o reglaje</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"marc_regl")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por parricidio</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"parricidio\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por robo</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"robo\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por robo agravado</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"robo_agrav\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por secuestro</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"secuestro\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por sicariato</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"sicariato\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por tenencia ilegal de armas</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"ten_ile_ar\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por trafico Ilícito de drogas</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"tra_ili_dr\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por trata de personas</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"tra_perso\"")."</td>
+			  	</tr>
+
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por violación sexual</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"vio_sexual\"")."</td>
+			  	</tr>
+
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por violacion sexual de menor de edad</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"vio_sex_ed\"")."</td>
+			  	</tr>
+
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por violencia y resistencia a la autoridad</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"vio_res_au\"")."</td>
+			  	</tr>
+
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores por otros tipos de delitos</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"otros\"")."</td>
+			  	</tr>
+				
+			";
+		?>
+			</table>
+
+			<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;POBLACIÓN TOTAL POR FRECUENCIA DE INGRESO</td>
+					  </tr>
+					  
+				</table>
+
+				<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con primer Internamiento</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"prim_inter\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con segundo Internamiento</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"seg_inter\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con tercer Internamiento</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"ter_inter\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con cuarto Internamiento</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"cua_inter\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Sin información</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"se_sin_inf\"")."</td>
+			  	</tr>
+
+			";
+		?>
+			</table>
+
+			<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;TIPO DE SEGURO MÉDICO</td>
+					  </tr>
+					  
+				</table>
+
+				<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con ESSALUD</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"essalud\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con SIS</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"sis\"")."</td>
+			  	</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con seguro particular</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"particular\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores sin seguro médico</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"ninguno\"")."</td>
+			  	</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>Sin información</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"se_sin_inf\"")."</td>
+			  	</tr>
+
+			";
+		?>
+			</table>
+
+			<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;GRADO DE INSTRUCCIÓN ACTUAL</td>
+					  </tr>
+					  
+				</table>
+
+				<table width='100%' align='center' class='general'>
+		<?php
+        print "
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores Analfabetos</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"analfabeto\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Ceba Avanzado</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"ceba_avan\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Ceba Inicial</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"ceba_inic\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Ceba Intermedio</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"ceba_inter\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Primaria Completa</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"prim_comp\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Primaria Incompleta</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"prim_incom\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Secundaria Completa</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"sec_comp\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Secundaria Incompleta</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"sec_incom\"")."</td>
+				</tr>
+
+        		<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Superior Técnica Incompleta</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"sup_tec_in\"")."</td>
+				</tr>
+
+				<tr>
+				<td width='50%' class='lista_titulo'>N° de adolescentes infractores con Superior Universitario Incompleto</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"sup_uni_in\"")."</td>
+				</tr>
+				
+				<tr>
+				<td width='50%' class='lista_titulo'>Sin información</td>
+				<td width='50%' class='texto1'>".pg_fetch_result($rsDet,0,"\"gr_sin_inf\"")."</td>
+			  	</tr>
+
+			";
+		?>
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$name='CENTROS JUVENILES DE DIAGNÓSTICO Y REHABILITACIÓN (CJDR)';
+	$capa='CENTROS JUVENILES DE DIAGNÓSTICO Y REHABILITACIÓN (CJDR)';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_discapacidad_regiones'.'&ocampo=gid';
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>

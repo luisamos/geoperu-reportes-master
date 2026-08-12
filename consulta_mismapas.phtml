@@ -1,0 +1,575 @@
+
+
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYHUITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+@session_start();
+//$_SESSION['usuario'] = 'a'; //para comentar
+
+if (isset($_POST['accion'])) {
+	$accion = $_POST['accion'];
+} else {
+	$accion = 'M';
+}
+
+include_once('../programas/conexion_postgres.phtml');
+include ('injection/funciones.php');
+$link = Conectarse_POSTGRES();
+include_once('../usuarios/inc/funciones.php');
+
+
+if (isset($_SESSION['usuario'])) {
+	
+	/*$cod_user = $_SESSION['usuario'];*/
+	$cod_user = 'user@sayhuite.gob.pe';
+	$readonly = 'readonly';
+	$onclick = 'onclick="validarMisMapas(\'usuario\'); InsertData();"';
+	$mimapa = 'onclick="PM.Custom.showMisMapas();"';
+	$refresh = 'onclick="PM.UI.showMapLink2()"';
+	/*$onclick1 = 'onclick="ShowCapas();"';*/
+
+} else {
+	$readonly = '';
+	$onclick = 'onclick="validarMisMapas(\'externo\');"';
+}
+function generarCodigo($longitud) {
+ $key = '';
+ $pattern = '1234567890abcdefghijklmnopqrstuvwxyz';
+ $max = strlen($pattern)-1;
+ for($i=0;$i < $longitud;$i++) $key .= $pattern{mt_rand(0,$max)};
+ return $key;
+}
+
+if (isset($_POST['accion']) && $_POST['accion'] == 'M') { // insertar sugerencia
+	//$cod_user = trim($_POST['cod_user']);
+	$cod_user = 'user@sayhuite.gob.pe';
+	//$nombre = trim($_POST['nombre']);
+	$nombre = '';
+	$url = trim($_POST['url']);
+	//$tipo = trim($_POST['tipo']);
+	$tipo = '1';
+	$email2 = trim($_POST['mail_destino']);
+	$sugerencia = limpiarCadena($_POST['sugerencia']);
+	$mapa = trim($_POST['mapa']);
+	$pass_tmp = rand(1000,9999);
+	if (isset($_SESSION['usuario']) ) {
+		$id_serial=generarCodigo(20);
+		/*if(isset($_POST['guardar_mapas'])) {
+				$tipo="1";
+					}
+			else{
+				$tipo="0";
+				}*/
+				//$url = $_POST['url'];
+				$url = $_POST['url'].'&u='.$id_serial.'&ac=0';
+				
+						$vacio = '';
+						
+						if($url != $vacio){
+								if($tipo == '0'){
+									$insert = "insert into tab_mismapas (cod_user, nombre, url, tipo , sugerencia, mapa,id_serial)
+									values ('".$cod_user."', '".strtoupper($nombre)."', '".$url."' , '".$tipo."'  , '".$sugerencia."', '".$mapa."','".$id_serial."' )";
+									
+									echo '<script language="javascript">console.log("'.$insert.'");</script>';
+									$rsu = pg_query($link, $insert);
+									
+								}elseif($tipo == '1')
+								{
+												$insert = "insert into tab_mismapas (cod_user, nombre, url, tipo , email, sugerencia, mapa,id_serial)
+												values ('".$cod_user."', '".strtoupper($nombre)."', '".$url."' , '".$tipo."' ,'".$email2."' , '".$sugerencia."', '".$mapa."','".$id_serial."')";		
+												
+											
+												$rsu = pg_query($link, $insert);
+											
+												$cons_id_mis_mapas=pg_query($link,"select * from tab_mismapas where cod_user='".$cod_user."' and url='".$url."'");
+												$id_mismapas=pg_fetch_result($cons_id_mis_mapas,0,"\"id_mismapas\"");
+												$link_envio=$url.'&ac=1'.'&id='.$id_mismapas.'&ids='.$_SESSION["id_sistema"];
+												//Inicio verificacion si es nuevo usuario
+														$cons_es_nuevo=pg_query($link,"select * from tab_usuarios where cod_user='".$email2."';");
+														$existe_cod_user=pg_fetch_result($cons_es_nuevo,0,"\"cod_user\"");
+														
+														/*$existe_cod_user=pg_fetch_row($cons_es_nuevo);
+														$existe = $existe_cod_user[0];*/
+														//$nombre_receptor=pg_fetch_result($cons_es_nuevo,0,"\"snombres\"").' '.pg_fetch_result($cons_es_nuevo,0,"\"sappaterno\"").' '.pg_fetch_result($cons_es_nuevo,0,"\"sapmaterno\"");
+														//$existe_cod_user=pg_fetch_result($cons_es_nuevo,0,"\"cod_user\"");
+														//if($existe_cod_user!=''){
+														
+														if($existe_cod_user!=''){
+														
+														//Inicio envio de correo electronico
+														$mail = $email2;
+														$asunto = strtoupper($nombre).' Le envio un mapa del proyecto Sayhuite';
+														//cabeceras
+														$headers  = "MIME-Version: 1.0\r\n";
+														$headers .= "Content-type: text/html; charset=utf-8\r\n";
+														$headers .= "From: ".$cod_user."\r\n";
+														include_once('../usuarios/mail/mail_compartirMapa2.php');
+
+														mail("$mail","$asunto","$cuerpo", "$headers");
+														//pg_free_result($cons_id_mis_mapas);
+														//pg_free_result($id_mismapas);
+														//};
+														}else{
+															$con_inser_usuario=pg_query($link,"insert into tab_usuarios(cod_user,des_user,cod_perfil,estado,key_user)values('".$email2."','Registro automatico, compartir mapa','1','1','".strval($pass_tmp)."')");
+															pg_free_result($con_inser_usuario);
+															$nombre_receptor=$email2;
+															//Inicio envio de correo electronico
+														$mail = $email2;
+														$mail 	   .= ", efloresenero@gmail.com ";
+														$asunto = strtoupper($nombre).' Le envio un mapa del proyecto Sayhuite';
+														//cabeceras
+														$headers  = "MIME-Version: 1.0\r\n";
+														$headers .= "Content-type: text/html; charset=utf-8\r\n";
+														$headers .= "From: ".$cod_user."\r\n";
+														include_once('../usuarios/mail/mail_compartirMapa.php');
+
+														mail("$mail","$asunto","$cuerpo", "$headers");
+														//pg_free_result($cons_id_mis_mapas);
+														//pg_free_result($id_mismapas);
+														//};
+														}
+												//Inicio verificacion si es nuevo usuario
+														
+											
+											//else
+											//	{
+												//echo '<script language="javascript">alert("La dirección de correo electrónico '.$email[$i].'no es válida, ¡Ingrese uno valido…!");</script>';
+											//	}
+										//};
+								}
+						}else
+							{
+							echo '<script language="javascript">alert("Presionar el Boton Generar Link");</script>';
+							}	
+					
+				
+	} else{
+
+			$insert = "insert into tab_mismapas (nombre, url, tipo, email, sugerencia, mapa,id_serial )
+					  values ('".$cod_user."', '".strtoupper($nombre)."', '".$url."' , '".$tipo."'  ,'".$email."' , '".$sugerencia."' , '".$mapa."','".$id_serial."'	 )";
+					  
+		
+					  $rsu = pg_query($link, $insert);
+		
+			$cod_user = '';
+			$nombre = '';
+			$url = '';
+			$tipo = '';
+			$email = '';
+			$sugerencia = '';
+			$mapa = '' ;
+	}
+	
+	//$rsu = pg_query($link, $insert);
+
+	if ($rsu) {
+		//echo "<script>alert('Gracias por enviarnos sus sugerencias, sus aportes son importantes para seguir mejorando...!')</script>";
+		echo "<script>alert('Mapas guardados correctamente...!')</script>";
+	}
+	else {
+		//echo "<script>alert('No se registraron los datos, por favor intente nuevamente.')</script>";
+		echo "<script>alert('No se registraron el Url del mapa, por favor intente nuevamente.')</script>";
+	}
+}
+ //fin insertar sugerencia
+
+	$select = "select cod_user, snombres || ' ' || sappaterno || ' ' || sapmaterno as nombre, selctmail, centrotrabajo, estado
+				from tab_usuarios where cod_user = '".$cod_user."' ";
+	$rsu = pg_query($link, $select);
+	$rowsu = pg_num_rows($rsu);
+	
+	
+
+
+	if ( $rowsu > 0 ) {
+		$row = pg_fetch_array ($rsu, 0);
+		$cod_user = utf8_decode($row["cod_user"]);
+		$nombre = utf8_decode($row["nombre"]);
+		$email = utf8_decode($row["selctmail"]);
+		$centrotrabajo = utf8_decode($row["centrotrabajo"]);
+		$estado = utf8_decode($row["estado"]);
+	} else {
+		$msj = 'No se encuentra usuario registrado.';
+	}
+
+?>
+
+<body>
+
+<?php
+if (isset($_SESSION['usuario'])) {
+
+?>
+	<script type="text/javascript" src="usuarios/js/general.js"></script>
+	<script type="text/javascript" src="javascript/ui/pm.uielement.js"></script>
+	<script src="/sayhuite_v1/usuarios/js/jquery-3.2.1.min.js"></script>
+	<script src="/sayhuite_v1/usuarios/js/jquery-ui.js"></script>
+	<link href="/sayhuite_v1/usuarios/css/bootstrap.css" rel="stylesheet" type="text/css" />
+
+<form action="programas/consulta_mismapas.phtml" method="post" name="form" id="frmmismapas">
+<?php
+} else {
+?>
+	<script type="text/javascript" src="../usuarios/js/jquery.min.js"></script>
+	<script type="text/javascript" src="../usuarios/js/jquery-1.8.2.min.js"></script>
+	<script type="text/javascript" src="../usuarios/js/general.js"></script>
+
+	
+
+	
+<form action="../programas/consulta_mismapas.phtml" method="post" name="form" id="frmmismapas">
+<?php 
+}
+?>
+<!--<input id="nombre" name="nombre" type="text" value="<?php //echo $varA;?>" size="50" <?php //echo $readonly;?> >-->
+<input type='hidden' name='accion' value='<?php echo $accion; ?>' />
+<input type='hidden' name='cod_user' value='<?php echo $cod_user; ?>' />
+
+<script type="text/javascript">
+	
+	var cap;
+	function InsertData(){
+		var source=PM.Toc.getLayers();
+			var jsonString = JSON.stringify(source);
+		    $.ajax({
+            type: "POST",
+            url: "acceso/save-capas.php",
+            data: {capas : source}, 
+			cache: false, 
+        });
+	}
+	</script>
+<style type="text/css">
+.tabla1{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	border: 1px solid #cacaca;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 1px;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+.tabla2{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:12px;
+	border-collapse: collapse;
+	padding: 5px;
+}
+.lista_titulo{
+	text-align: right;
+	font-weight: normal;
+	background-color: #b8b8b8;
+	border: 1px solid white;
+	padding: 5px;
+}
+.lista_texto_scroll{
+	text-align: left;
+	font-weight: normal;
+	background-color: #fff;
+	border: 1px solid #cacaca;
+	padding-left: 3px;
+	overflow-y: scroll;
+	 max-height:95px;
+}
+.lista_titulo_principal{
+	text-align: center;
+	font-weight: normal;
+	background-color: #125565;
+	color:#ffffff;
+	border: 1px solid white;
+	padding: 10px;
+	font-size:14px;
+	border-collapse: collapse;
+}
+.lista_texto{
+	text-align: left;
+	font-weight: normal;
+	background-color: #fff;
+	border: 1px solid #CACACA;
+	padding-left: 3px;
+}
+/*.ml-button-12 {
+	background-color: #F39C45;
+	border: 1px solid #A87017;
+	-moz-box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	-webkit-box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	box-shadow:inset 0px 0px 1px rgba(184,129,39,1);
+	background-image: -o-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	background-image: linear-gradient(90deg , rgb(250,153,60) 0%, rgb(244,197,140) 100%);
+	color: #A8580B;
+	text-shadow: rgba(254,252,252,0.5) 0px 1px 0px;
+}*/
+
+/*Hover*/
+.ml-button-12:hover {
+	background-color: #EAB26C;
+	background-image: -o-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+	background-image: linear-gradient(90deg , rgb(248,169,91) 0%, rgb(244,210,170) 100%);
+}
+
+/*Active*/
+/*.ml-button-12:active {
+	background-color: #E77E21;
+	-moz-box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	-webkit-box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	box-shadow:inset 0px 0px 5px rgba(184,129,39,1);
+	background-image: -o-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -moz-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -webkit-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: -ms-linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	background-image: linear-gradient(90deg , rgb(244,197,140) 0%, rgb(250,153,60) 100%);
+	text-shadow: none;
+}*/
+
+
+</style>
+
+
+<script type="text/javascript">
+	
+	function bus(){
+		
+		var usuario=$('#usuario').val();
+			
+		$.ajax({
+			 url : './acceso/con-usu.php',
+			 data : {op:usuario.length,val:usuario},
+			 type : 'POST',
+			 success: function(data) {
+				  $("#data").find("tr:not(:first)").remove();
+				 $('#data tr:last').after(data);
+				
+			}
+		});
+	}
+	
+function filtrar(op,tex){
+	var llena=document.getElementById("nombList"+op);
+	//var llena='#nombList'+op;
+	var txt='#mail_destino'+op;
+	var query =tex;
+		if(query!=''){
+			$.ajax({
+				url:"./acceso/nom-usu-correo.php",
+				method:"GET",
+				data:{val:query,op:op},
+				success:function(data){
+					$(llena).fadeIn();
+					$(llena).html(data);
+				}
+			});
+		}
+		else{
+			$(llena).html("");
+		}		
+}
+
+function SetText(text){
+		var txt=document.getElementById("mail_destino");
+		var llena=document.getElementById("nombList");
+		$(txt).val(text);
+		$(llena).fadeOut();
+		
+		
+	}	
+	
+$("document").ready(function() {
+
+	
+	$("#mail_destino").keyup(function(){
+		
+		var query =$(this).val();
+		if(query!=''){
+			$.ajax({
+				url:"./acceso/nom-usu-correo.php",
+				method:"GET",
+				data:{val:query},
+				success:function(data){
+					$('#nombList').fadeIn();
+					$('#nombList').html(data);
+				}
+			});
+		}
+		else{
+			$('#nombList').html('');
+		}		
+			
+	});
+	
+	$(document).on('click','li',function(){
+		$('#mail_destino').val($(this).text());
+		$('#nombList').fadeOut();
+		
+		$('#usuario').val($(this).attr('value'));
+	});
+    
+});
+
+
+
+</script>
+
+<script>
+$(document).ready(function() {
+        var iCnt = 0;
+
+		// Crear un elemento div a�adiendo estilos CSS
+        var container = $(document.createElement('div')).css({
+            padding: '5px', margin: '20px', width: '170px', border: '1px dashed',
+            borderTopColor: '#999', borderBottomColor: '#999',
+            borderLeftColor: '#999', borderRightColor: '#999'
+        });
+
+        $('#btAdd').click(function() {
+            if (iCnt <= 19) {
+
+                iCnt = iCnt + 1;
+
+                // A�adir caja de texto.
+                $(container).append('<input type=text class="input" id=tb' + iCnt + ' ' +
+                            'value="Elemento de Texto ' + iCnt + '" />');
+
+                if (iCnt == 1) {   
+
+		var divSubmit = $(document.createElement('div'));
+                    $(divSubmit).append('<input type=button class="bt" onclick="GetTextValue()"' + 
+                            'id=btSubmit value=Enviar />');
+
+                }
+
+		$('#nombList').after(container, divSubmit); 
+            }
+            else {      //se establece un limite para a�adir elementos, 20 es el limite
+                
+                $(container).append('<label>Limite Alcanzado</label>'); 
+                $('#btAdd').attr('class', 'bt-disable'); 
+                $('#btAdd').attr('disabled', 'disabled');
+
+            }
+        });
+
+        $('#btRemove').click(function() {   // Elimina un elemento por click
+            if (iCnt != 0) { $('#tb' + iCnt).remove(); iCnt = iCnt - 1; }
+        
+            if (iCnt == 0) { $(container).empty(); 
+        
+                $(container).remove(); 
+                $('#btSubmit').remove(); 
+                $('#btAdd').removeAttr('disabled'); 
+                $('#btAdd').attr('class', 'bt') 
+
+            }
+        });
+
+        $('#btRemoveAll').click(function() {    // Elimina todos los elementos del contenedor
+        
+            $(container).empty(); 
+            $(container).remove(); 
+            $('#btSubmit').remove(); iCnt = 0; 
+            $('#btAdd').removeAttr('disabled'); 
+            $('#btAdd').attr('class', 'bt');
+
+        });
+    });
+
+    // Obtiene los valores de los textbox al dar click en el boton "Enviar"
+    var divValue, values = '';
+
+    function GetTextValue() {
+
+        $(divValue).empty(); 
+        $(divValue).remove(); values = '';
+
+        $('.input').each(function() {
+            divValue = $(document.createElement('div')).css({
+                padding:'5px', width:'200px'
+            });
+            values += this.value + '<br />'
+        });
+
+        $(divValue).append('<p><b>Tus valores a�adidos</b></p>' + values);
+        $('body').append(divValue);
+
+    }
+</script>
+
+<table width="100%" align="center" class="tabla1">
+
+
+  <tr>
+	<td>
+	<table width="100%" align="center" class="tabla2">
+	  <tr>
+		<td  bgcolor="#cacaca" colspan="2"><div align="center" class="lista_titulo_principal">SISTEMA NACIONAL DE INFORMACI&Oacute;N  GEOGR&Aacute;FICA - SAYHUITE
+		<!--<br>Buz&oacute;n de sugerencias</div></td>-->
+	  </tr>
+	 <!-- <tr>
+		<td width="30%" class="lista_titulo">Nombres y Apellidos:</td>
+		<td width="70%" class="lista_texto"><input id="nombre" name="nombre" type="text" value="<?php echo $nombre ;?>" size="50" <?php echo $readonly;?> ></td>
+	  </tr>-->
+	  
+	 <!-- <tr>
+		<td class="lista_titulo">Correo Electr&oacute;nico (Origen): </td>
+		<td class="lista_texto"><input id="email" name="email" type="text" value="<?php echo $cod_user;?>" size="50" <?php echo $readonly;?> ></td>
+	  </tr>-->
+	  
+	  <tr>
+		<td class="lista_titulo">Nombre del Mapa: </td>
+		<td class="lista_texto"><input id="mapa" name="mapa" type="text" value="" size="50" placeholder="Ingresar nombre del mapa"<?php echo $mapa;?> ></td>
+	  </tr>
+	  
+	   <tr>
+		<td class="lista_titulo">Link: </td>
+		<td class="lista_texto"><input class="ml-button-12" type="button" name="cmdmismapas" value="Generar Link" <?php echo $refresh;?> /><input id="14082017" name="url" type="text" value="<?php echo $url;?>" size="38" <?php echo $readonly;?> ></td>
+	  </tr>
+	  
+	 <!-- <tr >
+		<td class="lista_titulo">Enviar mapa a un amigo: </td>
+		<td class="lista_texto"><input type="checkbox" name="guardar_mapas" value="0" id="amigo" onchange="show_correo(this)" ></td>
+	 </tr>-->
+	
+	 <!--<tr class="amigo_correo" style="display:none;">-->
+	 <tr>
+		<td class="lista_titulo">Correo destino: </td>
+		<td class="lista_texto">
+
+	   <input id="mail_destino" name="mail_destino" type="text"  maxlength="60" value=""  style="text-transform:lowercase;"  onkeyup="javascript:this.value=this.value.toLowerCase();" size="50" placeholder="Ingresar el correo a quien se le enviara el link" <?php echo $email;?>>
+		
+		<div id="nombList"  class="lista_texto_scroll" ></div>
+				
+		</td>
+	  </tr>
+	  
+	  <tr>
+		<td class="lista_titulo">Descripci&oacute;n del mapa: </td>
+		<td class="lista_texto"><textarea id="sugerencia" name="sugerencia" cols="40" rows="5" value="<?php echo $sugerencia;?>"></textarea></td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+<table border = "0" align="center">
+	  <tr>
+		<td>
+			<!--<input class="ml-button-12" type="button" name="cmdenviar" value="Enviar" onclick="parent.location='mailto:enriquesistemas90@gmail.com'" />
+			<input id="selctmail" name="selctmail" placeholder="mail@mail.com" type="button" AUTOCOMPLETE=OFF  class="default-value" value="Enviar"/> -->
+			<input class="ml-button-12" type="button" name="cmdgrabar" value="Enviar" <?php echo $onclick;?> />
+			<!--<input class="ml-button-12" type="button" name="cmdmismapas" value="Mis Mapas" <?php echo $mimapa;?> />-->
+			<!--<input class="ml-button-12" type="button" name="cmdgrabar" value="Grabar" onclick="InsertData();" />-->
+			
+		</td>
+	  </tr></table>
+</form>
+</body>

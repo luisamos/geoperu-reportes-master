@@ -1,0 +1,674 @@
+<?php
+/***************************************************************************************
+Organizaci�n: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretar�a de Descentralizaci�n
+Sistema		: 	Sistema Nacional de Informaci�n Geogr�fica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+	/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+		}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	
+	$gid = $pvalor;
+
+	// Browse Data
+	$sQueryS = "SELECT *";   
+	$sQueryF = " FROM peru_cenagro_seas";
+	$sQueryW = " WHERE \"idsea\" = '" . $gid . "'";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$can_ua = pg_fetch_result($rsDet,0,"can_ua")/100;
+	if($player=='peru_cenagro_distrital'){
+		$titulo 		= 'REPORTE IV CENSO AGROPECUARIO 2012 <br> DISTRITO ' . pg_fetch_result($rsDet,0,"nom_dist");
+	}else if($player=='peru_cenagro_capacitacion'){
+		$titulo 	=	'<br>CAPACITACI&Oacute;N';
+	}else if($player=='peru_cenagro_asistecnica'){
+		$titulo 	=	'<br>ASISTENCIA T&Eacute;CNICA';
+	}else if($player=='peru_cenagro_asempresarial'){
+		$titulo 	=	'<br>ASESOR&Iacute;A EMPRESARIAL';
+	}else if($player=='peru_cenagro_accredito'){
+		$titulo 	=	'<br>ACCESO AL CR&Eacute;DITO';
+	}
+	$titulo_ventana = 'REPORTE IV CENSO AGROPECUARIO - DISTRITO '.pg_fetch_result($rsDet,0,"nom_dist");
+	$titulo = 'REPORTE IV CENSO AGROPECUARIO <br>DISTRITO ' . pg_fetch_result($rsDet,0,"nom_dist").$titulo;;
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table>
+					</h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th width='13%' align='center'>Departamento</th>
+								<th width='13%' align='center'>Provincia</th>
+								<th width='13%' align='center'>Distrito</th>
+								<th width='20%' align='center'>C&oacute;digo de SEA</th>
+								<th width='21%' align='center'>Cantidad<br>de Unidades<br>Agropecuarias</th>
+								<th width='20%' align='center'>Productores Agropecuarios</th>
+							  </tr>
+							</thead>
+							<tbody>
+						<?php
+						print "<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"idsea\"")."</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"can_ua\"")." (*)</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"can_ua\"")."</td>
+							   </tr>";
+						?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<?php 
+		if($player =='peru_cenagro_sea_capacitacion'||$player =='peru_cenagro_sea_asistecnica'||$player =='peru_cenagro_sea_asempresarial'){echo('');?>
+	    <table class="marco_individual">
+		<tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;1. Capacitaci&oacute;n. Asistencia t&eacute;cnica y asesor&iacute;a</td>
+						  </tr>
+						</table>
+					</h1>
+				<div>
+						<table width='100%' align='left' class='general'>
+							<thead>
+							  <tr>
+								<th colspan='10' align='left'> 1.1 Recibi&oacute; capacitaci&oacute;n, asistencia o asesor&iacute;a en tema:</th>
+							  </tr>
+							  <tr>
+								<th colspan='2'>Cultivos</th>
+								<th colspan='2'>Ganaderia</th>
+								<th colspan='2'>Manejo,    conservaci&oacute;n y procesamiento</th>
+								<th colspan='2'>Asociatividad    para producci&oacute;n y comercializaci&oacute;n</th>
+								<th colspan='2'>Negocios    y comercializaci&oacute;n</th>
+							  </tr>
+							</thead>
+						<tbody>
+						<?php
+						print"<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p087_01\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p087_01\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p087_02\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p087_02\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p087_03\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p087_03\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p087_04\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p087_04\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p087_05\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p087_05\"")/$can_ua,2)."%</td>
+						</tr>";
+						?>
+						</tbody>
+						</table>
+					</br>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th colspan='12'>1.2 Ha recibido:</th>
+							  </tr>
+							  <tr>
+								<th colspan='4'>Capacitaci&oacute;n</th>
+								<th colspan='4'>Asistencia t&eacute;cnica</th>
+								<th colspan='4'>Asesor&iacute;a empresarial&nbsp;</th>
+							  </tr>
+							  <tr>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+							  </tr>
+							</thead>
+						<tbody>
+						<?php
+						print"<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p086_01_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p086_01_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p086_01_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p086_01_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p086_02_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p086_02_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p086_02_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p086_02_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p086_03_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p086_03_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p086_03_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p086_03_2\"")/$can_ua,2)."%</td>
+							  </tr>";
+						?>
+						</tbody>
+						</table>
+						</br>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							<tr>
+								<th colspan='16'>1.3 Instituci&oacute;n de la que recibi&oacute; capacitaci&oacute;n, asistencia o    asesor&iacute;a</th>
+							  </tr>
+							  <tr>
+								<th colspan='2'>Ministerio de Agricultura</th>
+								<th colspan='2'>Programa SIERRA NORTE</th>
+								<th colspan='2'>Programa SIERRA SUR</th>
+								<th colspan='2'>Programa ALIADOS</th>
+								<th colspan='2'>Programa Subsectorial de Irrigaci&oacute;n (Asistencia T&eacute;cnica)</th>
+								<th colspan='2'>Agro Rural</th>
+								<th colspan='2'>Inst. Nac. de Innovaci&oacute;n Agraria (INIA)</th>
+								<th colspan='2'>Servicio Nacional de Sanidad Agraria (SENASA)</th>
+							  </tr>  
+							</thead>
+						<tbody>
+						<?php
+						print"<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_01\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_01\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_02\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_02\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_03\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_03\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_04\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_04\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_05\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_05\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_06\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_06\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_07\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_07\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_08\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_08\"")/$can_ua,2)."%</td>
+							</tr>";
+						?>
+						</tbody>
+						</table>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th colspan='2'>Gobierno    Regional</th>
+							<th colspan='2'>Direcci&oacute;n    Regional Agraria</th>
+							<th colspan='2'>Agencia    Agraria / Oficina Agraria</th>
+							<th colspan='2'>Municipalidad</th>
+							<th colspan='2'>Asociaci&oacute;n    / Comit&eacute; / Coop.de productores</th>
+							<th colspan='2'>Empresa    privada</th>
+							<th colspan='2'>Organismo    No Gubernamental (ONG)</th>
+							<th colspan='2'>Otro</th>
+						  </tr>
+						  <tr>
+							</thead>
+						<tbody>
+						<?php
+						print"
+						<tr>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_09\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_09\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_10\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_10\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_11\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_11\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_12\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_12\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_13\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_13\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_14\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_14\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_15\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_15\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p088_16\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p088_16\"")/$can_ua,2)."%</td>
+						</tr>";
+						?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<?php } else if($player =='peru_cenagro_sea_accredito'){echo('</br>'); ?>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u3" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;1. ACCESO A CR&Eacute;DITO</td>
+						  </tr>
+						</table>
+					</h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th colspan="4">1.1 &iquest;Realiz&oacute;    gestiones para obtener un pr&eacute;stamo o cr&eacute;dito?</th>
+							  </tr>
+							  <tr>
+								<th colspan="2">SI</th>
+								<th colspan="2">NO</th>
+							  </tr>
+							</thead>
+							<tbody>
+						<?php
+						print "<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p090_1\"")."</td>
+									<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p090_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p090_2\"")."</td>
+									<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p090_2\"")/$can_ua,2)."%</td>
+							   </tr>";
+						?>
+						</tbody>
+						</table>
+						<table width='100%' align='center' class='general'>
+							<thead>
+								  <tr>
+									<th colspan="6">&iquest;Obtuvo    el&nbsp; pr&eacute;stamo o cr&eacute;dito que gestion&oacute;?</th>
+								  </tr>
+								  <tr>
+									<th colspan="2">SI</th>
+									<th colspan="2">NO</th>
+									<th colspan="2">S/D</th>
+								  </tr>
+							  </tr>
+							</thead>
+							<tbody>
+						<?php
+						print "<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p092_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p092_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p092_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p092_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p092_0\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p092_0\"")/$can_ua,2)."%</td>
+							   </tr>";
+						?>
+						</tbody>
+						</table>
+						</br>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th colspan="14">1.2 &iquest;Ante qu&eacute; instituci&oacute;n o persona gestion&oacute; el pr&eacute;stamo o cr&eacute;dito?</th>
+							  </tr>
+							  <tr>
+								<th colspan="2">Comerciante</th>
+								<th colspan="2">Habilitador</th>
+								<th colspan="2">AGROBANCO</th>
+								<th colspan="2">Banca m&uacute;ltiple</th>
+								<th colspan="2">Caja municipal</th>
+								<th colspan="2">Cooperativa</th>
+								<th colspan="2">Caja rural</th>
+							  </tr>
+							</thead>
+							<tbody>
+						<?php
+						print "
+							  <tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_01\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_01\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_02\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_02\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_03\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_03\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_04\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_04\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_05\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_05\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_06\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_06\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_07\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_07\"")/$can_ua,2)."%</td>
+							  </tr>";
+						?>
+						</tbody>
+						</table>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							<tr>
+								<th colspan='2' height='20'>Molino / desmotadora</th>
+								<th colspan='2'>Organismo No Gubernamental&nbsp;</th>
+								<th colspan='2'>Empresa textil</th>
+								<th colspan='2'>Prestamista</th>
+								<th colspan='2'>EDPYME</th>
+								<th colspan='2'>Otro</th>
+							</tr>
+							</thead>
+							<tbody>
+						<?php
+						print "
+							  <tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_08\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_08\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_09\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_09\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_10\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_10\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_11\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_11\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_12\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_12\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p091_13\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p091_13\"")/$can_ua,2)."%</td>
+							</tr>";
+						?>
+						</tbody>
+						</table>
+						</br>
+						<table width='100%' align='center' class='general'>
+						 <thead>
+						  <tr>
+							<th colspan='14'>1.3 &iquest;Qu&eacute; instituci&oacute;n o persona le otorg&oacute; el pr&eacute;stamo o cr&eacute;dito?</th>
+						  </tr>
+						  <tr>
+							<th colspan='2'>Comerciante</th>
+							<th colspan='2'>Habilitador</th>
+							<th colspan='2'>AGROBANCO</th>
+							<th colspan='2'>Banca m&uacute;ltiple</th>
+							<th colspan='2'>Caja municipal</th>
+							<th colspan='2'>Cooperativa</th>
+							<th colspan='2'>Caja rural</th>
+						  </tr>
+							</thead>
+							<tbody>
+						<?php
+						print "
+						  <tr>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_01\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_01\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_02\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_02\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_03\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_03\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_04\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_04\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_05\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_05\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_06\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_06\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_07\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_07\"")/$can_ua,2)."%</td>
+						</tr>";
+						?>
+						</tbody>
+						</table>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th colspan='2'>Molino    / desmotadora</th>
+							<th colspan='2'>Organismo    No Gubernamental&nbsp;</th>
+							<th colspan='2'>Empresa textil</th>
+							<th colspan='2'>Prestamista</th>
+							<th colspan='2'>EDPYME</th>
+							<th colspan='2'>Otro</th>
+						  </tr>
+						</thead>
+							<tbody>
+						<?php
+						print "
+						  <tr>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_08\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_08\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_09\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_09\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_10\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_10\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_11\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_11\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_12\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_12\"")/$can_ua,2)."%</td>
+							<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p093_13\"")."</td>
+							<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p093_13\"")/$can_ua,2)."%</td>
+						</tr>";
+						?>
+						</tbody>
+						</table>
+						<br>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							<tr>
+							<th colspan="10">1.4 &iquest;Cu&aacute;l fue la raz&oacute;n principal por la que no le dieron el cr&eacute;dito?</th>
+							 </tr>													
+						     <tr>
+								<th colspan="2">Por    falta de garant&iacute;a</th>
+								<th colspan="2">&nbsp;Incumplimiento en pago de cr&eacute;ditos    anteriores</th>
+								<th colspan="2">Por    no tener t&iacute;tulo de propiedad de tierra</th>
+								<th colspan="2">Otro</th>
+								<th colspan="2">Sin    data</td>
+							</tr>
+							</thead>
+							<tbody>
+						<?php
+						print "
+							<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p095_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p095_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p095_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p095_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p095_3\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p095_3\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p095_4\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p095_4\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p095_0\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p095_0\"")/$can_ua,2)."%</td>
+							  </tr>";
+						?>
+						</tbody>
+						</table>
+						</br>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							<tr>
+								<th colspan="10">1.5 &iquest;Cu&aacute;l es la raz&oacute;n principal por la que no solicit&oacute; el cr&eacute;dito?</th>
+							 </tr>					
+							  <tr>
+								<th colspan='2'>No    necesit&oacute;</th>
+								<th colspan='2'>Tr&aacute;mites    engorrosos</th>
+								<th colspan='2'>Intereses    elevados</th>
+								<th colspan='2'>No    hay instituciones</th>
+								<th colspan='2'>Falta    de garantia</th>
+							  </tr>
+							</thead>
+							<tbody>
+						<?php
+						print "
+							  <tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_3\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_3\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_4\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_4\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_5\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_5\"")/$can_ua,2)."%</td>
+							 </tr>";
+						?>
+						</tbody>
+						</table>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th colspan='2'>Por tener deudas pendientes</th>
+								<th colspan='2'>Por que cree que no se lo dar&iacute;an</th>
+								<th colspan='2'>Otro</th>
+								<th colspan='2'>Sin data</th>
+							  </tr>
+							</thead>
+							<tbody>
+						<?php
+						print "
+							<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_6\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_6\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_7\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_7\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_8\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_8\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p096_0\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p096_0\"")/$can_ua,2)."%</td>
+							</tr>";
+						?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		
+		
+		<br>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u4" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;2. ACCESO A LA INFORMACI&Oacute;N</td>
+						  </tr>
+						</table>
+					</h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+							<thead>
+							  <tr>
+								<th colspan='24'>Para obtener informaci&oacute;n sobre agricultura o ganader&iacute;a ha    utilizado</th>
+							  </tr>
+							  <tr>
+								<th colspan='4'>Tel&eacute;fono</th>
+								<th colspan='4'>Radio</th>
+								<th colspan='4'>Televisi&oacute;n</th>
+								<th colspan='4'>&nbsp;Internet</th>
+								<th colspan='4'>Publicaciones escritas</th>
+								<th colspan='4'>Otro</th>
+							  </tr>
+							  <tr>    <th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+								<th colspan='2'>SI</th>
+								<th colspan='2'>NO</th>
+							</tr>
+						  </thead>
+						  <tbody>
+						<?php
+						print "<tr>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_01_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_01_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_01_2\"")."</td>";
+								print"<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_01_2\"")/$can_ua,2)."%</td>";	
+								print"<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_02_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_02_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_02_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_02_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_03_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_03_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_03_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_03_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_04_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_04_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_04_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_04_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_05_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_05_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_05_2\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_05_2\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_06_1\"")."</td>
+								<td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_06_1\"")/$can_ua,2)."%</td>
+								<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"p089_06_2\"")."</td>
+							   <td align='center' class='texto'>".number_format(pg_fetch_result($rsDet,0,"\"p089_06_2\"")/$can_ua,2)."%</td>
+							   </tr>";
+						?>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<?php } else {echo('');}?>
+		<br>
+		<table width='100%' class='fuente_general'>
+			<tr>
+				<td colspan='4'><b>Fuente:</b></br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></td>
+			</tr>
+		</table>
+		<table width='100%' class='fuente_general'>
+			<tr>
+				<td>(*) Los porcentajes estan descritos en relaci&oacute;n a la Cantidad de Unidades  Agropecuarias
+				</td>
+			</tr>
+		</table>
+	<?php
+	$name=$titulo_ventana; //'REPORTE DE INDICADORES A NIVEL DE DISTRITO';
+	$capa='consulta_cenagro_seas.phtml';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body> 
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+	});
+</script>
+</html>
+
+
+<?php include_once("./analyticstracking.php");?>
+

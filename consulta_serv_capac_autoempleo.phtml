@@ -1,0 +1,176 @@
+<?php
+/***************************************************************************************
+Organización: 	Presidencia del Consejo de Ministros - PCM
+Gerencia	: 	Secretaría de Descentralización
+Sistema		: 	Sistema Nacional de Información Geográfica - SAYWITE
+Coordinador/Desarrollador TIC: Vitaly Uriel Cespedes Reynaga vitalyuri@hotmail.com/vitalyuri@gmail.com/969228151
+Periodo		: 	Septiembre 2012 - 2013
+***************************************************************************************/
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+	
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$tipo = $_GET['otipo'];
+	$anio = $_GET['oanio'];
+	
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	// Browse Data
+	
+
+    
+	$sQueryTipo="";
+	
+	if($tipo==1){
+		$titulo_ventana = 'SERVICIO DE CAPACITACI&Oacute;N AUTOEMPLEO - DISTRITO ';
+		$titulo = 'SERVICIO DE CAPACITACI&Oacute;N AUTOEMPLEO - </br> DISTRITO ';
+		$sQueryTipo="peru_serv_capac_autoempleo";
+	}
+	else if($tipo==2){
+		$titulo_ventana = 'SERVICIO DE CAPACITACI&Oacute;N LABORAL ';
+		$titulo = 'SERVICIO DE CAPACITACI&Oacute;N LABORAL - </br> DISTRITO ';
+		$sQueryTipo="peru_serv_capac_laboral";
+	}
+	else if($tipo==3){
+		$titulo_ventana = 'SERVICIO DE CERTIFICACI&Oacute;N Y COMPETENCIAS - DISTRITO ';
+		$titulo = 'SERVICIO DE CERTIFICACI&Oacute;N Y COMPETENCIAS - </br> DISTRITO ';
+		$sQueryTipo="peru_serv_certif_competencia";
+	}
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM ".$sQueryTipo;
+	$sQueryW = " WHERE \"cod_dist\" = '" . $pvalor . "' and \"anio_repo\"= '".$anio."'";
+	
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$rsDet = pg_query( $linkPG , $sQuery );
+	
+	
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table></h1>
+					<div>
+						<table width='100%' align='center' class='general'>
+						<thead>
+						  <tr>
+							<th width="20%">Ubigeo</th>
+							<th width="20%">Departamento</th>
+							<th width="20%">Provincia</th>
+							<th width="20%">Distrito</th>
+							
+		
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr>
+						<?php
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>";
+							print "<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>";
+							
+						?> 		  
+						  </tr>
+						</tbody>
+						</table>
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1><table width="100%" class="titulo_general">
+						  <tr>
+							<td><?php echo $imgtitulo;?>&nbsp;&nbsp;REPORTE </td>
+						  </tr>
+						</table></h1>
+					<div>
+					<table width='100%' align='center' class='general'>
+						<?php
+						$m=0;//masculino
+						$f=0;//femenino
+						$t=0;//total
+						$c=0; //costo total
+						print "<tr>";print "<td width='40%' class='lista_titulo'><b>CURSOS :</b></td>";print "<td width='15%' class='lista_titulo'>Beneficiarios Hombres</td>";print "<td width='15%' class='lista_titulo'>Beneficiarios Mujeres</td>";print "<td width='15%' class='lista_titulo'>Total de beneficiarios</td>";print "<td width='15%' class='lista_titulo'>Total de beneficiarios</td>";print "</tr>";
+							while ($row = pg_fetch_assoc($rsDet)) {
+									$m+=$row['masculino'];
+								$f+=$row['femenino'];
+								$t+=$row['total'];
+								$c+=$row['tot_costo'];
+								print "<tr>";if($tipo==3){print "<td width='40%' class='lista_titulo'><b>".$row['perfil']."</b></td>";}else print "<td width='40%' class='lista_titulo'><b>".$row['curso']."</b></td>"; print "<td width='15%' style='text-align:center;' class='lista_textosub'>".$row['masculino']."&nbsp;</td>";print "<td width='15%' style='text-align:center;' class='lista_textosub'>".$row['femenino']."&nbsp;</td>";print "<td width='15%' style='text-align:center;' class='lista_textosub'>".$row['total']."&nbsp;</td>";print "<td width='15%' style='text-align:center;' class='lista_textosub'> S/ ".number_format($row['tot_costo'], 2, ".", ",")."&nbsp;</td>";print "</tr>";
+							   
+							}
+						print "<tr>";print "<td width='40%' class='lista_titulo'><b>TOTAL :</b></td>";print "<td width='15%' style='text-align:center;' class='lista_titulo'>".$m."</td>";print "<td width='15%' style='text-align:center;' class='lista_titulo'>".$f."</td>";print "<td width='15%' style='text-align:center;' class='lista_titulo'>".$t."</td>";print "<td width='15%' style='text-align:center;' class='lista_titulo'> S/ ".number_format($c, 2, ".", ",")."</td>";print "</tr>";	
+						?>	
+					</table>				
+					</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		
+		<?php 
+	if(getComDesc($player)!=''){
+			include ('inc/descarga.php');	
+	}
+		?>
+		<br>
+		<table class='fuente_general' width="100%"><thead><tr><th>Fuentes:
+		<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"").'<br>';?></th></tr></thead>
+		</table>
+	<?php
+
+	$capa='consulta_serv_capac_autoempleo';
+	if (!isset($_GET['excel'])) {
+		//$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&name = '.$name;
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body> 
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+		$("#u6").h2c_acordeon();
+	});
+</script>
+</html>
+<?php include_once("./analyticstracking.php");?>

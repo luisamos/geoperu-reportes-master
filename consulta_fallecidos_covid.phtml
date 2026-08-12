@@ -1,0 +1,136 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')){
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else{
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+/*@session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+    // Browse Data
+    // select pec.cod_des_op, pec.tot_vot,pec.desc_op, pd.cod_dist, pd.nom_dist, pd.cod_prov , pd.nom_prov, pd.cod_dpto, pd.nom_dpto,pd.the_geom from peru_elecciones_congresales pec
+	//   	inner join peru_distritos pd on pd.cod_dist = pec.cod_dist where pd.cod_dist = '010101';
+	$sQueryS = "select * from peru_fallecidos_covid19_dist";
+	$sQueryW = "  where gid = " . $pvalor;
+
+	$sQuery = $sQueryS . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Fallecidos por la COVID-19 - Nivel de distrito';
+	$titulo = 'Fallecidos por la COVID-19 - Nivel de distrito';
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+				  <tr>
+					<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+				  </tr>
+				</table>
+				<table width='100%' align='center' class='general'>
+					<thead>
+					  <tr>
+						<th width='25%'>Departamento</th>
+						<th width='25%'>Provincia</th>
+						<th width='25%'>Distrito</th>
+						<th width='25%'>Codigo Distrito</th>
+					  </tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dpto\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_prov\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"nom_dist\"")) ?></td>
+						<td align='center' class='texto'><?php echo(pg_fetch_result($rsDet,0,"\"cod_dist\"")) ?></td>
+					</tr>
+	
+					</tbody>
+				</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<table width="100%" class="titulo_general">
+					  <tr>
+						<td>&nbsp;&nbsp;DATOS GENERALES</td>
+					  </tr>
+				</table>
+			<table width='100%' align='center' class='general'>
+
+                    <tr>
+						<td width='50%' class='texto1'>Población (hab.)</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php echo(number_format(pg_fetch_result($rsDet,0,"\"pob_2020\""),0)) ?></td>
+					</tr>
+                    <tr>
+						<td width='50%' class='texto1'>Número de fallecidos por COVID-19</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php  echo(number_format(pg_fetch_result($rsDet,0,"\"num_fallec\""),0)) ?></td>
+					</tr>
+                    <tr>
+						<td width='50%' class='texto1'>Número de hombres fallecidos</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php  echo(number_format(pg_fetch_result($rsDet,0,"\"sx_mascul\""),0)) ?></td>
+					</tr>
+                    <tr>
+						<td width='50%' class='texto1'>Número de mujeres fallecidas</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php  echo(number_format(pg_fetch_result($rsDet,0,"\"sx_femen\""),0)) ?></td>
+					</tr>
+                    <tr>
+						<td width='50%' class='texto1'>Fecha de corte de registro de datos</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php  echo(pg_fetch_result($rsDet,0,"\"fecha_cort\"")) ?></td>
+					</tr>
+                    <tr>
+						<td width='50%' class='texto1'>Rango de número de fallecidos por COVID-19</td>
+						<td width='50%' class='texto1' style='text-align:right;'><?php  echo(pg_fetch_result($rsDet,0,"\"ran_fall\"")) ?></td>
+					</tr>
+                  
+	
+			</table>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	//$name=strtoupper(pg_fetch_result($rsDet,0,"\"tipoaerona\"").' - '.pg_fetch_result($rsDet,0,"\"label\""));
+	$name='Fallecidos por la COVID-19 - Nivel de distrito';
+	$capa='consulta_fallecidos_covid';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer=peru_covid'.'&ocampo=gid';
+		include 'inc/consulta_pie.php';
+	}
+	if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+	?>
+		</td>
+	  </tr>
+	</table>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
+<?php include_once("./analyticstracking.php");?>
+
+

@@ -1,0 +1,191 @@
+<?php
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+@ini_set("session.cookie_lifetime",1800);
+/*session_start();
+	if(empty($_SESSION['usuario'])){
+        header('Location: ../index.php');
+	}else{$cod_user = $_SESSION['usuario'];}*/
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$cod_ofic 	=	$_GET['cod_ofic_'];
+	$cod_atm	=	$_GET['cod_atm_'];
+	$cod_cajero	=	$_GET['cod_cajero_'];
+	$player = 	limpiarCadena($_GET['olayer']);
+	$pcampo = 	limpiarCadena($_GET['ocampo']);
+	if($_GET['gid_']!='')
+	{ 
+		$pvalor = limpiarCadena(limpiarNumeros($_GET['gid_']));
+	}
+	else if($_GET['ovalor']!='')
+	{
+		$pvalor = limpiarCadena(limpiarNumeros($_GET['ovalor']));
+	}
+	$linkPG = Conectarse_POSTGRES();
+	$sQueryS = " SELECT *";   
+	$sQueryF = " FROM data_canon_distrito";
+	$sQueryW = " WHERE \"gid\" = '".$pvalor."'";
+
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;   
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'Distribución del Canon Municipal - DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	$titulo = 'Distribución del Canon Municipal 2020 <br> DISTRITO '.pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+<table width="100%" class="marco_general">
+  <tr><td>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th><?php echo( getTablaCampo('data_canon_distrito','nom_dpto'));?></th>
+				<th><?php echo( getTablaCampo('data_canon_distrito','nom_prov'));?></th>
+				<th><?php echo( getTablaCampo('data_canon_distrito','nom_dist'));?></th>
+				<th width='25%'>Ubigeo</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+		print "<tr>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+				<td align='center' class='texto'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+			  </tr>";
+?>
+			</tbody>
+		</table>
+		</td>
+	  </tr>
+	</table>
+	<br>
+	<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;Datos del Mapa de Canon Municipal</td>
+		  </tr>
+		</table>
+		<table width="100%" class="general">
+			<thead>
+			  <tr>
+				<th>UNIDAD EJECUTORA</th>
+				<th>RECURSOS TOTALES DEL CANON Y SOBRECANON</th>
+				<th>PRESUPUESTO INSTITUCIONAL MODIFICADO DE LOS PROYECTOS</th>
+				<th>PRESUPUESTO INSTITUCIONAL MODIFICADO DE LAS ACTIVIDADES</th>
+				<th>POBLACIÓN PROYECTADA AL 2020</th>
+			  </tr>
+			</thead>
+			<tbody>
+<?php
+$numRow=pg_num_rows($rsDet);
+$i=0;
+	while($i<$numRow){
+			print "<tr><td align='center' class='numero11'>".pg_fetch_result($rsDet,$i,"\"ejecutora\"")."</td>
+					<td align='center' class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"tot_canon\""),2)."</td>
+					<td align='center' class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"pim_proy\""),2)."</td>
+					<td align='center' class='numero11'>".number_format(pg_fetch_result($rsDet,$i,"\"pim_activ\""),2)."</td>
+					<td align='center' class='numero11'>".pg_fetch_result($rsDet,$i,"\"pob_2017\"")."</td>
+				  </tr>";
+			$cod_prov=pg_fetch_result($rsDet,$i,"\"cod_prov\"");
+			$fuente=pg_fetch_result($rsDet,$i,"\"fuente\"");
+			
+			$i++;
+		}
+		print"</tbody></table>";
+		?>
+		</td>
+	  </tr>
+	</table>
+	<br>
+<?php
+
+
+		?>
+			<table width="100%" class="marco_individual">
+	  <tr>
+		<td>
+		<table width="100%" class="titulo_general">
+		  <tr>
+			<td>&nbsp;&nbsp;reporte de Canon Municipal de <?php echo( ' LA PROVINCIA - '.pg_fetch_result($rsDet,0,"\"nom_prov\"")); ?></td>
+		  </tr>
+		</table>
+		<table width='100%' align='center' class='general'>
+			<thead>
+			  <tr>
+				<th width='2%'>#</th>
+				<th>DISTRITO</th>
+				<th>UNIDAD EJECUTORA</th>
+				<th>RECURSOS TOTALES DEL CANON Y SOBRECANON</th>
+				<th>PRESUPUESTO INSTITUCIONAL MODIFICADO DE LOS PROYECTOS</th>
+				<th>PRESUPUESTO INSTITUCIONAL MODIFICADO DE LAS ACTIVIDADES</th>
+				<th>POBLACIÓN PROYECTADA AL 2020</th>
+			  </tr>
+			</thead>
+		<?php
+			$rsCon 		= pg_query($linkPG , "select * from data_canon_distrito where cod_prov='".$cod_prov."';");
+			$numRowRsCon = pg_num_rows($rsCon);
+			$j=0;
+			while($j<$numRowRsCon){
+				$k=$j+1;
+				if(pg_fetch_result($rsCon,$j,"\"cod_dist\"")==pg_fetch_result($rsDet,0,"\"cod_dist\"")){
+					$classet='class="titulo11"';
+				} else {
+					$classet='class="numero11"';
+				}
+				
+					print "<tr><td align='center' ".$classet." >".$k."</td>
+					<td align='center' ".$classet." >".pg_fetch_result($rsCon,$j,"\"nom_dist\"")."</td>
+					<td align='center' ".$classet." >".pg_fetch_result($rsCon,$j,"\"ejecutora\"")."</td>
+					<td align='center' ".$classet." >".number_format(pg_fetch_result($rsCon,$j,"\"tot_canon\""),2)."</td>
+					<td align='center' ".$classet." >".number_format(pg_fetch_result($rsCon,$j,"\"pim_proy\""),2)."</td>
+					<td align='center' ".$classet." >".number_format(pg_fetch_result($rsCon,$j,"\"pim_activ\""),2)."</td>
+					<td align='center' ".$classet." >".pg_fetch_result($rsCon,$j,"\"pob_2017\"")."</td>
+				  </tr>";
+				  
+				$j++;
+			}
+	?>
+			</table>
+			</td></tr>
+		</table><br>
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo($fuente); ?>
+		</th></tr></thead></table>
+	<?php
+		$capas='CANON DISTRITAL 2017 ';
+		$name=$capas.strtoupper(pg_fetch_result($rsDet,0,"\"nom_dist\""));
+		$capa='consulta_canon_dist';
+		if (!isset($_GET['excel'])) {
+			$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor;
+			include 'inc/consulta_pie.php';
+		}
+		if (isset($_SESSION['usuario'])) {
+			grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+		}
+	?>
+		</td></tr>
+	</table>
+	</td></tr>
+</table>
+</body>
+ 
+</html>
+<?php include_once("./analyticstracking.php");?>

@@ -1,0 +1,161 @@
+<?php
+
+if (isset($_GET['excel']) && ($_GET['excel']=='excel')) {
+	header("Content-type:application/x-msexcel");
+	$file=$_GET['capa'];
+	header("Content-Disposition: attachment; filename=".$file.".xls");
+	$imgtitulo='';
+} else {
+	$imgtitulo='<img src="imajes/desplegable.png" width="11" height="11">';
+}
+
+// @session_start();
+
+// 	if(empty($_SESSION['usuario'])){
+//         header('Location: ../index.php');
+// 		}else{$cod_user = $_SESSION['usuario'];}
+
+	include ('conexion_postgres.phtml');
+	include ('injection/funciones.php');
+	$player = limpiarCadena($_GET['olayer']);
+	$pcampo = limpiarCadena($_GET['ocampo']);
+	$pvalor = limpiarNumeros($_GET['ovalor']);
+	$linkPG = Conectarse_POSTGRES();
+	if($pvalor==''){
+		$gid = $_GET['codigo'];
+	}else {
+		$gid = $pvalor;
+	}
+	// Browse Data
+	$sQueryS = "SELECT *";
+	$sQueryF = " FROM peru_establecimientos_salud";
+	$sQueryW = " WHERE \"est_coduni\" = '" . $gid. "' limit 1";
+	$sQuery = $sQueryS . $sQueryF . $sQueryW;
+	$rsDet = pg_query( $linkPG , $sQuery );
+	$titulo_ventana = 'INFORMACI&Oacute;N DE ESTABLECIMIENTO DE SALUD';
+	$titulo = 'INFORMACI&Oacute;N DE ESTABLECIMIENTOS DE SALUD - DISTRITO - '. pg_fetch_result($rsDet,0,"\"nom_dist\"");
+	include ('inc/consulta_cabecera.php');
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+  <tr><td>
+	<table width="100%" class="marco_general">
+	  <tr><td>
+		<table class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u1" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td colspan="7"><?php echo $imgtitulo;?>&nbsp;&nbsp;UBICACI&Oacute;N GEOGR&Aacute;FICA</td>
+						  </tr>
+						</table>
+					</h1>
+				<div>
+					<table width='100%' align='center' class='general'>
+						<thead>
+							<th width='20%'><?php echo( getTablaCampo('peru_instituciones_salud','nom_dpto'));?></th>
+							<th width='20%'><?php echo( getTablaCampo('peru_instituciones_salud','nom_prov'));?></th>
+							<th width='20%'><?php echo( getTablaCampo('peru_instituciones_salud','nom_dist'));?></th>
+							<th width='20%'>UBIGEO</th>
+						</thead>
+						<tbody>
+						<?php
+							print "<tr>
+									<td align='center' class='numero1'>".pg_fetch_result($rsDet,0,"\"nom_dpto\"")."</td>
+									<td align='center' class='numero1'>".pg_fetch_result($rsDet,0,"\"nom_prov\"")."</td>
+									<td align='center' class='numero1'>".pg_fetch_result($rsDet,0,"\"nom_dist\"")."</td>
+									<td align='center' class='numero1'>".pg_fetch_result($rsDet,0,"\"cod_dist\"")."</td>
+								</tr>";
+						?>
+						</tbody>
+					</table>
+				</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		<br>
+		<table width="100%" class="marco_individual">
+		  <tr>
+			<td>
+				<div id="u2" style="width: 100%;">
+					<h1>
+						<table width="100%" class="titulo_general">
+						  <tr>
+							<td  colspan="7"><?php echo $imgtitulo;?>&nbsp;&nbsp;DATOS DE  <?php echo(pg_fetch_result($rsDet,0,"\"desc_eess\"")); ?></td>
+						  </tr>
+						</table>
+					</h1>
+				<div>
+					<table width='100%' align='center' class='listado'>
+						<?php
+		  		print "<tr>";
+				print "<td width='50%' class='lista_titulo'>Nombre del establecimiento de Salud</td>";
+				print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"est_nombre\"")."</td>";
+		  		print "</tr>";
+		  		print "<tr>";
+				print "<td width='50%' class='lista_titulo'>Categoría del establecimiento de Salud</td>";
+				print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"ctg_codigo\"")."</td>";
+		  		print "</tr>";
+				print "<tr>";
+				print "<td width='50%' class='lista_titulo'>Conectividad</td>";
+				print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"conect\"")."</td>";
+		  		print "</tr>";
+                print "<tr>";
+				print "<td width='50%' class='lista_titulo'>Tecnología del servicio</td>";
+				print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"tecno\"")."</td>";
+		  		print "</tr>";
+		  		print "<tr>";
+				print "<td width='50%' class='lista_titulo'>Internet</td>";
+				print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"internet\"")."</td>";
+		  		print "</tr>";
+				print "<tr>";
+				print "<td width='50%' class='lista_titulo'>Operador del servicio</td>";
+				print "<td width='50%' class='lista_textosub'>".pg_fetch_result($rsDet,0,"\"operador\"")."</td>";
+		  		print "</tr>";
+
+?>
+					</table>
+				</div>
+				</div>
+			</td>
+		  </tr>
+		</table>
+		
+
+		<table class='fuente_general' width="100%"><thead><tr><th><b>Fuente:</b>
+			<br><?php echo pg_fetch_result($rsDet,0,"\"fuente\"");?></th></tr></thead>
+		</table>
+	<?php
+	$name=strtoupper(pg_fetch_result($rsDet,0,"\"clasificac\"").' '.pg_fetch_result($rsDet,0,"\"est_nombre\""));
+	$capa='consulta_instituciones_salud';
+	if (!isset($_GET['excel'])) {
+		$ruta=$capa.'.phtml?excel=excel&capa='.$capa.'&ovalor='.$pvalor.'&olayer='.$player.'&niv_descarga='.$niv_descarga.'&descarga='.$descarga;
+		include 'inc/consulta_pie.php';
+	}
+
+		if (isset($_SESSION['usuario'])) {
+		grabar_log_accesos('ingreso', $cod_user, $name, $descripcion);
+	}
+
+		?>
+		</td>
+	</tr>
+</table>
+</td>
+	</tr>
+</table>
+</body>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		$("#u1").h2c_acordeon();
+		$("#u2").h2c_acordeon();
+		$("#u3").h2c_acordeon();
+		$("#u4").h2c_acordeon();
+		$("#u5").h2c_acordeon();
+		$("#u6").h2c_acordeon();
+	});
+</script>
+
+</html>
