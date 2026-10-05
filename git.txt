@@ -1,0 +1,11 @@
+#
+# REPORTE: INVERSIÓN PÚBLICA, CENSO DE POBLACIÓN Y VIVIENDA, CEM Y RENADESPPLE, PROGRAMAS PRESUPUESTALES.
+#
+git init
+git add .
+git commit -m "v.2.14 | 05/10/2026 10:24"
+git branch -M main
+git remote add origin https://github.com/luisamos/geoperu-reportes.git
+git push -u origin main
+
+git pull origin claude/proyact-router-2026-p1grhf
