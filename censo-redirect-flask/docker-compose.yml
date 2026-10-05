@@ -1,0 +1,10 @@
+services:
+  censo-redirect-flask:
+    build: .
+    ports:
+      - "8080:8000"
+    environment:
+      CENSO_BASE_URL: https://reportes.geoperu.gob.pe/censos
+      CENSO_YEAR: "2025"
+      REDIRECT_CODE: "302"   # usar 301 cuando la migración sea definitiva
+    restart: unless-stopped
