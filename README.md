@@ -64,6 +64,7 @@ Se hace con variables de entorno:
 |---|---|---|
 | `CENSO_BASE_URL` | `https://reportes.geoperu.gob.pe/censos` | Dominio y ruta base del destino |
 | `CENSO_YEAR` | `2025` | Año del censo por defecto |
+| `URL_PREFIX` | `/reportes` | Carpeta con la que se publica el servicio (`visor.geoperu.gob.pe/reportes/...`); se ignora si el proxy ya la quita. Vacío = sin prefijo |
 | `REDIRECT_CODE` | `302` | `302` mientras se prueba; `301` cuando la migración sea definitiva (301/302/307/308) |
 
 ---
@@ -151,6 +152,30 @@ curl -I "localhost/consulta_Distrito.phtml?ovalor=080101"
 **Que los enlaces antiguos lleguen al servicio:** el dominio donde vivía el sistema PHP debe
 apuntar (DNS o proxy inverso) al servidor donde corre este contenedor. Tras validar en
 desarrollo, use `-e REDIRECT_CODE=301` en producción.
+
+**Publicado en una carpeta (`https://visor.geoperu.gob.pe/reportes/...`)**
+
+El servicio acepta la ruta con o sin el prefijo `/reportes` (variable `URL_PREFIX`). El proxy del
+servidor (Nginx, Apache o el túnel/Cloudflare) debe enviar `/reportes/` al contenedor, por ejemplo:
+
+```nginx
+location /reportes/ {
+    proxy_pass http://127.0.0.1:80/;     # el contenedor publicado en el puerto 80
+}
+```
+
+**Error 502 (Bad gateway)** significa que el proxy no logra hablar con el contenedor. Revise en el
+servidor, en este orden:
+
+```bash
+docker ps -a                        # ¿está "Up"? si salió, ver el motivo:
+docker logs censo-redirect          # errores al arrancar
+curl -i localhost/health            # desde el servidor: debe responder "ok"
+curl -I "localhost/reportes/consulta_Departamento.phtml?ovalor=16"   # debe dar 302
+```
+
+Causas habituales: contenedor detenido, el puerto 80 ya ocupado por otro servicio (el contenedor no
+arranca), o el `proxy_pass` apuntando a un puerto distinto de donde se publicó el contenedor.
 
 ---
 

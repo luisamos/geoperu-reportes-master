@@ -28,7 +28,24 @@ ALIASES = {
 }
 LEGACY = {cfg["legacy"].lower(): level for level, cfg in LEVELS.items()}
 
+# Prefijo con el que el servicio se publica detrás del proxy (ej. https://visor.geoperu.gob.pe/reportes/...).
+# Se quita de la ruta si llega; si el proxy ya lo quita, no pasa nada. Vacío = sin prefijo.
+URL_PREFIX = "/" + os.getenv("URL_PREFIX", "/reportes").strip("/") if os.getenv("URL_PREFIX", "/reportes").strip("/") else ""
+
+
+class StripPrefix:
+    def __init__(self, wsgi, prefix):
+        self.wsgi, self.prefix = wsgi, prefix
+
+    def __call__(self, environ, start_response):
+        path = environ.get("PATH_INFO", "")
+        if self.prefix and (path == self.prefix or path.startswith(self.prefix + "/")):
+            environ["PATH_INFO"] = path[len(self.prefix):] or "/"
+        return self.wsgi(environ, start_response)
+
+
 app = Flask(__name__)
+app.wsgi_app = StripPrefix(app.wsgi_app, URL_PREFIX)
 
 
 def build(level, code, year=None, pad=False):

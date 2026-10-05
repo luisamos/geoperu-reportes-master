@@ -16,6 +16,8 @@ def client():
     ("/consulta_ccpp.phtml?ovalor=0801010001", "/2025/0801010001"),
     ("/distrito/080101", "/2025/080101"),
     ("/2024/080101", "/2024/080101"),
+    ("/reportes/consulta_Departamento.phtml?olayer=peru_departamento&ocampo=cod_dpto&ovalor=16", "/2025/16"),
+    ("/reportes/distrito/080101", "/2025/080101"),
 ])
 def test_redirects(client, url, dest):
     r = client.get(url)
@@ -29,3 +31,7 @@ def test_redirects(client, url, dest):
 ])
 def test_not_found(client, url):
     assert client.get(url).status_code == 404
+
+
+def test_health_with_prefix(client):
+    assert client.get("/reportes/health").data == b"ok"
