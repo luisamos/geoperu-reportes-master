@@ -20,4 +20,4 @@ ENV CENSO_BASE_URL=https://reportes.geoperu.gob.pe/censos \
 USER app
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request as u; u.urlopen('http://localhost:80/health')" || exit 1
-CMD ["gunicorn", "-b", "0.0.0.0:80", "-w", "2", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:80", "-w", "2", "--access-logfile", "-", "--error-logfile", "-", "app:app"]

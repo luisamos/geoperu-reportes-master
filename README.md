@@ -177,6 +177,18 @@ curl -I "localhost/reportes/consulta_Departamento.phtml?ovalor=16"   # debe dar 
 Causas habituales: contenedor detenido, el puerto 80 ya ocupado por otro servicio (el contenedor no
 arranca), o el `proxy_pass` apuntando a un puerto distinto de donde se publicó el contenedor.
 
+**Si corre en Kubernetes (pod `prod-geoperu-reportes-…`)**
+
+Si el log del pod muestra `Listening at: http://0.0.0.0:80` y los workers arrancan, el contenedor
+está bien y el 502 está entre el Ingress/Service y el pod. Verifique:
+
+- El **Service** debe tener `targetPort: 80` (no el puerto del sistema PHP anterior).
+- El **Ingress** debe enviar `/reportes` al Service de este pod. El servicio acepta la ruta con
+  o sin el prefijo, así que no hace falta reescribirla.
+- Las sondas *readiness/liveness* (si existen) deben apuntar a `GET /health` en el puerto 80.
+- Con la imagen nueva, cada petición queda en el log del pod (`--access-logfile -`): si al abrir
+  el enlace no aparece ninguna línea, la petición no está llegando al pod.
+
 ---
 
 ## 5. Estructura del proyecto
