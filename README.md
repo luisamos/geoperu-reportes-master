@@ -135,8 +135,53 @@ curl -I "localhost:8080/consulta_Distrito.phtml?ovalor=080101"
 
 - Base `python:3.12-slim`; ejecuta con **gunicorn** (2 workers) en el puerto 8000.
 - Corre con un usuario sin privilegios y tiene `HEALTHCHECK` sobre `/health`.
-- Para publicarla en un registro propio:
-  `docker tag censo-redirect:dev <registro>/censo-redirect:<versión>` y `docker push …`.
+- Para publicarla en GitHub Packages, vea la sección siguiente.
+
+### Publicar la imagen en GitHub Packages (ghcr.io) y levantarla en otro entorno
+
+Reemplace `DDMMAAAA-HHMM` por la fecha y hora de la versión (ejemplo: `05102026-1030`).
+
+**1. Token y acceso a GitHub**
+
+Use un *Personal Access Token* de GitHub con permisos `write:packages` (y `read:packages` para
+descargar). No lo escriba en archivos del repositorio.
+
+```bash
+echo xxx-xxx-xxx-xxx-xxx | docker login ghcr.io -u luisamos --password-stdin
+```
+
+> `-u` es el usuario de GitHub (`luisamos`). Si su registro le pide el correo, use
+> `luisamos7@gmail.com`.
+
+**2. Generar la imagen** (desde la raíz del proyecto, donde está el `Dockerfile`)
+
+```bash
+docker build --no-cache -t censo-redirect-DDMMAAAA-HHMM -f Dockerfile .
+```
+
+**3. Etiquetar la imagen con la URL de GitHub Packages** (el nombre debe ir en minúsculas)
+
+```bash
+docker tag censo-redirect-DDMMAAAA-HHMM ghcr.io/luisamos/censo-redirect-DDMMAAAA-HHMM
+```
+
+**4. Subir la imagen a GitHub Packages**
+
+```bash
+docker push ghcr.io/luisamos/censo-redirect-DDMMAAAA-HHMM
+```
+
+**5. Levantarla en un entorno** (el servicio escucha en el puerto 8000 del contenedor)
+
+```bash
+docker run -d -p 5002:8000 --name censo-redirect \
+  -e CENSO_YEAR=2025 -e REDIRECT_CODE=302 \
+  ghcr.io/luisamos/censo-redirect-DDMMAAAA-HHMM
+```
+
+Quedará en `http://<servidor>:5002`. En un servidor distinto al que construyó la imagen,
+haga antes el paso 1 (`docker login`) si el paquete es privado. Para actualizar, ejecute
+`docker rm -f censo-redirect` y vuelva a correr el paso 5 con la nueva versión.
 
 ### Que los enlaces antiguos lleguen al servicio
 
