@@ -91,55 +91,11 @@ curl -I "http://localhost:8000/consulta_Departamento.phtml?olayer=peru_departame
 
 ---
 
-## 4. Docker y despliegue en desarrollo
+## 4. Docker: imagen y despliegue (desarrollo y producción)
 
-Requisitos: Docker 24+ con Docker Compose v2.
-
-### Opción A – Docker Compose (recomendada)
-
-```bash
-docker compose up --build -d     # construye la imagen y levanta el servicio
-docker compose ps                # estado (debe aparecer "healthy")
-docker compose logs -f           # ver registros
-docker compose down              # detener y eliminar el contenedor
-```
-
-El servicio queda en **http://localhost:8080** (puerto 8080 del equipo → 8000 del contenedor).
-Para cambiar año, dominio o tipo de redirect, edite la sección `environment` de
-`docker-compose.yml` y ejecute de nuevo `docker compose up -d`.
-
-### Opción B – Docker a mano
-
-```bash
-docker build -t censo-redirect:dev .
-
-docker run -d --name censo-redirect -p 8080:8000 \
-  -e CENSO_YEAR=2025 \
-  -e REDIRECT_CODE=302 \
-  censo-redirect:dev
-
-docker logs -f censo-redirect
-docker rm -f censo-redirect      # detener y eliminar
-```
-
-### Comprobar el despliegue
-
-```bash
-curl localhost:8080/health                      # ok
-curl localhost:8080/routes                      # catálogo JSON
-curl -I "localhost:8080/consulta_Distrito.phtml?ovalor=080101"
-# Location: https://reportes.geoperu.gob.pe/censos/2025/080101
-```
-
-### Detalles de la imagen
-
-- Base `python:3.12-slim`; ejecuta con **gunicorn** (2 workers) en el puerto 8000.
-- Corre con un usuario sin privilegios y tiene `HEALTHCHECK` sobre `/health`.
-- Para publicarla en GitHub Packages, vea la sección siguiente.
-
-### Publicar la imagen en GitHub Packages (ghcr.io) y levantarla en otro entorno
-
-Reemplace `DDMMAAAA-HHMM` por la fecha y hora de la versión (ejemplo: `05102026-1030`).
+El contenedor **escucha en el puerto 80** y se publica también en el puerto 80 del servidor,
+tanto en desarrollo como en producción. Reemplace `DDMMAAAA-HHMM` por la fecha y hora de la
+versión (ejemplo: `05102026-1030`).
 
 **1. Token y acceso a GitHub**
 
@@ -171,31 +127,30 @@ docker tag censo-redirect-DDMMAAAA-HHMM ghcr.io/luisamos/censo-redirect-DDMMAAAA
 docker push ghcr.io/luisamos/censo-redirect-DDMMAAAA-HHMM
 ```
 
-**5. Levantarla en un entorno** (el servicio escucha en el puerto 8000 del contenedor)
+**5. Levantarla en un entorno** (puerto 80)
 
 ```bash
-docker run -d -p 5002:8000 --name censo-redirect \
+docker run -d -p 80:80 --name censo-redirect \
   -e CENSO_YEAR=2025 -e REDIRECT_CODE=302 \
   ghcr.io/luisamos/censo-redirect-DDMMAAAA-HHMM
 ```
 
-Quedará en `http://<servidor>:5002`. En un servidor distinto al que construyó la imagen,
+Quedará en `http://<servidor>` (puerto 80). En un servidor distinto al que construyó la imagen,
 haga antes el paso 1 (`docker login`) si el paquete es privado. Para actualizar, ejecute
-`docker rm -f censo-redirect` y vuelva a correr el paso 5 con la nueva versión.
+`docker rm -f censo-redirect` y vuelva a correr el paso 5 con la nueva versión. El puerto 80
+del servidor debe estar libre.
 
-### Que los enlaces antiguos lleguen al servicio
+**Comprobar**
 
-Los enlaces viejos apuntan al dominio donde vivía el sistema PHP. Para que lleguen aquí, ese
-dominio (o su proxy inverso: Nginx, Apache, balanceador) debe enviar el tráfico al contenedor.
-Ejemplo con Nginx:
-
-```nginx
-location / {
-    proxy_pass http://127.0.0.1:8080;
-}
+```bash
+curl localhost/health            # ok
+curl -I "localhost/consulta_Distrito.phtml?ovalor=080101"
+# Location: https://reportes.geoperu.gob.pe/censos/2025/080101
 ```
 
-Tras validar en desarrollo, cambie `REDIRECT_CODE` a `301` para producción.
+**Que los enlaces antiguos lleguen al servicio:** el dominio donde vivía el sistema PHP debe
+apuntar (DNS o proxy inverso) al servidor donde corre este contenedor. Tras validar en
+desarrollo, use `-e REDIRECT_CODE=301` en producción.
 
 ---
 
@@ -205,8 +160,7 @@ Tras validar en desarrollo, cambie `REDIRECT_CODE` a `301` para producción.
 app.py              Aplicación Flask (toda la lógica de rutas)
 test_app.py         Pruebas automáticas (pytest)
 requirements.txt    Dependencias (Flask, gunicorn)
-Dockerfile          Imagen del servicio
-docker-compose.yml  Despliegue en desarrollo
+Dockerfile          Imagen del servicio (puerto 80)
 ```
 
 El código PHP original ya no está en esta rama; sigue disponible en `main` y en el historial de git.
