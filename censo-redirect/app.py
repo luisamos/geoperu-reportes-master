@@ -26,14 +26,19 @@ ALIASES = {
     "distrito": "distrito", "dist": "distrito",
     "centro-poblado": "centro_poblado", "centro_poblado": "centro_poblado", "ccpp": "centro_poblado",
 }
-LEGACY = {cfg["legacy"]: level for level, cfg in LEVELS.items()}
+LEGACY = {cfg["legacy"].lower(): level for level, cfg in LEVELS.items()}
 
 app = Flask(__name__)
 
 
-def build(level, code, year=None):
-    """URL destino o None si el código no corresponde al nivel."""
+def build(level, code, year=None, pad=False):
+    """URL destino o None si el código no corresponde al nivel.
+
+    pad=True completa ceros a la izquierda (enlaces guardados con ovalor=8 -> 08).
+    """
     code = re.sub(r"\D", "", code or "")
+    if pad and level in LEVELS and code:
+        code = code.zfill(LEVELS[level]["len"])
     if level is None:
         level = next((n for n, c in LEVELS.items() if c["len"] == len(code)), None)
     if level is None or LEVELS[level]["len"] != len(code):
@@ -75,9 +80,11 @@ def routes():
 # Rutas legadas: /consulta_Distrito.phtml?olayer=..&ocampo=..&ovalor=080101
 @app.get("/<name>.<ext>")
 def legacy(name, ext):
-    if ext not in ("phtml", "php") or name not in LEGACY:
+    # Enlaces guardados: consulta_Departamento.phtml?olayer=..&ocampo=cod_dpto&ovalor=25
+    # (olayer/ocampo se ignoran: el nivel lo define la plantilla y el código es ovalor)
+    if ext.lower() not in ("phtml", "php") or name.lower() not in LEGACY:
         return go(None)
-    return go(build(LEGACY[name], request.args.get("ovalor", ""), request.args.get("anio")))
+    return go(build(LEGACY[name.lower()], request.args.get("ovalor", ""), request.args.get("anio"), pad=True))
 
 
 # /distrito/080101
