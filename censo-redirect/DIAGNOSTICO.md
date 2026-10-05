@@ -32,7 +32,7 @@ Variantes históricas (`*_2007.phtml`) existen para los tres primeros niveles: *
 - PHP puro: `consulta_mosca_fruta.php`, `consulta_proy_mi_riego.php`, `consulta_registro.php`,
   `consulta_uso_may_tierras.php`, `dashboard.php`, `crom/*.php`, `graficos/*.php`.
 
-## Router nuevo (este proyecto)
+## Router nuevo (Flask, este proyecto)
 
 Rutas soportadas (el nivel se infiere por longitud del código si no se indica):
 

@@ -1,8 +1,8 @@
 services:
-  censo-redirect:
+  censo-redirect-flask:
     build: .
     ports:
-      - "8080:80"
+      - "8080:8000"
     environment:
       CENSO_BASE_URL: https://reportes.geoperu.gob.pe/censos
       CENSO_YEAR: "2025"
