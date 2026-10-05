@@ -28,9 +28,10 @@ ALIASES = {
 }
 LEGACY = {cfg["legacy"].lower(): level for level, cfg in LEVELS.items()}
 
-# Prefijo con el que el servicio se publica detrás del proxy (ej. https://visor.geoperu.gob.pe/reportes/...).
-# Se quita de la ruta si llega; si el proxy ya lo quita, no pasa nada. Vacío = sin prefijo.
-URL_PREFIX = "/" + os.getenv("URL_PREFIX", "/reportes").strip("/") if os.getenv("URL_PREFIX", "/reportes").strip("/") else ""
+# Prefijo con el que el servicio se publica detrás del proxy (ej. URL_PREFIX=/reportes en producción,
+# https://visor.geoperu.gob.pe/reportes/...). Se quita de la ruta si llega. Vacío (por defecto) = sin prefijo.
+_prefix = os.getenv("URL_PREFIX", "").strip("/")
+URL_PREFIX = f"/{_prefix}" if _prefix else ""
 
 
 class StripPrefix:

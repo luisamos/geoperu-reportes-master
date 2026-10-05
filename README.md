@@ -64,7 +64,7 @@ Se hace con variables de entorno:
 |---|---|---|
 | `CENSO_BASE_URL` | `https://reportes.geoperu.gob.pe/censos` | Dominio y ruta base del destino |
 | `CENSO_YEAR` | `2025` | Año del censo por defecto |
-| `URL_PREFIX` | `/reportes` | Carpeta con la que se publica el servicio (`visor.geoperu.gob.pe/reportes/...`); se ignora si el proxy ya la quita. Vacío = sin prefijo |
+| `URL_PREFIX` | *(vacío)* | Carpeta con la que se publica el servicio. En **producción** use `/reportes` (`visor.geoperu.gob.pe/reportes/...`); en desarrollo déjelo vacío. Si el proxy ya quita la carpeta, tampoco hace falta |
 | `REDIRECT_CODE` | `302` | `302` mientras se prueba; `301` cuando la migración sea definitiva (301/302/307/308) |
 
 ---
@@ -131,12 +131,14 @@ docker push ghcr.io/luisamos/censo-redirect-DDMMAAAA-HHMM
 **5. Levantarla en un entorno** (puerto 80)
 
 ```bash
+# URL_PREFIX solo en producción; en desarrollo quitar esa línea
 docker run -d -p 80:80 --name censo-redirect \
   -e CENSO_YEAR=2025 -e REDIRECT_CODE=302 \
+  -e URL_PREFIX=/reportes \
   ghcr.io/luisamos/censo-redirect-DDMMAAAA-HHMM
 ```
 
-Quedará en `http://<servidor>` (puerto 80). En un servidor distinto al que construyó la imagen,
+Quedará en `http://<servidor>` (puerto 80). `URL_PREFIX=/reportes` solo va en producción; en desarrollo quítelo. En un servidor distinto al que construyó la imagen,
 haga antes el paso 1 (`docker login`) si el paquete es privado. Para actualizar, ejecute
 `docker rm -f censo-redirect` y vuelva a correr el paso 5 con la nueva versión. El puerto 80
 del servidor debe estar libre.
@@ -155,7 +157,7 @@ desarrollo, use `-e REDIRECT_CODE=301` en producción.
 
 **Publicado en una carpeta (`https://visor.geoperu.gob.pe/reportes/...`)**
 
-El servicio acepta la ruta con o sin el prefijo `/reportes` (variable `URL_PREFIX`). El proxy del
+En producción defina `URL_PREFIX=/reportes` (en desarrollo no se usa). El proxy del
 servidor (Nginx, Apache o el túnel/Cloudflare) debe enviar `/reportes/` al contenedor, por ejemplo:
 
 ```nginx

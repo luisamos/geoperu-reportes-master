@@ -1,4 +1,8 @@
+import os
+
 import pytest
+
+os.environ["URL_PREFIX"] = "/reportes"  # los tests cubren la ruta con prefijo
 
 from app import app
 
