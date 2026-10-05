@@ -1,7 +1,7 @@
-# censo-redirect-flask
+# censo-redirect
 
-Versión Flask (gunicorn) del redirector; mismas rutas y variables que `DIAGNOSTICO.md`
-(ver `DIAGNOSTICO.md/DIAGNOSTICO.md`).
+Redirector Flask (gunicorn) que lleva las rutas legadas de reportes a
+`https://reportes.geoperu.gob.pe/censos/{año}/{codigo}`. Diagnóstico en [DIAGNOSTICO.md](DIAGNOSTICO.md).
 
 ```bash
 docker compose up --build
